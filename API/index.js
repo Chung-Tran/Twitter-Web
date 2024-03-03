@@ -1,0 +1,30 @@
+//Khởi tạo biến config
+const express = require("express");
+const app = express();
+const dotenv = require('dotenv').config();
+const bodyParser = require('body-parser')
+const cors = require('cors')
+const cookieParser = require('cookie-parser');
+const dbConnect = require('./config/dbConnect');
+//Connect db
+dbConnect();
+//Define routes
+const userRoute = require("./routes/UserRoute");
+
+//Config server
+app.use(cookieParser()); 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended:false}));
+app.use(express.json());
+app.use(cors());
+
+//Use routes
+app.use('/api/users', userRoute);
+
+//Start server
+const PORT = process.env.PORT;
+app.listen(PORT, () => {
+    console.log(`Server start in PORT ${PORT}`)
+})
+
+
