@@ -35,4 +35,5 @@ const TestGithub2 = asyncHandle(async (req, res) => {
     return res.status(200).json(formatResponse(newUser, true, "Register user successfully!"));
 });
 
+
 module.exports={registerUser,testController}
