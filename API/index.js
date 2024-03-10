@@ -10,6 +10,7 @@ const dbConnect = require('./config/dbConnect');
 dbConnect();
 //Define routes
 const userRoute = require("./routes/UserRoute");
+const sweetRoute = require('./routes/SweerRoute');
 
 //Config server
 app.use(cookieParser()); 
@@ -20,6 +21,7 @@ app.use(cors());
 
 //Use routes
 app.use('/api/users', userRoute);
+app.use('/api/sweet', sweetRoute);
 
 //Start server
 const PORT = process.env.PORT;
