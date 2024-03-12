@@ -13,9 +13,6 @@ const registerUser = asyncHandle(async (req, res) => {
     return res.status(200).json(formatResponse(newUser, true, "Register user successfully!"));
 });
 
-
-module.exports={registerUser};
-
 const editUser = asyncHandle(async(req, res) => {
     const userId = req.params;
     const email = req.body.email;
@@ -34,7 +31,6 @@ const editUser = asyncHandle(async(req, res) => {
         res.status(500).json({ message: 'An error occurred' });
     }
 });
-module.exports = {editUser};
 
 const addFollowUser = asyncHandle(async(req, res) => {
     const userId  = req.params;
@@ -62,8 +58,6 @@ const addFollowUser = asyncHandle(async(req, res) => {
     }
 });
   
-module.exports = {addFollowUser};
-
 const removeFollowUser = asyncHandle(async(req, res) => {
     const userId  = req.params;
     const followUserId = req.params;
@@ -90,4 +84,4 @@ const removeFollowUser = asyncHandle(async(req, res) => {
     }
 });
 
-module.exports = {removeFollowUser}
+module.exports = {registerUser, editUser, addFollowUser, removeFollowUser}
