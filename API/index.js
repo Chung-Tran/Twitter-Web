@@ -10,7 +10,7 @@ const dbConnect = require('./config/dbConnect');
 dbConnect();
 //Define routes
 const userRoute = require("./routes/UserRoute");
-const sweetRoute = require('./routes/SweerRoute');
+const sweetRoute = require('./routes/SweetRoute');
 
 //Config server
 app.use(cookieParser()); 
