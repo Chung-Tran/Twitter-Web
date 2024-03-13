@@ -3,7 +3,7 @@ const Sweet = require("../model/Sweet");
 const User = require("../controllers/UserController")
 const formatResponse = require('../common/ResponseFormat');
 const { set } = require('mongoose');
-const { use } = require('../routes/SweetRoute');
+//const { use } = require('../routes/SweetRoute');
 
 const createSweet = asyncHandle(async (req, res) => {
 

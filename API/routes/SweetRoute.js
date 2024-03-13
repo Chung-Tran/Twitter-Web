@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { create, update, get, deleted, createSweet, add_User_To_List_Like_Sweet, add_User_To_List_Share_Sweet} = require('../controllers/SweetController');
+const { createSweet, update, get, deleted, add_User_To_List_Like_Sweet, add_User_To_List_Share_Sweet} = require('../controllers/SweetController');
 
 router.post('/createSweet', createSweet);
 router.put('/update', update);
