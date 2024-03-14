@@ -12,7 +12,7 @@ const createSweet = asyncHandle(async (req, res) => {
     const image = req.body.image;
     const create_At = req.body.create_At;
 
-    
+  
     //console.log("ket qua tu params ", req.params.user_id);
 
     const createNew = await Sweet.create({
