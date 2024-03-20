@@ -1,8 +1,10 @@
-// const express = require('express');
-// const router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-// const { createComment } = require("../controllers/CommentController");
+const { create_Comment, update_Comment, delete_Comment} = require("../controllers/CommentController");
 
-// router.post('/createComment', createComment);
+router.post('/createComment/:SweetID', create_Comment);
+router.put('/updateComment/:CommentID', update_Comment);
+router.delete('/deleteComment/:CommentID', delete_Comment);
 
-// module.exports = router;
+module.exports = router;
