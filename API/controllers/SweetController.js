@@ -3,7 +3,7 @@ const Sweet = require("../model/Sweet");
 const formatResponse = require('../common/ResponseFormat');
 
 const create = asyncHandle(async (req, res) => {
-
+    
     const user_id = req.body.user_id;
     const content = req.body.content;
     console.log("ket qua tu params ", req.params.user_id);
