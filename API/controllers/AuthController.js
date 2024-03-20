@@ -30,3 +30,4 @@ const loginUser = asyncHandle(async (req, res) => {
         throw new Error("Invalid credential");
     }
 });
+module.exports={loginUser}
