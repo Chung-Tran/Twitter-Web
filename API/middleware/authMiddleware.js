@@ -1,17 +1,12 @@
 //Xử lí login, xác thực người dùng
-const jwt = requrie('jsonwebtoken');
-const secretKey = process.env.JWT_CODE;
-
+const jwt = require('jsonwebtoken');
+const secretKey=process.env.JWT_CODE;
 const generateToken = (userInfo) => {
     const refeshToken = jwt.sign(userInfo, secretKey, { expiresIn: '7d' });
     const accessToken = jwt.sign(userInfo, secretKey, { expiresIn: '15m' });
     return { refeshToken, accessToken };
 }
 
-const generateSessionToken = (userInfo) => {
-    const token = jwt.sign({ user }, secretKey, { expiresIn: '30d' });
-    return token;
-}
 
 //Kiểm tra token hết hạn hay chưa, nếu hết hạn thì chuyển hướng qua login
 const authenticationToken = (req, res, next) => {
