@@ -23,8 +23,8 @@ app.use(bodyParser.urlencoded({extended:false}));
 app.use(express.json());
 app.use(cors());
 //Connect redis server in docker
- const redisClient = connectRedis();
-redisClient.connect();
+//  const redisClient = connectRedis();
+// redisClient.connect();
 
 //Middleware xác thực người dùng
 app.use('/api/authentication', authenticationRoute);
