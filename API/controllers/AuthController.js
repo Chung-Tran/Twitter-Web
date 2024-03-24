@@ -10,6 +10,8 @@ const { sendEmail } = require('../config/sendMailConfig');
 const jwt = require('jsonwebtoken');
 const redisClient = connectRedis();
 const secretKey = process.env.JWT_CODE;
+
+
 const loginUser = asyncHandle(async (req, res) => {
     const { email, password } = req.body;
     const findUser = await User.findOne({ email });

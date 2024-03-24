@@ -491,7 +491,8 @@ const get_Sweet = asyncHandle(async (req, res)=>{
   res.status(200).json(formatResponse(data, true, ""))
 })
 
-const get_10_sweet = asyncHandle(async(req,res) =>{
+const get_10_sweet = asyncHandle(async (req, res) => {
+  
   const sweet = Sweet.find({}, "user_id content").skip(0).limit(10)
   .populate('user_id', 'displayName') 
   .populate({
