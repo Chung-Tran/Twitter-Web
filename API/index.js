@@ -12,6 +12,7 @@ dbConnect();
 const userRoute = require("./routes/UserRoute");
 const sweetRoute = require('./routes/SweetRoute');
 const commentRoute = require('./routes/CommentRoute');
+const shareRoute = require("./routes/ShareRoute");
 
 //Config server
 app.use(cookieParser()); 
@@ -24,6 +25,7 @@ app.use(cors());
 app.use('/api/users', userRoute);
 app.use('/api/sweet', sweetRoute);
 app.use('/api/comment', commentRoute);
+app.use('/api/share', shareRoute);
 
 //Start server
 const PORT = process.env.PORT;
