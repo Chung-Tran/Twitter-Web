@@ -234,6 +234,30 @@ const delete_User_To_List_Like_Sweet = asyncHandle(async(req, res)=> {
   
 });
 
+const add_OR_Delete_User_To_List_Like_Sweet = asyncHandle(async(req,res) =>{
+  const sweet_id = req.params.SweetID;
+  const user_id = req.body.user_id;
+
+  try {
+    const sweet = await Sweet.findById(sweet_id);
+    const user_id_In_List_Like_Sweet = sweet.likes.findIndex(user => user._id.toString() === user_id);
+    if(user_id_In_List_Like_Sweet === -1){
+      sweet.likes.push(user_id);
+      sweet.save();
+      res.status(200).json(formatResponse("Đã like bài viết!", true, ""));
+    }else{
+      sweet.likes.splice(user_id_In_List_Like_Sweet, 1);
+      sweet.save();
+      res.status(200).json(formatResponse("Bỏ thích bài viết thành công!", true, ""));
+    }
+
+
+  } catch (error) {
+    res.status(404).json(formatResponse("", false, "Lỗi khi tương tác với bài viết"));
+  }
+
+})
+
 const add_User_To_List_Share_Sweet = asyncHandle(async(req, res)=> {
 
   const sweetID = req.params.SweetID;
@@ -467,6 +491,42 @@ const get_Sweet = asyncHandle(async (req, res)=>{
   res.status(200).json(formatResponse(data, true, ""))
 })
 
+const get_10_sweet = asyncHandle(async(req,res) =>{
+  const sweet = Sweet.find({}, "user_id content").skip(0).limit(10)
+  .populate('user_id', 'displayName') 
+  .populate({
+    path: 'comments',
+    populate: {
+      path: 'user_id',
+      select: 'username',
+      
+    }
+  }) 
+  .exec()
+  .then(sweets => {
+    console.log('Danh sách bài viết:', sweets);
+    res.status(200).json(formatResponse(sweets, true, ""))
+  })
+  /*const data ={
+    //SweetID: sweet._id,
+    UserName: sweet,
+    Content: sweets.content,
+    QuantityLike: sweets.likes.length,
+    ListUserTolike: sweets.likes,
+    QUantityComment: sweets.comments.length,
+    ListUserToComment: comment,
+    QuantityShare: sweets.shares.length,
+    ListUserToShare: sweetShare.shares,
+    CreateAt: sweets.created_at,
+  }*/
+  
+  .catch(err => {
+    console.error('Lỗi khi lấy danh sách bài viết:', err);
+    res.status(400).json(formatResponse("", false, "Lỗi khi lấy bài viết"))
+
+  });
+})
+
 
 module.exports= {
   create_Sweet, 
@@ -474,10 +534,12 @@ module.exports= {
   deleted_Sweet, 
   add_User_To_List_Like_Sweet, 
   delete_User_To_List_Like_Sweet,
+  add_OR_Delete_User_To_List_Like_Sweet,
   add_User_To_List_Share_Sweet, 
   delete_User_To_List_Share_Sweet,
   get_List_User_To_Like, 
   get_List_User_To_Share, 
   get_List_Comment_To_Sweet,
-  get_Sweet
+  get_Sweet,
+  get_10_sweet,
 }

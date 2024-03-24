@@ -15,6 +15,7 @@ const sweetRoute = require('./routes/SweetRoute');
 const commentRoute = require('./routes/CommentRoute');
 const authenticationRoute = require("./routes/AuthenticationRoute");
 const authenticateToken = require("./middleware/authMiddleware");
+const shareRoute = require("./routes/ShareRoute");
 
 //Config server
 app.use(cookieParser()); 
@@ -34,6 +35,7 @@ app.use(authenticateToken);
 app.use('/api/users', userRoute);
 app.use('/api/sweet', sweetRoute);
 app.use('/api/comment', commentRoute);
+app.use('/api/share', shareRoute);
 
 //Start server
 const PORT = process.env.PORT;
