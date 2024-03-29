@@ -28,8 +28,8 @@ app.use(cors());
 // redisClient.connect();
 
 //Middleware xác thực người dùng
-app.use('/api/authentication', authenticationRoute);
-app.use(authenticateToken);
+// app.use('/api/authentication', authenticationRoute);
+// app.use(authenticateToken);
 
 //Use routes
 app.use('/api/users', userRoute);

@@ -14,21 +14,24 @@ const create_Share = asyncHandle(async (req, res) => {
     const content = req.body.content;
     const image = req.body.image;
     
-
-    const createNew = await Share.create({
+    const sweet = await Sweet.findById(sweet_id);
+    if(sweet){
+      const createNew = await Share.create({
         sweet_id: sweet_id,
         user_id: user_id,
         content: content,
         image: image,
+      });
 
-    });
+      const index_UserID_In_Share = sweet.shares.findIndex(share => share._id.toString() === user_id);
+      
+      if(index_UserID_In_Share === -1){
+        const add_UserID_To_Share = await Sweet.findByIdAndUpdate(sweet_id, {$push: {shares: createNew.user_id}}).populate("user_id", "displayName");
+        await sweet.save();
+      }
 
-    const sweet = await Sweet.findByIdAndUpdate(sweet_id, {$push: {shares: createNew.user_id}}).populate("user_id", "displayName");
-    
-
-    const data = {
-        
-        UserName: await getDisplayName_By_ID(createNew.user_id),
+      const data = {
+        UserName: await getDisplayName_By_ID(user_id),
         CreateAt: createNew.created_at,
         Content: createNew.content,
         Sweet_Origin: createNew.sweet_id,
@@ -37,9 +40,12 @@ const create_Share = asyncHandle(async (req, res) => {
         Content_Origin: sweet.content,
         QuantityLike: createNew.likes.length,
         QuantityComment: createNew.comments.length,
-    };
+      };
 
-    return res.status(200).json(formatResponse(data, true, ""));
+      return res.status(200).json(formatResponse(data, true, "Share bài viết thành công!!"));
+   
+    }else return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết để Share!"));
+ 
 });
 
 async function getDisplayName_By_ID(id){
@@ -89,6 +95,7 @@ const update_Share = asyncHandle(async (req, res) => {
         shareAfterUpdate
       } else {
         console.log('Không tìm thấy đối tượng share.');
+        res.status(404).json(formatResponse(null, false, "Không tìm thấy bài Share!!"));
       }
 
     const sweet = await Sweet.findById(shareAfterUpdate.sweet_id).populate("user_id", "displayName");
@@ -106,7 +113,7 @@ const update_Share = asyncHandle(async (req, res) => {
         UpdateAt: shareAfterUpdate.updated_at,
     };
 
-    return res.status(200).json(formatResponse(data, true, ""));
+    return res.status(200).json(formatResponse(data, true, "Cập nhật bài Share thành công!!"));
 });
 
 const delete_Share = asyncHandle(async(req, res) => {
@@ -123,7 +130,7 @@ const delete_Share = asyncHandle(async(req, res) => {
             if (sweet) {
                 const quantityShare = Share.find({user_id:share.user_id, sweet_id:share.sweet_id})
                 const indexToRemove = sweet.shares.findIndex(share => share._id.toString() === user_id_In_Share.toString());
-                if (((await quantityShare).length==1) && (indexToRemove !== -1)) {
+                if (((await quantityShare).length===1) && (indexToRemove !== -1)) {
                 sweet.shares.splice(indexToRemove, 1);
                     try {
                         await sweet.save();
@@ -132,24 +139,26 @@ const delete_Share = asyncHandle(async(req, res) => {
                         console.error('Lỗi khi xóa user_id trong list share của Sweet:', error);
                     }
                 } 
-            }
+            }else return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết!"));
+
 
             const delete_Comment = await Comment.deleteMany({tweet_id: share_id});
             const delete_Share = await Share.findByIdAndDelete(share_id);
 
         } catch (error) {
             console.error("Lỗi khi xóa bài Share", error);
+            return res.status(400).json(formatResponse(null, false, "Lỗi khi thực hiện xóa bài Share!"));
         }
 
         data ={
             Note: "Bài Share đã xóa!",
-            count: sweet.shares.length,
+            //count: sweet.shares.length,
         }
     
         return res.status(200).json(formatResponse(data, true, ""));
 
     } catch (error) {
-        return res.status(200).json(formatResponse("", false, "Không thể xóa bài Share"));
+        return res.status(400).json(formatResponse("", false, "Không thể xóa bài Share"));
     }
   })
   

@@ -12,12 +12,13 @@ const { create_Sweet,
     delete_User_To_List_Share_Sweet,
     get_List_User_To_Share, 
     get_List_Comment_To_Sweet, 
-    get_Sweet,
-    get_10_sweet} = require('../controllers/SweetController');
+    get_A_Sweet,
+    get_Many_sweet,
+    get_Sweet_To_UserID} = require('../controllers/SweetController');
 
 router.post('/createSweet', create_Sweet);
-router.put('/updateSweet', update_Sweet);
-router.delete('/deleteSweet', deleted_Sweet);
+router.put('/updateSweet/:SweetID', update_Sweet);
+router.delete('/deleteSweet/:SweetID', deleted_Sweet);
 
 router.post('/addUserLike/:SweetID', add_User_To_List_Like_Sweet);
 router.delete('/deleteUserLike/:SweetID', delete_User_To_List_Like_Sweet);
@@ -29,7 +30,8 @@ router.delete('/deleteUserShare/:SweetID', delete_User_To_List_Share_Sweet);
 router.get('/getListShare', get_List_User_To_Share);
 
 router.get('/getListComment', get_List_Comment_To_Sweet);
-router.get('/getOneSweet',get_Sweet);
-router.get('/get10Sweet',get_10_sweet);
+router.get('/getOneSweet',get_A_Sweet);
+router.get('/getManySweet',get_Many_sweet);
+router.get('/getSweetByUserID',get_Sweet_To_UserID);
 
 module.exports = router;
