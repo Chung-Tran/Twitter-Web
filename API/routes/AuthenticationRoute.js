@@ -1,12 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const { registerUser } = require("../controllers/UserController");
-const {loginUser,sendPasswordByEmail,authenticateOTP,confirmResetPassword} = require("../controllers/AuthController")
+const {loginUser,sendPasswordByEmail,authenticateOTP,confirmResetPassword, upload} = require("../controllers/AuthController");
+const uploadImage = require('../middleware/UploadImageMiddleware');
 
 router.post("/register", registerUser); //Đăng kí user
 router.post("/login", loginUser);
 router.post("/forgot-password", sendPasswordByEmail);
 router.post("/authenticate-otp", authenticateOTP);
 router.post("/confirm-reset-password", confirmResetPassword);
+router.post("/upload", uploadImage.array('image'),upload);
 
 module.exports = router;

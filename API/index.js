@@ -6,7 +6,11 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const cookieParser = require('cookie-parser');
 const dbConnect = require('./config/dbConnect');
-const {connectRedis} = require('./config/redisConfig'); 
+const { connectRedis } = require('./config/redisConfig'); 
+const cloudinary = require('cloudinary').v2;
+cloudinary.config({
+    secure: true
+  });
 //Connect db
 dbConnect();
 //Define routes
@@ -16,6 +20,7 @@ const commentRoute = require('./routes/CommentRoute');
 const authenticationRoute = require("./routes/AuthenticationRoute");
 const authenticateToken = require("./middleware/authMiddleware");
 const shareRoute = require("./routes/ShareRoute");
+
 
 //Config server
 app.use(cookieParser()); 

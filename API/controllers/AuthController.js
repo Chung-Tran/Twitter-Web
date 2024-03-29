@@ -8,8 +8,11 @@ const formatResponse = require('../common/ResponseFormat');
 const { connectRedis } = require('../config/redisConfig');
 const { sendEmail } = require('../config/sendMailConfig');
 const jwt = require('jsonwebtoken');
+const { uploadImage } = require('../config/cloudinaryConfig');
 const redisClient = connectRedis();
 const secretKey = process.env.JWT_CODE;
+const cloudinary = require('cloudinary').v2;
+
 
 
 const loginUser = asyncHandle(async (req, res) => {
@@ -198,4 +201,9 @@ const getKeyValue = async (key) => {
         return false;
     }
 }
-module.exports = { loginUser, sendPasswordByEmail, authenticateOTP, confirmResetPassword }
+const upload = asyncHandle(async (req, res) => {
+    const data = await uploadImage(req.files);
+    return res.status(200).json(data)
+
+});
+module.exports = { loginUser, sendPasswordByEmail, authenticateOTP, confirmResetPassword,upload }
