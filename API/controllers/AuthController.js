@@ -3,7 +3,7 @@ const User = require('../model/User');
 const crypto = require('crypto');
 const asyncHandle = require('express-async-handler');
 const { generateSessionToken, authenticationToken } = require('../middleware/authMiddleware')
-const { generateRefreshToken } = require("../common/CommonFunctions");
+const { generateRefreshToken, generateAccessToken } = require("../common/CommonFunctions");
 const formatResponse = require('../common/ResponseFormat');
 const { connectRedis } = require('../config/redisConfig');
 const { sendEmail } = require('../config/sendMailConfig');
@@ -27,6 +27,7 @@ const loginUser = asyncHandle(async (req, res) => {
             email: findUser.email
         }
         const refeshToken = generateRefreshToken(encodeData);
+        const accessToken = generateAccessToken(encodeData);
 
         const updateUser = await User.findByIdAndUpdate(findUser._id, { refeshToken: refeshToken }, { new: true });
         // res.cookie("refeshToken", refeshToken, {
@@ -40,7 +41,7 @@ const loginUser = asyncHandle(async (req, res) => {
             lastName: findUser?.lastName,
             email: findUser?.email,
             mobile: findUser?.mobile,
-            token: refeshToken
+            token: accessToken
         }
         res.status(200).json(formatResponse(responseData, true, "Đăng nhập thành công"));
     } else {
