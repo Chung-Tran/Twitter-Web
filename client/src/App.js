@@ -5,7 +5,7 @@ import NotFound from './pages/NotFound';
 
 const App = () => {
   return (
-    <Router>
+    <Router >
         <Routes>
           <Route exact path="/login" element={<LoginPage/>}/>
           <Route path="*" element={<NotFound/>}/> 

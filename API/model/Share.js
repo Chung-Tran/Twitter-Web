@@ -8,7 +8,6 @@ const shareSchema = new mongoose.Schema({
     comments: [{type:mongoose.Schema.Types.ObjectId, ref: 'Comment'}],
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: Date.now },
-
 });
 
 module.exports = mongoose.model('Share', shareSchema)
