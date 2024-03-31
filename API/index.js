@@ -18,7 +18,7 @@ const userRoute = require("./routes/UserRoute");
 const sweetRoute = require('./routes/SweetRoute');
 const commentRoute = require('./routes/CommentRoute');
 const authenticationRoute = require("./routes/AuthenticationRoute");
-const authenticateToken = require("./middleware/authMiddleware");
+// const authenticateToken = require("./middleware/authMiddleware");
 const shareRoute = require("./routes/ShareRoute");
 
 
@@ -30,13 +30,13 @@ app.use(express.json());
 app.use(cors());
 
 //Connect redis server in docker
- const redisClient = connectRedis();
-redisClient.connect();
+//  const redisClient = connectRedis();
+// redisClient.connect();
 
 //Middleware xác thực người dùng
 app.use('/api/authentication', authenticationRoute);
 
-app.use(authenticateToken);
+// app.use(authenticateToken);
 
 //Use routes
 app.use('/api/users', userRoute);

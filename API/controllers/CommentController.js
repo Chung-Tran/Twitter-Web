@@ -6,11 +6,13 @@ const formatResponse = require("../common/ResponseFormat");
 const { set } = require('mongoose');
 const User = require('../model/User');
 const Share = require('../model/Share');
+const { uploadImage } = require('../config/cloudinaryConfig');
 
 
 const create_Comment = asyncHandle(async (req, res)=>{
     const user_id = req.body.user_id;
     const content = req.body.content;
+    const image = await uploadImage(req.files);
     const sweet_id= req.params.SweetID;
     
 
@@ -22,7 +24,8 @@ const create_Comment = asyncHandle(async (req, res)=>{
       comment= await Comment.create({
         tweet_id : sweet_id,
         user_id : user_id,
-        content : content
+        content : content,
+        image: image
       });
     const add_Comment_To_Sweet = await Sweet.findByIdAndUpdate(sweet_id, {$addToSet : {comments:comment._id}});
 
@@ -41,6 +44,7 @@ const create_Comment = asyncHandle(async (req, res)=>{
         UserName: await getDisplayName_By_ID(user_id),
         SweetID: comment.tweet_id,
         Content: comment.content,
+        Image: comment.image,
         CreateComment: comment.created_at
         
     }
@@ -64,9 +68,10 @@ async function getDisplayName_By_ID(id){
 const update_Comment = asyncHandle(async (req, res) =>{
   const commentID = req.params.CommentID;
   const content = req.body.content;
+  const image = await uploadImage(req.files);
 
   try {
-    const comment = await Comment.findByIdAndUpdate(commentID, {$set : {content: content, updated_at: new Date()}} )
+    const comment = await Comment.findByIdAndUpdate(commentID, {$set : {content: content, image: image, updated_at: new Date()}} )
   
     const commentAferUpdate = await Comment.findById(commentID)
     const displayName_User = await getDisplayName_By_ID(commentAferUpdate.user_id);
@@ -74,6 +79,7 @@ const update_Comment = asyncHandle(async (req, res) =>{
     const data = {
       UserName : displayName_User,
       Content : commentAferUpdate.content,
+      Image: commentAferUpdate.image,
       Create_at: commentAferUpdate.created_at,
       Updated_at : commentAferUpdate.updated_at,
     }

@@ -8,12 +8,15 @@ const { query } = require('express');
 const { create_Comment } = require('./CommentController');
 const Share = require('../model/Share');
 
+const {uploadImage} = require('../config/cloudinaryConfig');
+const { upload } = require('./AuthController');
+
 
 const create_Sweet = asyncHandle(async (req, res) => {
 
     const user_id = req.body.user_id;
     const content = req.body.content;
-    const image = req.body.image;
+    const image = await uploadImage(req.files);
 
     try {
       const createNew = await Sweet.create({
@@ -21,11 +24,12 @@ const create_Sweet = asyncHandle(async (req, res) => {
         content: content,
         image: image,
       });
-
+    
       const data = {
         
         User: await getDisplayName_By_ID(createNew.user_id),
         Content: createNew.content,
+        Image: createNew.image.map(i => i.toString()),
         CreateAt: createNew.created_at,
         QuantityLike: createNew.likes.length,
         QuantityComment: createNew.comments.length,
@@ -100,17 +104,57 @@ const update_Sweet = asyncHandle(async (req, res) => {
     const sweet_id = req.params.SweetID;
     
     const content = req.body.content;
-    const image = req.body.image;
+    const image = await uploadImage(req.files);
     
     const sweet = await Sweet.findById(sweet_id);
+    
     try {
       if(!sweet){
         console.log("Không thấy bài viết!");
         return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết!"));
 
       }
-      const updateData = await Sweet.findByIdAndUpdate(sweet_id, { $set: { content: content, updated_at: new Date()}});
 
+      try {
+        if(sweet.updated_at==null){
+
+          const content_History = sweet.content;
+          const image_History = sweet.image;
+          const updated_History = sweet.created_at;
+
+          const historyUpdate = {
+            content: content_History, 
+            images: image_History,
+            updated_at: updated_History,
+          };
+          
+          const addDataToHistory = await Sweet.findByIdAndUpdate(sweet_id, { $push : {edit_history: historyUpdate}}); // , { new: true }
+          
+          const updateDataToSweet = await Sweet.findByIdAndUpdate(sweet_id, { $set: { content: content, image: image, updated_at: new Date()}});  
+          
+        }else{
+
+          const content_History = sweet.content;
+          const image_History = sweet.image;
+          const updated_History = sweet.updated_at;
+
+          const historyUpdate = {
+            content: content_History, 
+            images: image_History,
+            updated_at: updated_History,
+          };
+          
+          const addDataToHistory = await Sweet.findByIdAndUpdate(sweet_id, { $push : {edit_history: historyUpdate}}); // , { new: true }
+        
+          const updateData = await Sweet.findByIdAndUpdate(sweet_id, { $set: { content: content, image: image, updated_at: new Date()}});
+          
+
+        }
+      } catch (error) {
+        return res.status(400).json(formatResponse(null, false, "Lỗi khi cập nhật bài viết!"));
+      }
+      
+   
       const sweetAfterUpdate = await get_Sweet_By_Id(sweet_id);
       
       if (sweetAfterUpdate) {
@@ -123,6 +167,7 @@ const update_Sweet = asyncHandle(async (req, res) => {
       const data = {
         UserID: await getDisplayName_By_ID(sweetAfterUpdate.user_id),
         Content: sweetAfterUpdate.content,
+        Image: sweetAfterUpdate.image.map(i => i.toString()),
         QuantityLike: sweetAfterUpdate.likes.length,
         QuantityComment: sweetAfterUpdate.comments.length,
         QuantityShare: sweetAfterUpdate.shares.length,
@@ -137,6 +182,34 @@ const update_Sweet = asyncHandle(async (req, res) => {
     } 
 });
 
+const get_History_Update_Sweet = asyncHandle(async(req, res) => {
+  const sweet_id = req.query.SweetID;
+
+  const sweet = await Sweet.findById(sweet_id);
+  const edit_historys = sweet.edit_history;
+
+  if(!sweet){
+    console.log("Không thấy bài viết!");
+    return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết!"));
+
+  }
+
+  let list_History_Update = [];
+
+  edit_historys.forEach(edit_history => {
+      const content = edit_history.content;
+      const images = edit_history.images.map(image => image.toString());
+      const updated_at = edit_history.updated_at;
+  
+      list_History_Update.push(content, images, updated_at);
+  });
+
+  const data = {
+    History_Update: list_History_Update,
+  }
+  return res.status(200).json(formatResponse(data, true, "Đã lấy được danh sách lịch sử chỉnh sửa bài viết"));
+
+})
 
 async function delete_Sweet_By_ID(id){
     try {
@@ -149,9 +222,7 @@ async function delete_Sweet_By_ID(id){
     } catch (error) {
         console.log("Lỗi khi xóa bài viết", error.message);
     }
-
 }
-
 
 const deleted_Sweet = asyncHandle(async (req, res)=> {
 
@@ -185,6 +256,90 @@ const deleted_Sweet = asyncHandle(async (req, res)=> {
     }
 });
 
+const deleted_Sweet_Temporary = asyncHandle(async (req, res)=> {
+
+  const sweet_id = req.params.SweetID;
+
+  const sweet = await Sweet.findById(sweet_id);
+
+  try {
+    
+    if(!sweet){
+      console.log("Không thấy bài viết!");
+      return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết!"));
+    }
+
+    const delete_Sweet = await Sweet.findByIdAndUpdate(sweet_id, {$set : {isDelete : true}}); 
+    
+    return res.status(200).json(formatResponse(null, true, "Đã xóa bài viết!"));
+
+  } catch (error) {
+    return res.status(400).json(formatResponse(null, false, "Lỗi khi thực hiện xóa bài viết!"));
+  }
+});
+
+
+const get_List_Sweet_Deleted_Temporary = asyncHandle(async(req, res) => {
+  const user_id = req.query.user_id;
+  
+  try {
+    const list_Sweet_Deleted_Temporary = await Sweet.find({user_id: user_id},{isDelete: true})
+    .populate('user_id', 'displayName')
+    .populate('likes', 'displayName')
+    .populate('shares', 'displayName')   
+    .populate({
+      path: 'comments',
+      populate: {
+        path: 'user_id',
+        select: 'displayName',
+      }
+    })
+    .exec()
+    .then(sweets => {
+  
+        console.log('Danh sách bài viết đã xóa:', sweets);
+  
+        sweets = sweets.map(sweet => {
+        sweet = sweet.toObject(); // Chuyển sang đối tượng plain JavaScript để thêm trường mới
+        sweet.quantityLike = sweet.likes.length;
+        sweet.quantityComment = sweet.comments.length;
+        sweet.quantityShare = sweet.shares.length;
+        return sweet;
+      });
+  
+      const data ={
+        InFo_Sweet: sweets,
+      }
+      
+      return res.status(200).json(formatResponse(data, true, "Lấy danh sách bài viết đã xóa thành công!"));
+    
+    });
+  } catch (error) {
+    return res.status(400).json(formatResponse(null, false, "Lỗi khi thực hiện lấy các bài viết đã xóa!"));
+  }
+
+})
+
+const restore_Sweet = asyncHandle(async(req, res) => {
+
+  const sweet_id = req.params.SweetID;
+  const sweet = await Sweet.findById(sweet_id);
+
+  try {
+    
+    if(!sweet){
+      console.log("Không thấy bài viết!");
+      return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết!"));
+    }
+
+    const restore_Sweet = await Sweet.findByIdAndUpdate(sweet_id, {$set : {isDelete : false}}); 
+    
+    return res.status(200).json(formatResponse(null, true, "Đã khôi phục bài viết thành công!"));
+
+  } catch (error) {
+    return res.status(400).json(formatResponse(null, false, "Lỗi khi thực hiện khôi phục bài viết!"));
+  }
+})
 
 const add_User_To_List_Like_Sweet = asyncHandle(async(req, res)=> {
 
@@ -192,7 +347,7 @@ const add_User_To_List_Like_Sweet = asyncHandle(async(req, res)=> {
 
     const userID = req.body.user_id;
 
-    const sweet = await Sweet.findById(sweet_id);
+    const sweet = await Sweet.findById(sweetID);
 
     try {
 
@@ -446,7 +601,7 @@ async function get_Comment_Info_To_Sweet(list_CommentID){
   for (const commentID of list_CommentID) {
     const comment = await Comment.findById(commentID);
     const userName = await getDisplayName_By_ID(comment.user_id) ;
-    comment_Info.push(userName , comment.content, comment.created_at);
+    comment_Info.push(userName , comment.content, comment.image, comment.created_at);
   }
   return comment_Info;
 }
@@ -503,7 +658,8 @@ const get_A_Sweet = asyncHandle(async (req, res)=>{
       //SweetID: sweet._id,
       UserName: await getDisplayName_By_ID(sweet.user_id),
       Content: sweet.content,
-      QuantityLike: sweet.likes.length,
+      Image: sweet.image,
+      QuantityLike: sweet.likes.length,   
       ListUserTolike: sweetLike.likes,
       QUantityComment: sweet.comments.length,
       ListUserToComment: comment,
@@ -527,10 +683,7 @@ const get_Many_sweet = asyncHandle(async(req,res) =>{
   const skipNumble = req.body.skip;
   const limitNumble = req.body.limit;
 
-  let countLike = null;
-  let data = null;
-
-  const sweet = Sweet.find({}).skip(skipNumble).limit(limitNumble)
+  const sweet = Sweet.find({isDelete: false}, "content image created_at ").skip(skipNumble).limit(limitNumble)
   .populate('user_id', 'displayName')
   .populate('likes', 'displayName')
   .populate('shares', 'displayName')   
@@ -538,7 +691,7 @@ const get_Many_sweet = asyncHandle(async(req,res) =>{
     path: 'comments',
     populate: {
       path: 'user_id',
-      select: 'displayName content',
+      select: 'displayName',
     }
   })
   
@@ -546,18 +699,21 @@ const get_Many_sweet = asyncHandle(async(req,res) =>{
   .then(sweets => {
 
     console.log('Danh sách bài viết:', sweets);
-    sweets.forEach(sweet=> {
-      countLike = sweet.likes.length;
-      console.log(`Bài viết '${sweet.content}' có ${countLike} lượt thích.`);
-    })
-    
-    data ={
+
+    sweets = sweets.map(sweet => {
+      sweet = sweet.toObject(); // Chuyển sang đối tượng plain JavaScript để thêm trường mới
+      sweet.quantityLike = sweet.likes.length;
+      sweet.quantityComment = sweet.comments.length;
+      sweet.quantityShare = sweet.shares.length;
+      return sweet;
+    });
+
+    const data ={
       InFo_Sweet: sweets,
-      //QuantityLike: countLike,
     }
     
-
-    res.status(200).json(formatResponse(data, true, ""))
+    return res.status(200).json(formatResponse(data, true, "Lấy các bài viết thành công"))
+  
   })
   
   .catch(err => {
@@ -569,7 +725,7 @@ const get_Many_sweet = asyncHandle(async(req,res) =>{
 const get_Sweet_To_UserID = asyncHandle(async(req, res) => {
   const user_id = req.query.UserID;
 
-  const sweet = await Sweet.find({user_id : user_id}, "content likes comments shares created_at");
+  const sweet = await Sweet.find({user_id : user_id, isDelete : false}, "content image likes comments shares created_at");
 
   return res.status(200).json(formatResponse(sweet, true, "Lấy các bài viết thành công!!"))
 })
@@ -577,7 +733,11 @@ const get_Sweet_To_UserID = asyncHandle(async(req, res) => {
 module.exports= {
   create_Sweet, 
   update_Sweet, 
+  get_History_Update_Sweet,
   deleted_Sweet, 
+  deleted_Sweet_Temporary,
+  get_List_Sweet_Deleted_Temporary,
+  restore_Sweet,
   add_User_To_List_Like_Sweet, 
   delete_User_To_List_Like_Sweet,
   add_OR_Delete_User_To_List_Like_Sweet,

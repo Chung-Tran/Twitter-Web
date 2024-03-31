@@ -1,18 +1,19 @@
 const asyncHandle = require('express-async-handler')
 const Share = require("../model/Share")
-const Sweet =require("../model/Sweet")
+const Sweet = require("../model/Sweet")
 const User = require("../model/User")
 const Comment = require('../model/Comment');
 const formatResponse = require('../common/ResponseFormat');
 const { set } = require('mongoose');
 const { query } = require('express');
+const {uploadImage} = require('../config/cloudinaryConfig');
 
 const create_Share = asyncHandle(async (req, res) => {
 
     const sweet_id = req.params.SweetID;
     const user_id = req.body.user_id;
     const content = req.body.content;
-    const image = req.body.image;
+    const image = await uploadImage(req.files);
     
     const sweet = await Sweet.findById(sweet_id);
     if(sweet){
@@ -34,6 +35,7 @@ const create_Share = asyncHandle(async (req, res) => {
         UserName: await getDisplayName_By_ID(user_id),
         CreateAt: createNew.created_at,
         Content: createNew.content,
+        Image: createNew.image,
         Sweet_Origin: createNew.sweet_id,
         UserName_Origin: sweet.user_id,
         CreateAT_Origin: sweet.created_at,
@@ -83,10 +85,10 @@ const update_Share = asyncHandle(async (req, res) => {
     const share_id = req.params.ShareID;
     
     const content = req.body.content;
-    const image = req.body.image;
+    const image = await uploadImage(req.files);
 
    
-    const updateData = await Share.findByIdAndUpdate(share_id, { $set: { content: content, updated_at: new Date()}});
+    const updateData = await Share.findByIdAndUpdate(share_id, { $set: { content: content, image: image, updated_at: new Date()}});
     
     const shareAfterUpdate = await get_Share_By_Id(share_id);
 
@@ -104,6 +106,7 @@ const update_Share = asyncHandle(async (req, res) => {
         UserName: await getDisplayName_By_ID(shareAfterUpdate.user_id),
         CreateAt: shareAfterUpdate.created_at,
         Content: shareAfterUpdate.content,
+        Image: shareAfterUpdate.image,
         Sweet_Origin: Share.sweet_id,
         UserName_Origin: sweet.user_id,
         CreateAT_Origin: sweet.created_at,
@@ -231,7 +234,7 @@ async function get_Comment_Info_To_Share(list_CommentID){
     for (const commentID of list_CommentID) {
       const comment = await Comment.findById(commentID);
       const userName = await getDisplayName_By_ID(comment.user_id) ;
-      comment_Info.push(userName , comment.content, comment.created_at);
+      comment_Info.push(userName , comment.content, comment.image, comment.created_at);
     }
     return comment_Info;
   }

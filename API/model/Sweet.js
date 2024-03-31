@@ -9,13 +9,14 @@ const tweetSchema = new mongoose.Schema({
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }], // Mảng các ObjectId của bình luận liên quan đến bài đăng,
     shares: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     edit_history: [{
-        edit_id: { type: mongoose.Schema.Types.ObjectId, required: true },
+        // edit_id: { type: mongoose.Schema.Types.ObjectId, required: true },
         content: { type: String, required: true }, // Nội dung cũ của bài viết
         updated_at: { type: Date, default: Date.now }, // Ngày giờ chỉnh sửa
         images: [{ type: String }]
     }],
     isDelete: { type: Boolean, default: false },
     created_at: { type: Date, default: Date.now },
+    updated_at: { type: Date},
 });
 const Privacys = {
     PRIVACY_PUBLIC: 1001,
