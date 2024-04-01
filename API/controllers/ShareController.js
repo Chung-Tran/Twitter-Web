@@ -1,45 +1,53 @@
 const asyncHandle = require('express-async-handler')
 const Share = require("../model/Share")
-const Sweet =require("../model/Sweet")
+const Sweet = require("../model/Sweet")
 const User = require("../model/User")
 const Comment = require('../model/Comment');
 const formatResponse = require('../common/ResponseFormat');
 const { set } = require('mongoose');
 const { query } = require('express');
+const {uploadImage} = require('../config/cloudinaryConfig');
 
 const create_Share = asyncHandle(async (req, res) => {
 
     const sweet_id = req.params.SweetID;
     const user_id = req.body.user_id;
     const content = req.body.content;
-    const image = req.body.image;
+    const image = await uploadImage(req.files);
     
-
-    const createNew = await Share.create({
+    const sweet = await Sweet.findById(sweet_id);
+    if(sweet){
+      const createNew = await Share.create({
         sweet_id: sweet_id,
         user_id: user_id,
         content: content,
         image: image,
+      });
 
-    });
+      const index_UserID_In_Share = sweet.shares.findIndex(share => share._id.toString() === user_id);
+      
+      if(index_UserID_In_Share === -1){
+        const add_UserID_To_Share = await Sweet.findByIdAndUpdate(sweet_id, {$push: {shares: createNew.user_id}}).populate("user_id", "displayName");
+        await sweet.save();
+      }
 
-    const sweet = await Sweet.findByIdAndUpdate(sweet_id, {$push: {shares: createNew.user_id}}).populate("user_id", "displayName");
-    
-
-    const data = {
-        
-        UserName: await getDisplayName_By_ID(createNew.user_id),
+      const data = {
+        UserName: await getDisplayName_By_ID(user_id),
         CreateAt: createNew.created_at,
         Content: createNew.content,
+        Image: createNew.image,
         Sweet_Origin: createNew.sweet_id,
         UserName_Origin: sweet.user_id,
         CreateAT_Origin: sweet.created_at,
         Content_Origin: sweet.content,
         QuantityLike: createNew.likes.length,
         QuantityComment: createNew.comments.length,
-    };
+      };
 
-    return res.status(200).json(formatResponse(data, true, ""));
+      return res.status(200).json(formatResponse(data, true, "Share bài viết thành công!!"));
+   
+    }else return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết để Share!"));
+ 
 });
 
 async function getDisplayName_By_ID(id){
@@ -77,10 +85,10 @@ const update_Share = asyncHandle(async (req, res) => {
     const share_id = req.params.ShareID;
     
     const content = req.body.content;
-    const image = req.body.image;
+    const image = await uploadImage(req.files);
 
    
-    const updateData = await Share.findByIdAndUpdate(share_id, { $set: { content: content, updated_at: new Date()}});
+    const updateData = await Share.findByIdAndUpdate(share_id, { $set: { content: content, image: image, updated_at: new Date()}});
     
     const shareAfterUpdate = await get_Share_By_Id(share_id);
 
@@ -89,6 +97,7 @@ const update_Share = asyncHandle(async (req, res) => {
         shareAfterUpdate
       } else {
         console.log('Không tìm thấy đối tượng share.');
+        res.status(404).json(formatResponse(null, false, "Không tìm thấy bài Share!!"));
       }
 
     const sweet = await Sweet.findById(shareAfterUpdate.sweet_id).populate("user_id", "displayName");
@@ -97,6 +106,7 @@ const update_Share = asyncHandle(async (req, res) => {
         UserName: await getDisplayName_By_ID(shareAfterUpdate.user_id),
         CreateAt: shareAfterUpdate.created_at,
         Content: shareAfterUpdate.content,
+        Image: shareAfterUpdate.image,
         Sweet_Origin: Share.sweet_id,
         UserName_Origin: sweet.user_id,
         CreateAT_Origin: sweet.created_at,
@@ -106,7 +116,7 @@ const update_Share = asyncHandle(async (req, res) => {
         UpdateAt: shareAfterUpdate.updated_at,
     };
 
-    return res.status(200).json(formatResponse(data, true, ""));
+    return res.status(200).json(formatResponse(data, true, "Cập nhật bài Share thành công!!"));
 });
 
 const delete_Share = asyncHandle(async(req, res) => {
@@ -123,7 +133,7 @@ const delete_Share = asyncHandle(async(req, res) => {
             if (sweet) {
                 const quantityShare = Share.find({user_id:share.user_id, sweet_id:share.sweet_id})
                 const indexToRemove = sweet.shares.findIndex(share => share._id.toString() === user_id_In_Share.toString());
-                if (((await quantityShare).length==1) && (indexToRemove !== -1)) {
+                if (((await quantityShare).length===1) && (indexToRemove !== -1)) {
                 sweet.shares.splice(indexToRemove, 1);
                     try {
                         await sweet.save();
@@ -132,24 +142,26 @@ const delete_Share = asyncHandle(async(req, res) => {
                         console.error('Lỗi khi xóa user_id trong list share của Sweet:', error);
                     }
                 } 
-            }
+            }else return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết!"));
+
 
             const delete_Comment = await Comment.deleteMany({tweet_id: share_id});
             const delete_Share = await Share.findByIdAndDelete(share_id);
 
         } catch (error) {
             console.error("Lỗi khi xóa bài Share", error);
+            return res.status(400).json(formatResponse(null, false, "Lỗi khi thực hiện xóa bài Share!"));
         }
 
         data ={
             Note: "Bài Share đã xóa!",
-            count: sweet.shares.length,
+            //count: sweet.shares.length,
         }
     
         return res.status(200).json(formatResponse(data, true, ""));
 
     } catch (error) {
-        return res.status(200).json(formatResponse("", false, "Không thể xóa bài Share"));
+        return res.status(400).json(formatResponse("", false, "Không thể xóa bài Share"));
     }
   })
   
@@ -222,7 +234,7 @@ async function get_Comment_Info_To_Share(list_CommentID){
     for (const commentID of list_CommentID) {
       const comment = await Comment.findById(commentID);
       const userName = await getDisplayName_By_ID(comment.user_id) ;
-      comment_Info.push(userName , comment.content, comment.created_at);
+      comment_Info.push(userName , comment.content, comment.image, comment.created_at);
     }
     return comment_Info;
   }
