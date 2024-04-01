@@ -1,14 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { registerUser, editUser, addFollowUser, removeFollowUser } = require("../controllers/UserController");
-const {loginUser} = require("../controllers/AuthController")
-
-router.post("/register", registerUser); //Đăng kí user
-router.post("/login", loginUser);
-
+const { registerUser, editUser, addFollowUser, getUser} = require("../controllers/UserController");
 
 router.put("/edit", editUser);
 router.post("/addFollow", addFollowUser);
-router.delete("/unFollow", removeFollowUser);
+
+router.get("/:id", getUser);
 
 module.exports = router;

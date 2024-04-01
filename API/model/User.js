@@ -27,7 +27,11 @@ userSchema.pre("save", async function (next) {
     }
     const salt = await bcrypt.genSaltSync(10);
     this.password = await bcrypt.hash(this.password, salt);
-    this.refreshToken = generateRefreshToken(this);
+    const dataEncodeRefreshToken = {
+        userId: this._id,
+        email:this.email
+    }
+    this.refreshToken = generateRefreshToken(dataEncodeRefreshToken);
     next();
 });
 
@@ -59,25 +63,30 @@ userSchema.methods.checkAutoLogin = async function (accessToken) {
 
 userSchema.methods.generateNewAccessToken = async function (userInfo) {
     try {
-        // Giải mã access token
-        const decodedAccessToken = jwt.verify(accessToken, process.env.JWT_CODE);
-        // Kiểm tra xem access token
-        if (decodedAccessToken) {
-            // Trả về true nếu access token hợp lệ
-            return formatResponse(decodedAccessToken, true, null);
+        // Giải mã refresh token
+        const decodedRefreshToken = jwt.verify(this.refreshToken, process.env.JWT_CODE);
+
+        const newAccessToken = generateAccessToken(userInfo)
+        if (decodedRefreshToken) {
+            return formatResponse(newAccessToken, true, null);
         }
     } catch (error) {
-        try {
-            // Giải mã refresh token
-            const decodedRefreshToken = jwt.verify(this.refreshToken, process.env.JWT_CODE);
+        return formatResponse(null, false, "Refresh token is invalid");
+    }
+}
+userSchema.methods.updateUserPassword = async function (newPassword) {
+    try {
+        // Mã hóa password
+        const salt = await bcrypt.genSaltSync(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        this.password = hashedPassword;
+        // Save
+        await this.save();
 
-            const newAccessToken = generateAccessToken(userInfo)
-            if (decodedRefreshToken) {
-                return formatResponse(newAccessToken, true, null);
-            }
-        } catch (error) {
-            return formatResponse(null, false, "Refresh token is invalid");
-        }
+        return formatResponse(null, true, "Mật khẩu đã được cập nhật thành công.");
+    } catch (error) {
+        console.error("Error updating user password:", error);
+        return formatResponse(null, false, "Đã xảy ra lỗi khi cập nhật mật khẩu.");
     }
 }
 

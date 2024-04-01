@@ -5,6 +5,7 @@ const formatResponse = require("../common/ResponseFormat");
 
 const { set } = require('mongoose');
 const User = require('../model/User');
+const Share = require('../model/Share');
 
 
 const create_Comment = asyncHandle(async (req, res)=>{
@@ -17,7 +18,14 @@ const create_Comment = asyncHandle(async (req, res)=>{
         content : content
     });
 
-    const sweet = await Sweet.findByIdAndUpdate(sweet_id, {$addToSet : {comments:comment._id}});
+   
+    const sweet = await Sweet.findById(sweet_id);
+
+    if(sweet){
+      const add_Comment_To_Sweet = await Sweet.findByIdAndUpdate(sweet_id, {$addToSet : {comments:comment._id}});
+    }else{
+      const add_Comment_To_Share = await Share.findByIdAndUpdate(sweet_id, {$addToSet : {comments:comment._id}});
+    }
 
     const data = {
         UserName: await getDisplayName_By_ID(user_id),
