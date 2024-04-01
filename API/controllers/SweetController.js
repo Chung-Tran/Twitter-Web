@@ -258,6 +258,7 @@ const add_OR_Delete_User_To_List_Like_Sweet = asyncHandle(async(req,res) =>{
 
 })
 
+
 const add_User_To_List_Share_Sweet = asyncHandle(async(req, res)=> {
 
   const sweetID = req.params.SweetID;
@@ -541,6 +542,8 @@ module.exports= {
   get_List_User_To_Like, 
   get_List_User_To_Share, 
   get_List_Comment_To_Sweet,
+  get_Sweet,
+  get_10_sweet,
   get_Sweet,
   get_10_sweet,
 }

@@ -32,6 +32,9 @@ const loginUser = asyncHandle(async (req, res) => {
     if (!findUser) {
         res.status(403).json(formatResponse(null, false, "Không tìm thấy người dùng."));
     };
+    if (!findUser) {
+        res.status(403).json(formatResponse(null, false, "Không tìm thấy người dùng."));
+    };
     if (findUser && (await findUser.isPasswordMatched(password))) {
         const encodeData = {
             userId: findUser._id,
@@ -41,6 +44,12 @@ const loginUser = asyncHandle(async (req, res) => {
         const accessToken = generateAccessToken(encodeData);
 
         const updateUser = await User.findByIdAndUpdate(findUser._id, { refeshToken: refeshToken }, { new: true });
+        // res.cookie("refeshToken", refeshToken, {
+        //     httpOnly: true,
+        //     maxAge: 72 * 60 * 60 * 1000,
+        // });
+        // res.cookie('refeshToken',generateRefeshToken)
+        // const responseData = {
         // res.cookie("refeshToken", refeshToken, {
         //     httpOnly: true,
         //     maxAge: 72 * 60 * 60 * 1000,
