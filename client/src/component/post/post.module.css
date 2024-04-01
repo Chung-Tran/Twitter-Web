@@ -1,0 +1,162 @@
+.container {
+  background-color: black;
+  height: 700px;
+  color: white;
+  font-family: 'Segoe UI';
+  position: fixed;
+  top: 0;
+  width: 700px;
+  overflow-y: auto;
+  padding: 30px;
+  margin-left: 300px;
+}
+
+.icon2 {
+  display: flex;
+  justify-content: space-between;
+}
+
+.icon2 > div {
+  display: flex;
+  align-items: center;
+}
+
+.ico2n > div:first-child {
+  justify-content: flex-start;
+}
+
+.icon2 > div:last-child {
+  justify-content: flex-end;
+}
+
+.post {
+  display: flex;
+  align-items: center;
+  padding-top: 20px;
+}
+
+.post > div:first-child {
+  border-radius: 50px;
+  border: 1px solid transparent;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  background-color: brown;
+  align-Items: center;
+  font-family: bold;
+}
+
+.post > div:last-child {
+  color: gray;
+  margin-left: 10px;
+}
+
+.listIcon {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+  margin-left: 50px;
+}
+
+.listIcon li {
+  margin-right: 10px;
+}
+
+.listIcon li svg {
+  fill: #1e9be3;
+  font-size: 20px;
+}
+
+.listIcon li span {
+  width: 80px;
+  height: 35px;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  background-color: #1e9be3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 0;
+  margin-right: 30px;
+}
+
+.customPost {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-top: 10px;
+  align-items: center;
+}
+
+.customPostContent {
+  display: flex;
+  align-items: center;
+}
+
+.userAvatar {
+  width: 50px;
+  height: 50px;
+  background-color: brown;
+  border-radius: 50%;
+  margin-right: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+}
+
+.userInfo > div {
+  margin-right: 10px;
+}
+
+.userInfo span {
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.name{
+  font-size: 18px;
+  font-family: bold;
+}
+
+.email{
+  margin-left: 10px;
+  color: gray;
+  font-size: 15px;
+}
+
+.more {
+  margin-left: 270px;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.iconList {
+  display: flex;
+  list-style-type: none;
+  margin-left: 60px;
+  margin-top: 20px;
+}
+
+.iconList:last-child {
+  margin-left: auto;
+}
+
+.icon {
+  margin-right: 100px;
+}

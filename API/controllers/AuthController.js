@@ -14,7 +14,18 @@ const secretKey = process.env.JWT_CODE;
 const cloudinary = require('cloudinary').v2;
 
 
+const registerUser = asyncHandle(async (req, res) => {
+    const email = req.body.email;
+    const username = req.body.username;
 
+
+    const existData = await User.findOne({ email: email } || { username: username } );
+    if (existData) {
+        return res.status(400).json(formatResponse(null, false, "Register failed!! Try again with other username or email."));
+    }
+    const newUser = await User.create(req.body);
+    return res.status(200).json(formatResponse(null,true,null));
+});
 const loginUser = asyncHandle(async (req, res) => {
     const { email, password } = req.body;
     const findUser = await User.findOne({ email });
@@ -207,4 +218,4 @@ const upload = asyncHandle(async (req, res) => {
     return res.status(200).json(data)
 
 });
-module.exports = { loginUser, sendPasswordByEmail, authenticateOTP, confirmResetPassword,upload }
+module.exports = {registerUser, loginUser, sendPasswordByEmail, authenticateOTP, confirmResetPassword,upload }

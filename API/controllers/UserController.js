@@ -2,17 +2,7 @@ const asyncHandle = require('express-async-handler')
 const User = require('../model/User');
 const formatResponse = require('../common/ResponseFormat');
 
-const registerUser = asyncHandle(async (req, res) => {
-    const email = req.body.email;
-    const username = req.body.username;
-    const existData = await User.findOne({ email: email } || { username: username });
-    if (existData) {
-        return res.status(400).json(formatResponse(null, false, "Register failed!! Try again with other username or email."));
-    }
-    const newUser = await User.create(req.body);
 
-    return res.status(200).json("Like: 500");
-});
 
 const editUser = asyncHandle(async(req, res) => {
     const userId = req.params;
@@ -85,4 +75,4 @@ const removeFollowUser = asyncHandle(async(req, res) => {
     }
 });
 
-module.exports = {registerUser, editUser, addFollowUser, removeFollowUser}
+module.exports = {editUser, addFollowUser, removeFollowUser}
