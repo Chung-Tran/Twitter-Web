@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { registerUser } = require("../controllers/UserController");
-const {loginUser,sendPasswordByEmail,authenticateOTP,confirmResetPassword, upload} = require("../controllers/AuthController");
+const {registerUser,loginUser,sendPasswordByEmail,authenticateOTP,confirmResetPassword, upload} = require("../controllers/AuthController");
 const uploadImage = require('../middleware/UploadImageMiddleware');
 
 router.post("/register", registerUser); //Đăng kí user

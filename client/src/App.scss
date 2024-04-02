@@ -243,11 +243,13 @@
     }
     
     border-bottom: 1px solid rgb(212, 201, 201);
+
   }
   .modal-login{
     margin-top: 10px;
-    height: 250px;
+    height: auto;
     padding-top: 10px;
+    padding-bottom: 16px;
     .title-input-login{
       font-size: 18px;
       font-weight: bolder;
@@ -268,6 +270,20 @@
       border: 1px solid rgb(138, 122, 122);
       padding-left: 10px;
       outline: none;
+    }
+    .dob-input{
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 20px;
+      font-size: 17px;
+      align-items: center;
+      .ant-space{
+        width: 67%;
+        .ant-picker{
+          width: 100%;
+        }
+      }
     }
     button{
       width: 75%;

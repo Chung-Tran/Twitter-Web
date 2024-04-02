@@ -8,4 +8,5 @@ const dbConnect = () => {
         console.log(`Connect database failed, error: ${error.message}`)
     }
 }
+
 module.exports = dbConnect;

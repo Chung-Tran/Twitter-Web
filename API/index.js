@@ -43,6 +43,7 @@ app.use('/api/users', userRoute);
 app.use('/api/sweet', sweetRoute);
 app.use('/api/comment', commentRoute);
 app.use('/api/share', shareRoute);
+app.use('/api/share', shareRoute);
 
 //Start server
 const PORT = process.env.PORT;

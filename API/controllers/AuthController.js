@@ -14,10 +14,24 @@ const secretKey = process.env.JWT_CODE;
 const cloudinary = require('cloudinary').v2;
 
 
+const registerUser = asyncHandle(async (req, res) => {
+    const email = req.body.email;
+    const username = req.body.username;
 
+
+    const existData = await User.findOne({ email: email } || { username: username } );
+    if (existData) {
+        return res.status(400).json(formatResponse(null, false, "Register failed!! Try again with other username or email."));
+    }
+    const newUser = await User.create(req.body);
+    return res.status(200).json(formatResponse(null,true,null));
+});
 const loginUser = asyncHandle(async (req, res) => {
     const { email, password } = req.body;
     const findUser = await User.findOne({ email });
+    if (!findUser) {
+        res.status(403).json(formatResponse(null, false, "Không tìm thấy người dùng."));
+    };
     if (!findUser) {
         res.status(403).json(formatResponse(null, false, "Không tìm thấy người dùng."));
     };
@@ -30,6 +44,12 @@ const loginUser = asyncHandle(async (req, res) => {
         const accessToken = generateAccessToken(encodeData);
 
         const updateUser = await User.findByIdAndUpdate(findUser._id, { refeshToken: refeshToken }, { new: true });
+        // res.cookie("refeshToken", refeshToken, {
+        //     httpOnly: true,
+        //     maxAge: 72 * 60 * 60 * 1000,
+        // });
+        // res.cookie('refeshToken',generateRefeshToken)
+        // const responseData = {
         // res.cookie("refeshToken", refeshToken, {
         //     httpOnly: true,
         //     maxAge: 72 * 60 * 60 * 1000,
@@ -207,4 +227,4 @@ const upload = asyncHandle(async (req, res) => {
     return res.status(200).json(data)
 
 });
-module.exports = { loginUser, sendPasswordByEmail, authenticateOTP, confirmResetPassword,upload }
+module.exports = {registerUser, loginUser, sendPasswordByEmail, authenticateOTP, confirmResetPassword,upload }

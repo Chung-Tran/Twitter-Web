@@ -23,8 +23,6 @@ function LoginPage(props) {
                             <LoginOption setModalShow={setShowModal} />
                         </div>
                     </div>
-
-
                 </div>
                 <LoginModal/>
             </div>
