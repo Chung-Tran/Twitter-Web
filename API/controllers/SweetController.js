@@ -725,9 +725,44 @@ const get_Many_sweet = asyncHandle(async(req,res) =>{
 const get_Sweet_To_UserID = asyncHandle(async(req, res) => {
   const user_id = req.query.UserID;
 
-  const sweet = await Sweet.find({user_id : user_id, isDelete : false}, "content image likes comments shares created_at");
+  const sweet = await Sweet.find({user_id : user_id, isDelete : false}, "content image created_at")
+  .populate('user_id', 'displayName')
+  .populate('likes', 'displayName')
+  .populate('shares', 'displayName')   
+  .populate({
+    path: 'comments',
+    populate: {
+      path: 'user_id',
+      select: 'displayName',
+    }
+  })
+  
+  .exec()
+  .then(sweets => {
 
-  return res.status(200).json(formatResponse(sweet, true, "Lấy các bài viết thành công!!"))
+    console.log('Danh sách bài viết theo ID:', sweets);
+
+    sweets = sweets.map(sweet => {
+      sweet = sweet.toObject(); // Chuyển sang đối tượng plain JavaScript để thêm trường mới
+      sweet.quantityLike = sweet.likes.length;
+      sweet.quantityComment = sweet.comments.length;
+      sweet.quantityShare = sweet.shares.length;
+      return sweet;
+    });
+
+    const data ={
+      InFo_Sweet: sweets,
+    }
+    
+    return res.status(200).json(formatResponse(data, true, `Lấy bài viết theo id: ${user_id} thành công.`))
+
+  
+  })
+  
+  .catch(err => {
+    console.error('Lỗi khi lấy danh sách bài viết theo ID:', err);
+    res.status(400).json(formatResponse("", false, "Lỗi khi lấy bài viết theo ID"))
+  });
 })
 
 module.exports= {
