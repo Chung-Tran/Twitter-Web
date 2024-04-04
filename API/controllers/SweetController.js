@@ -10,6 +10,8 @@ const Share = require('../model/Share');
 
 const {uploadImage} = require('../config/cloudinaryConfig');
 const { upload } = require('./AuthController');
+const UploadImageMiddleware = require('../middleware/UploadImageMiddleware');
+
 
 
 const create_Sweet = asyncHandle(async (req, res) => {
@@ -17,7 +19,7 @@ const create_Sweet = asyncHandle(async (req, res) => {
     const user_id = req.body.user_id;
     const content = req.body.content;
     const image = await uploadImage(req.files);
-
+    
     try {
       const createNew = await Sweet.create({
         user_id: user_id,
@@ -201,10 +203,11 @@ const get_History_Update_Sweet = asyncHandle(async(req, res) => {
       const images = edit_history.images.map(image => image.toString());
       const updated_at = edit_history.updated_at;
   
-      list_History_Update.push(content, images, updated_at);
+      list_History_Update.push({Content: content,Image: images, UpdateAt: updated_at});
   });
 
   const data = {
+    UpdateNumber: edit_historys.length,
     History_Update: list_History_Update,
   }
   return res.status(200).json(formatResponse(data, true, "Đã lấy được danh sách lịch sử chỉnh sửa bài viết"));
@@ -600,9 +603,16 @@ const get_List_User_To_Share = asyncHandle(async (req, res) => {
 async function get_Comment_Info_To_Sweet(list_CommentID){
   const comment_Info = [];
   for (const commentID of list_CommentID) {
-    const comment = await Comment.findById(commentID);
-    const userName = await getDisplayName_By_ID(comment.user_id) ;
-    comment_Info.push(userName , comment.content, comment.image, comment.created_at);
+    const comment = await Comment.findById(commentID).populate('likes', 'displayName');
+    const userName = await getDisplayName_By_ID(comment.user_id);
+    const countLike = comment.likes.length;
+
+    comment_Info.push({DisplayName : userName,
+                      Content: comment.content, 
+                      Image: comment.image,
+                      QuantityLike: countLike, 
+                      User_Like: comment.likes, 
+                      CreateAt: comment.created_at});
   }
   return comment_Info;
 }
