@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 
+const moment = require("moment-timezone")
+
 const tweetSchema = new mongoose.Schema({
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // ObjectId của người dùng tạo bài đăng
     content: { type: String, required: true },
@@ -14,8 +16,11 @@ const tweetSchema = new mongoose.Schema({
         updated_at: { type: Date, default: Date.now }, // Ngày giờ chỉnh sửa
         images: [{ type: String }]
     }],
+    
     isDelete: { type: Boolean, default: false },
-    created_at: { type: Date, default: Date.now },
+    // created_at: { type: Date, default: () => moment.tz('Asia/Ho_Chi_Minh').toDate()},
+    created_at: { type: Date, default: Date.now},
+
     updated_at: { type: Date},
 });
 const Privacys = {

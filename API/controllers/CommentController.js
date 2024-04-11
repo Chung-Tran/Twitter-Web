@@ -9,6 +9,9 @@ const Share = require('../model/Share');
 const { uploadImage } = require('../config/cloudinaryConfig');
 const UploadImageMiddleware = require('../middleware/UploadImageMiddleware');
 
+const moment = require("moment-timezone");
+const path = require('path');
+moment.tz('Asia/Ho_Chi_Minh')
 
 
 const create_Comment = asyncHandle(async (req, res)=>{
@@ -50,7 +53,7 @@ const create_Comment = asyncHandle(async (req, res)=>{
         SweetID: comment.tweet_id,
         Content: comment.content,
         Image: comment.image,
-        CreateComment: comment.created_at
+        CreateComment: moment(comment.created_at).format()
         
     }
 
@@ -58,15 +61,19 @@ const create_Comment = asyncHandle(async (req, res)=>{
 })
 
 async function getDisplayName_By_ID(id){
-    const use = await User.findById(id).populate("displayName");
-    if(!use){
-      console.log("Không tìm thấy User!");
-      return null;
-    }
-    else if(use.displayName==null){
-      return use.username;
-    }
+  const use = await User.findById(id);
+  if(!use){
+    console.log("Không tìm thấy User!");
+    return null;
+  }
+  else if(use.displayName===null){
+    return use.username;
+  }
+  else if(use.username===null){
     return use.displayName;
+  }
+  return {DisplayName: use.displayName,
+          UserName: use.username,}
 }
 
 
@@ -135,8 +142,8 @@ const update_Comment = asyncHandle(async (req, res) =>{
       Content: commentAfterUpdate.content,
       Image: commentAfterUpdate.image.map(i => i.toString()),
       QuantityLike: commentAfterUpdate.likes.length,
-      CreateAt: commentAfterUpdate.created_at,
-      UpdateAt: commentAfterUpdate.updated_at
+      CreateAt: moment(commentAfterUpdate.created_at).format(),
+      UpdateAt: moment(commentAfterUpdate.updated_at).format()
     };
       
       return res.status(200).json(formatResponse(data, true, "Sửa đổi thành công"));
@@ -163,7 +170,7 @@ const get_History_Update_Comment = asyncHandle(async(req, res) => {
   edit_historys.forEach(edit_history => {
       const content = edit_history.content;
       const images = edit_history.images.map(image => image.toString());
-      const updated_at = edit_history.updated_at;
+      const updated_at = moment(edit_history.updated_at).format();
   
       list_History_Update.push({Content: content,Image: images, UpdateAt: updated_at});
   });
@@ -314,7 +321,7 @@ const create_ReplyComment = asyncHandle(async(req, res) => {
       UserName: await getDisplayName_By_ID(commentReply.user_id._id),
       Content: commentReply.content,
       Image: commentReply.image,
-      CreateAt: commentReply.create_at,
+      CreateAt: moment(commentReply.create_at).format(),
     }
     return res.status(200).json(formatResponse(data, true, `Trả lời Comment có id: ${comment_id} thành công!!`))
   
@@ -482,8 +489,8 @@ const update_ReplyComment = asyncHandle(async (req, res) =>{
           Content: cr.content,
           Image: cr.image.map(i => i.toString()),
           QuantityLike: cr.likes.length,
-          CreateAt: cr.create_at,
-          UpdateAt: cr.updated_at
+          CreateAt: moment(cr.create_at).format(),
+          UpdateAt: moment(cr.updated_at).format()
         };
       }
     });
@@ -516,7 +523,7 @@ const get_History_Update_ReplyComment = asyncHandle(async(req, res) => {
         const edit_history = rc.edit_history;
         edit_history.forEach(edh => {
           quantityUpdate++;
-          list_History_Update.push({Content: edh.content,Image: edh.images, UpdateAt: edh.updated_at});
+          list_History_Update.push({Content: edh.content,Image: edh.images, UpdateAt: moment(edh.updated_at).format()});
         })
       }
       
@@ -556,6 +563,30 @@ const delete_ReplyComment = asyncHandle(async(req, res) => {
   }  
 })
 
+async function formatTimeDifference(fromDate, toDate){
+
+  const duration = moment.duration(toDate.diff(fromDate));
+
+    if (duration.asMinutes() < 1) {
+        return 'Vừa xong';
+    } else if (duration.asHours() < 1) {
+        const minutes = Math.floor(duration.asMinutes());
+        return `${minutes} phút trước`;
+    } else if (duration.asDays() < 1) {
+        const hours = Math.floor(duration.asHours());
+        return `${hours} giờ trước`;
+    } else if (duration.asDays() < 7) {
+        const days = Math.floor(duration.asDays());
+        return `${days} ngày trước`;
+    } else {
+        // Nếu lớn hơn 7 ngày, hiển thị số tuần
+        // const weeks = Math.floor(duration.asDays() / 7);
+        // return `${weeks} tuần trước`;
+        return moment(fromDate).format();
+    }
+}
+
+
 const get_List_ReplyComment = asyncHandle(async(req, res) => {
 
   const comment_id = req.query.CommentID;
@@ -574,19 +605,22 @@ const get_List_ReplyComment = asyncHandle(async(req, res) => {
 
     let quantityLike;
     const replyCommentS = []; 
+    let duration;
     let quantityReplyComment=0;
-    replyComment.forEach(rc => {
+    for (const rc of replyComment) {
       quantityReplyComment++,
       quantityLike = rc.likes.length,
+      duration = await formatTimeDifference(moment(rc.create_at), moment())
+
 
       replyCommentS.push({
         UserName: rc.user_id, 
         Content: rc.content, 
         Image: rc.image,
-        CreateAt: rc.create_at,
+        CreateAt: duration,
         QuantityLike: quantityLike,
       })
-    });
+    };
 
     const data = {
       QuantityReplyComment: quantityReplyComment,

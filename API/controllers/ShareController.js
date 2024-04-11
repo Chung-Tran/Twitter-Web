@@ -9,6 +9,9 @@ const { query } = require('express');
 const {uploadImage} = require('../config/cloudinaryConfig');
 const UploadImageMiddleware = require('../middleware/UploadImageMiddleware');
 
+const moment = require('moment-timezone')
+moment.tz('Asia/Ho_Chi_Minh')
+
 const create_Share = asyncHandle(async (req, res) => {
 
     const sweet_id = req.params.SweetID;
@@ -34,12 +37,12 @@ const create_Share = asyncHandle(async (req, res) => {
 
       const data = {
         UserName: await getDisplayName_By_ID(user_id),
-        CreateAt: createNew.created_at,
+        CreateAt: moment(createNew.created_at).format(),
         Content: createNew.content,
         Image: createNew.image,
         Sweet_Origin: createNew.sweet_id,
         UserName_Origin: sweet.user_id,
-        CreateAT_Origin: sweet.created_at,
+        CreateAT_Origin: moment(sweet.created_at).format(),
         Content_Origin: sweet.content,
         QuantityLike: createNew.likes.length,
         QuantityComment: createNew.comments.length,
@@ -52,16 +55,21 @@ const create_Share = asyncHandle(async (req, res) => {
 });
 
 async function getDisplayName_By_ID(id){
-    const use = await User.findById(id).populate("displayName");
-    if(!use){
-      console.log("Không tìm thấy User!");
-      return null;
-    }
-    else if(use.displayName===null){
-      return use.username;
-    }
+  const use = await User.findById(id);
+  if(!use){
+    console.log("Không tìm thấy User!");
+    return null;
+  }
+  else if(use.displayName===null){
+    return use.username;
+  }
+  else if(use.username===null){
     return use.displayName;
+  }
+  return {DisplayName: use.displayName,
+          UserName: use.username,}
 }
+
 
 async function get_Share_By_Id(id) {
     try {
@@ -105,12 +113,12 @@ const update_Share = asyncHandle(async (req, res) => {
 
     const data = {
         UserName: await getDisplayName_By_ID(shareAfterUpdate.user_id),
-        CreateAt: shareAfterUpdate.created_at,
+        CreateAt: moment(shareAfterUpdate.created_at).format(),
         Content: shareAfterUpdate.content,
         Image: shareAfterUpdate.image,
         Sweet_Origin: Share.sweet_id,
         UserName_Origin: sweet.user_id,
-        CreateAT_Origin: sweet.created_at,
+        CreateAT_Origin: moment(sweet.created_at).format(),
         Content_Origin: sweet.content,
         QuantityLike: shareAfterUpdate.likes.length,
         QuantityComment: shareAfterUpdate.comments.length,
@@ -230,19 +238,44 @@ const get_List_User_To_Like = asyncHandle(async (req, res) => {
     }    
   });
   
-  async function get_Comment_Info_To_Sweet(list_CommentID){
+  async function formatTimeDifference(fromDate, toDate){
+
+    const duration = moment.duration(toDate.diff(fromDate));
+  
+      if (duration.asMinutes() < 1) {
+          return 'Vừa xong';
+      } else if (duration.asHours() < 1) {
+          const minutes = Math.floor(duration.asMinutes());
+          return `${minutes} phút trước`;
+      } else if (duration.asDays() < 1) {
+          const hours = Math.floor(duration.asHours());
+          return `${hours} giờ trước`;
+      } else if (duration.asDays() < 7) {
+          const days = Math.floor(duration.asDays());
+          return `${days} ngày trước`;
+      } else {
+          // Nếu lớn hơn 7 ngày, hiển thị số tuần
+          // const weeks = Math.floor(duration.asDays() / 7);
+          // return `${weeks} tuần trước`;
+          return moment(fromDate).format();
+      }
+  }
+  
+
+  async function get_Comment_Info_To_Share(list_CommentID){
     const comment_Info = [];
     for (const commentID of list_CommentID) {
       const comment = await Comment.findById(commentID).populate('likes', 'displayName');
       const userName = await getDisplayName_By_ID(comment.user_id);
       const countLike = comment.likes.length;
-  
+      const duration = await formatTimeDifference(moment(comment.created_at), moment())
+
       comment_Info.push({DisplayName : userName,
                         Content: comment.content, 
                         Image: comment.image,
                         QuantityLike: countLike, 
                         User_Like: comment.likes, 
-                        CreateAt: comment.created_at});
+                        CreateAt: duration});
     }
     return comment_Info;
   }
