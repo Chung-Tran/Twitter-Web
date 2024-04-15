@@ -5,7 +5,7 @@ import styles from './Menu.module.css'
 
 const Menu = () => {
   return (
-    <div className={styles.container}>
+    <div className='homepage-menu'>
         <nav className={styles.search}>
           <ul>
             <li><span><AiOutlineSearch /></span>Search</li>

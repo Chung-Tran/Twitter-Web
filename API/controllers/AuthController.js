@@ -123,7 +123,8 @@ const authenticateOTP = asyncHandle(async (req, res) => {
             return res.status(403).json(formatResponse(null, false, "Mã OTP đã hết hạn. Vui lòng thử lại"));
         }
         const dataFromRedis = JSON.parse(resetCodeData);
-        console.log("dataFromRedis,",dataFromRedis)
+        console.log("dataFromRedis,", dataFromRedis)
+        console.log(code, dataFromRedis.resetCode);
         if (dataFromRedis.resetCode != code)
             return res.status(400).json(formatResponse(null, false, "Mã OTP không hợp lệ. Vui lòng thử lại"));
 
@@ -144,7 +145,9 @@ const confirmResetPassword = asyncHandle(async (req, res) => {
     const { email, newPassword, token } = req.body;
 
     try {
-        const user = await User.findOne({ email });
+        console.log(email)
+        const user = await User.findOne({ email: email });
+        console.log(user)
         jwt.verify(token, secretKey, async (err, decoded) => {
             if (err) {
                 return res.status(400).json(formatResponse(null, false, "Phiên thay đổi mật khẩu hết hạn. Vui lòng thử lại"));

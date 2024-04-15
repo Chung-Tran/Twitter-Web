@@ -42,7 +42,6 @@ function LoginOption() {
                 }}
               />
             </GoogleOAuthProvider>
-
           </div>
           <div className='facebook-option single-option'>
             <GrFacebookOption /> &nbsp;     Đăng nhập với Facebook

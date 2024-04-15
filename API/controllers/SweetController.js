@@ -681,8 +681,10 @@ async function get_Quantity_Likes(id_Sweet){
 }
 
 const get_Many_sweet = asyncHandle(async(req,res) =>{
-  const skipNumble = req.body.skip;
-  const limitNumble = req.body.limit;
+  const skipNumble = req.query.skip;
+  const limitNumble = req.query.limit;
+  console.log(skipNumble, limitNumble);
+  
 
   const sweet = Sweet.find({isDelete: false}, "content image created_at ").skip(skipNumble).limit(limitNumble)
   .populate('user_id', 'displayName')

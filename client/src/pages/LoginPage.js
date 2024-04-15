@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BsTwitterX } from 'react-icons/bs';
 import LoginOption from '../component/LoginOption';
 import LoginModal from '../component/LoginModal';
+import axiosClient from '../authenticate/authenticationConfig';
 function LoginPage(props) {
     const [showModal, setShowModal] = useState(false);
 
@@ -20,7 +21,8 @@ function LoginPage(props) {
                             <span>Tham gia ngay</span>
                         </div>
                         <div className='login-menu'>
-                            <LoginOption setModalShow={setShowModal} />
+                            <LoginOption/>
+                       
                         </div>
                     </div>
                 </div>

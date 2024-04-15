@@ -13,10 +13,10 @@ import styles from './Navbar.css';
 
 const Navbar = () => {
   return (
-    <div className={styles.container}>
-        <div className={styles.content}>
-            <div className={styles.icon}>
-                <BsTwitterX style={{ margin: 'auto', width: '10%', height: '10%', maxHeight: '400px', color: 'white' }} />
+    <div className='homepage-navbar'>
+        <div className='navbar-content'>
+            <div className='navbar-icon'>
+                <BsTwitterX style={{ margin: 'auto', width: '30', height: '30', maxHeight: '400px', color: 'white' }} />
             </div>
             <nav>
                 <ul>
