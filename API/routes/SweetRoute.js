@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
-
-const uploadImage = require('../middleware/UploadImageMiddleware');
+const UploadImageMiddleware = require('../middleware/UploadImageMiddleware');
 
 const { create_Sweet, 
     update_Sweet, 
@@ -22,9 +21,9 @@ const { create_Sweet,
     get_Many_sweet,
     get_Sweet_To_UserID} = require('../controllers/SweetController');
 
-router.post('/createSweet', uploadImage.array('image'), create_Sweet);
 
-router.put('/updateSweet/:SweetID', uploadImage.array('image'), update_Sweet);
+router.post('/createSweet/',UploadImageMiddleware.array('image'), create_Sweet);
+router.put('/updateSweet/:SweetID', UploadImageMiddleware.array('image'), update_Sweet);
 router.get('/getHistoryUpdate', get_History_Update_Sweet);
 
 router.delete('/deleteSweet/:SweetID', deleted_Sweet);
