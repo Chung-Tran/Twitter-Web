@@ -19,8 +19,8 @@ const { create_Sweet,
     get_List_Comment_To_Sweet, 
     get_A_Sweet,
     get_Many_sweet,
-    get_Many_Sweet_And_Share,
     get_Many_Sweet_And_Share_For_You,
+    get_Many_Sweet_And_Share_Following,
     pin_Or_Unpin_Sweet,
     check_Pin_Or_Unpin_Sweet,
     get_Sweet_To_UserID,
@@ -50,8 +50,8 @@ router.get('/getListShare', get_List_User_To_Share);
 router.get('/getListComment', get_List_Comment_To_Sweet);
 router.get('/getOneSweet',get_A_Sweet);
 router.get('/getManySweet',get_Many_sweet);
-router.get('/getManySweetAndShare',get_Many_Sweet_And_Share);
 router.get('/getManySweetAndShareForYou',get_Many_Sweet_And_Share_For_You);
+router.get('/getManySweetAndShareFollowing',get_Many_Sweet_And_Share_Following);
 
 
 router.get('/checkPinOrUnpin', check_Pin_Or_Unpin_Sweet);

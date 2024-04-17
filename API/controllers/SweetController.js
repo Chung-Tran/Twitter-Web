@@ -838,7 +838,7 @@ const get_Many_sweet = asyncHandle(async(req,res) =>{
   });
 })
 
-const get_Many_Sweet_And_Share = asyncHandle((async (req, res) => {
+const get_Many_Sweet_And_Share_For_You = asyncHandle((async (req, res) => {
   let skipNumble = parseInt(req.query.skip) || 0;
   let limitNumble = parseInt(req.query.limit) || 10;
   
@@ -918,7 +918,7 @@ const get_Many_Sweet_And_Share = asyncHandle((async (req, res) => {
 
 }))
 
-const get_Many_Sweet_And_Share_For_You = asyncHandle((async (req, res) => {
+const get_Many_Sweet_And_Share_Following = asyncHandle((async (req, res) => {
   let skipNumble = parseInt(req.query.skip) || 0;
   let limitNumble = parseInt(req.query.limit) || 10;
 
@@ -1204,8 +1204,8 @@ module.exports= {
   get_List_Comment_To_Sweet,
   get_A_Sweet,
   get_Many_sweet,
-  get_Many_Sweet_And_Share,
   get_Many_Sweet_And_Share_For_You,
+  get_Many_Sweet_And_Share_Following,
   check_Pin_Or_Unpin_Sweet,
   pin_Or_Unpin_Sweet,
   get_Sweet_To_UserID,
