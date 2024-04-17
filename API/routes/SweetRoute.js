@@ -19,7 +19,12 @@ const { create_Sweet,
     get_List_Comment_To_Sweet, 
     get_A_Sweet,
     get_Many_sweet,
-    get_Sweet_To_UserID} = require('../controllers/SweetController');
+    get_Many_Sweet_And_Share,
+    get_Many_Sweet_And_Share_For_You,
+    pin_Or_Unpin_Sweet,
+    check_Pin_Or_Unpin_Sweet,
+    get_Sweet_To_UserID,
+    check_Sweet_Or_Share,} = require('../controllers/SweetController');
 
 
 router.post('/createSweet/',UploadImageMiddleware.array('image'), create_Sweet);
@@ -45,6 +50,14 @@ router.get('/getListShare', get_List_User_To_Share);
 router.get('/getListComment', get_List_Comment_To_Sweet);
 router.get('/getOneSweet',get_A_Sweet);
 router.get('/getManySweet',get_Many_sweet);
-router.get('/getSweetByUserID',get_Sweet_To_UserID);
+router.get('/getManySweetAndShare',get_Many_Sweet_And_Share);
+router.get('/getManySweetAndShareForYou',get_Many_Sweet_And_Share_For_You);
+
+
+router.get('/checkPinOrUnpin', check_Pin_Or_Unpin_Sweet);
+router.put('/pinSweet/:SweetID', pin_Or_Unpin_Sweet);
+router.get('/getSweetByUserID', get_Sweet_To_UserID);
+
+router.get('/checkSweetOrShare', check_Sweet_Or_Share);
 
 module.exports = router;

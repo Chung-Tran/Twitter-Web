@@ -19,7 +19,7 @@ const create_Share = asyncHandle(async (req, res) => {
     const content = req.body.content;
     const image = await uploadImage(req.files);
 
-    const sweet = await Sweet.findById(sweet_id);
+    const sweet = await Sweet.findById(sweet_id).populate('user_id', 'displayName username');
     if(sweet){
       const createNew = await Share.create({
         sweet_id: sweet_id,
@@ -44,6 +44,7 @@ const create_Share = asyncHandle(async (req, res) => {
         UserName_Origin: sweet.user_id,
         CreateAT_Origin: moment(sweet.created_at).format(),
         Content_Origin: sweet.content,
+        Image_Origin: sweet.image,
         QuantityLike: createNew.likes.length,
         QuantityComment: createNew.comments.length,
       };
