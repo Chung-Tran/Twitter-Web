@@ -1,10 +1,20 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BsTwitterX } from 'react-icons/bs';
 import LoginOption from '../component/LoginOption';
 import LoginModal from '../component/LoginModal';
+import { useNavigate } from 'react-router-dom';
 function LoginPage(props) {
     const [showModal, setShowModal] = useState(false);
+    const navigate = useNavigate();
+    const isAuthentication = localStorage.getItem("token") ? true : false;
 
+    useEffect(() => {
+        if (!isAuthentication) {
+            navigate('/login');
+        } else {
+            navigate('/');
+        }
+    }, [isAuthentication, navigate]);
     return (
         <>
             <div className='root-container'>
@@ -20,7 +30,8 @@ function LoginPage(props) {
                             <span>Tham gia ngay</span>
                         </div>
                         <div className='login-menu'>
-                            <LoginOption setModalShow={setShowModal} />
+                            <LoginOption/>
+                       
                         </div>
                     </div>
                 </div>

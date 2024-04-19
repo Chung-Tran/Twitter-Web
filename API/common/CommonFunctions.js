@@ -8,7 +8,7 @@ const generateRefreshToken = (user) => {
 };
 
 const generateAccessToken = (user) => {
-    const token = jwt.sign({ user }, secretKey, { expiresIn: '15m' });
+    const token = jwt.sign( user , secretKey, { expiresIn: '15m' });
     return token;
 };
 const generateToken = (userInfo) => {

@@ -436,19 +436,18 @@ const delete_User_To_List_Like_Sweet = asyncHandle(async(req, res)=> {
 
 const add_OR_Delete_User_To_List_Like_Sweet = asyncHandle(async(req,res) =>{
   const sweet_id = req.params.SweetID;
-  const user_id = req.body.user_id;
-  
-  const sweet = await Sweet.findById(sweet_id);
+  const user_id = req.user.userId
+  console.log(req.user)
 
+  const sweet = await Sweet.findById(sweet_id);
   if(!sweet){
     console.log("Không thấy bài viết!");
     return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết!"));
-
   }
-
+  
   try {
     const sweet = await Sweet.findById(sweet_id);
-    const user_id_In_List_Like_Sweet = sweet.likes.findIndex(user => user._id.toString() === user_id);
+    const user_id_In_List_Like_Sweet = sweet.likes.findIndex(userId => userId?.toString() === user_id.toString());
     if(user_id_In_List_Like_Sweet === -1){
       sweet.likes.push(user_id);
       sweet.save();
@@ -793,8 +792,6 @@ const get_Many_sweet = asyncHandle(async(req,res) =>{
   .exec()
   .then(async (sweets) => {
 
-    console.log('Danh sách bài viết:', sweets);
-
     sweets = await Promise.all(sweets.map(async (sweet) => {
       const now = moment();
       const createdAt = moment(sweet.created_at);
@@ -808,6 +805,7 @@ const get_Many_sweet = asyncHandle(async(req,res) =>{
       //sweet.quantityShare = sweet.shares.length;
       
       return {
+              _id:sweet._id,
               UserName: sweet.user_id,
               Content: sweet.content,
               Image: sweet.image,

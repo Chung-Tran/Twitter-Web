@@ -8,9 +8,12 @@ const cookieParser = require('cookie-parser');
 const dbConnect = require('./config/dbConnect');
 const { connectRedis } = require('./config/redisConfig'); 
 const cloudinary = require('cloudinary').v2;
+// const firebase = require('firebase');
 cloudinary.config({
     secure: true
-  });
+});
+//Config firebase
+// firebase.auth().languageCode = 'it';
 //Connect db
 dbConnect();
 //Define routes
@@ -20,6 +23,7 @@ const commentRoute = require('./routes/CommentRoute');
 const authenticationRoute = require("./routes/AuthenticationRoute");
 // const authenticateToken = require("./middleware/authMiddleware");
 const shareRoute = require("./routes/ShareRoute");
+const authenticationToken = require("./middleware/authMiddleware");
 
 
 //Config server
@@ -36,7 +40,7 @@ app.use(cors());
 //Middleware xác thực người dùng
 app.use('/api/authentication', authenticationRoute);
 
-// app.use(authenticateToken);
+ app.use(authenticationToken);
 
 //Use routes
 app.use('/api/users', userRoute);
