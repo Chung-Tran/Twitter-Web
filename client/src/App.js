@@ -2,30 +2,31 @@ import './App.scss';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import LoginPage from './pages/LoginPage';
 import NotFound from './pages/NotFound';
-import PrivateRoute from './authenticate/privateRoute';
-import AdminPage from './pages/Admin/AdminPage'
 import Menu from './component/Menu/Menu'
-import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Suspense } from 'react';
 import CommonToastContainer from './ultis/ToastNoti';
+import HomePage from './pages/HomePage';
+import SinglePost from './component/SinglePost';
+import SweetDetail from './pages/SweetDetail';
+import Layout from './layout';
 
 const App = () => {
-  const isAuthentication = localStorage.getItem("accesstoken") ? false : true;
+  const isAuthentication = localStorage.getItem("accesstoken") ? true : false;
   return (
     <Router >
-      <Suspense>
-      <CommonToastContainer/>
-      <Routes>
-        <Route exact path="/login" element={<LoginPage />} />
-        <Route exact path="/admin" element={<AdminPage />} />
-        <Route exact path="/menu" element={<Menu />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+         <Suspense fallback={<div>Loading...</div>}>
+        <CommonToastContainer />
+        <Routes>
+          <Route exact path="login" element={<LoginPage />} />
+          <Route path="/" element={<Layout />}>
+            <Route index element={<HomePage />} />
+            <Route  path="menu" element={<Menu />} />
+            <Route  path="status/:id" element={<SweetDetail />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
       </Suspense>
-      
-      
-
     </Router >
   );
 }

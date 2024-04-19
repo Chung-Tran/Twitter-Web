@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
-const uploadImage = require('../middleware/UploadImageMiddleware');
+const UploadImageMiddleware = require('../middleware/UploadImageMiddleware');
+
 
 const {create_Share, update_Share, delete_Share, 
         add_OR_Delete_User_To_List_Like_Share,
@@ -9,8 +10,8 @@ const {create_Share, update_Share, delete_Share,
         get_List_Comment_To_Share,
         } = require("../controllers/ShareController");
 
-router.post("/createShare/:SweetID", uploadImage.array('image'), create_Share);
-router.put("/updateShare/:ShareID", uploadImage.array('image'), update_Share);
+router.post("/createShare/:SweetID", UploadImageMiddleware.array('image'), create_Share);
+router.put("/updateShare/:ShareID", UploadImageMiddleware.array('image'), update_Share);
 router.delete("/deleteShare/:ShareID", delete_Share);
 
 router.put('/addOrDeleleLike/:ShareID', add_OR_Delete_User_To_List_Like_Share);

@@ -3,14 +3,34 @@ import LoginModal from './LoginModal';
 import { GoogleLogin } from '@react-oauth/google';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { GrFacebookOption } from "react-icons/gr";
+import { jwtDecode } from "jwt-decode";
+import axiosClient from '../authenticate/authenticationConfig';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 function LoginOption() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [openModalType, setOpenModalType] = useState('');
+  const navigate = useNavigate();
   const handleLogin = async (credentialResponse) => {
-    // var obj = jwtDecode(credentialResponse.credential);
-    // var data = JSON.stringify(obj);
-    console.log(credentialResponse);
+    var obj = jwtDecode(credentialResponse.credential);
+    var data = JSON.stringify(obj);
+    var decodedData = JSON.parse(data);
+    if (decodedData.email_verified == true) {
+      try {
+        const email = decodedData.email;
+        const response = await axiosClient.post(`/authentication/login-by-email`, { email: email });
+        if (response.data.isSuccess) {
+          toast.success("Đăng nhập thành công");
+          navigate("/");
+        } else {
+          toast.error(response.errorMessage);
+        }
+      } catch (error) {
+        console.log(error)
+        toast.error(error.response?.data.errorMessage ?? "Unexpected error");
+      }
+    }
+    console.log(data);
     const config = {
       method: 'POST',
       url: 'your backend server or endpoint',
@@ -26,7 +46,7 @@ function LoginOption() {
     } else if (type == 2) //Register
     {
       setOpenModalType(2)
-    }   
+    }
     setIsModalVisible(!isModalVisible);
   }
   return (
@@ -42,7 +62,6 @@ function LoginOption() {
                 }}
               />
             </GoogleOAuthProvider>
-
           </div>
           <div className='facebook-option single-option'>
             <GrFacebookOption /> &nbsp;     Đăng nhập với Facebook
@@ -55,7 +74,7 @@ function LoginOption() {
           <div className='login-option'>
             <span>Đã có tài khoản?</span>
             <div className='single-option login-option-content register-option'>
-              <span onClick={()=> handleOpenModal(1)}>Đăng nhập</span>
+              <span onClick={() => handleOpenModal(1)}>Đăng nhập</span>
             </div>
           </div>
         </div>
