@@ -9,20 +9,23 @@ import CommonToastContainer from './ultis/ToastNoti';
 import HomePage from './pages/HomePage';
 import SinglePost from './component/SinglePost';
 import SweetDetail from './pages/SweetDetail';
+import Layout from './layout';
 
 const App = () => {
-  const isAuthentication = localStorage.getItem("accesstoken") ? false : true;
+  const isAuthentication = localStorage.getItem("accesstoken") ? true : false;
   return (
     <Router >
-      <Suspense>
-      <CommonToastContainer/>
-      <Routes>
-        <Route exact path="/login" element={<LoginPage />} />
-        <Route exact path="/" element={<HomePage />} />
-        <Route exact path="/menu" element={<Menu />} />
-        <Route exact path="/status/:id" element={<SweetDetail />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+         <Suspense fallback={<div>Loading...</div>}>
+        <CommonToastContainer />
+        <Routes>
+          <Route exact path="login" element={<LoginPage />} />
+          <Route path="/" element={<Layout />}>
+            <Route index element={<HomePage />} />
+            <Route  path="menu" element={<Menu />} />
+            <Route  path="status/:id" element={<SweetDetail />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
       </Suspense>
     </Router >
   );

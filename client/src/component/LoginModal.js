@@ -58,7 +58,7 @@ function LoginModal({ visible, setVisible, type }) {
                 const response = await axiosClient.post(`/authentication/login`, data);
                 if (response.data.isSuccess) {
                     toast.success("Đăng nhập thành công");
-                    navigate("/home");
+                    navigate("/");
                 } else {
                     toast.error(response.errorMessage);
                 }

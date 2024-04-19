@@ -2,10 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { BsTwitterX } from 'react-icons/bs';
 import LoginOption from '../component/LoginOption';
 import LoginModal from '../component/LoginModal';
-import axiosClient from '../authenticate/authenticationConfig';
+import { useNavigate } from 'react-router-dom';
 function LoginPage(props) {
     const [showModal, setShowModal] = useState(false);
+    const navigate = useNavigate();
+    const isAuthentication = localStorage.getItem("token") ? true : false;
 
+    useEffect(() => {
+        if (!isAuthentication) {
+            navigate('/login');
+        } else {
+            navigate('/');
+        }
+    }, [isAuthentication, navigate]);
     return (
         <>
             <div className='root-container'>

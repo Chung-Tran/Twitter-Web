@@ -19,19 +19,16 @@ const registerUser = asyncHandle(async (req, res) => {
     const username = req.body.username;
 
 
-    const existData = await User.findOne({ email: email } || { username: username } );
+    const existData = await User.findOne({ email: email } || { username: username });
     if (existData) {
         return res.status(400).json(formatResponse(null, false, "Register failed!! Try again with other username or email."));
     }
     const newUser = await User.create(req.body);
-    return res.status(200).json(formatResponse(null,true,null));
+    return res.status(200).json(formatResponse(null, true, null));
 });
 const loginUser = asyncHandle(async (req, res) => {
     const { email, password } = req.body;
     const findUser = await User.findOne({ email });
-    if (!findUser) {
-        res.status(403).json(formatResponse(null, false, "Không tìm thấy người dùng."));
-    };
     if (!findUser) {
         res.status(403).json(formatResponse(null, false, "Không tìm thấy người dùng."));
     };
@@ -44,17 +41,6 @@ const loginUser = asyncHandle(async (req, res) => {
         const accessToken = generateAccessToken(encodeData);
 
         const updateUser = await User.findByIdAndUpdate(findUser._id, { refeshToken: refeshToken }, { new: true });
-        // res.cookie("refeshToken", refeshToken, {
-        //     httpOnly: true,
-        //     maxAge: 72 * 60 * 60 * 1000,
-        // });
-        // res.cookie('refeshToken',generateRefeshToken)
-        // const responseData = {
-        // res.cookie("refeshToken", refeshToken, {
-        //     httpOnly: true,
-        //     maxAge: 72 * 60 * 60 * 1000,
-        // });
-        // res.cookie('refeshToken',generateRefeshToken)
         const responseData = {
             _id: findUser?._id,
             firstName: findUser?.firstName,
@@ -66,6 +52,34 @@ const loginUser = asyncHandle(async (req, res) => {
         res.status(200).json(formatResponse(responseData, true, "Đăng nhập thành công"));
     } else {
         res.status(403).json(formatResponse(null, false, "Mật khẩu không hợp lệ. Vui lòng thử lại."));
+    }
+});
+const loginByEmail = asyncHandle(async (req, res) => {
+    const { email } = req.body;
+    const findUser = await User.findOne({ email: email });
+    console.log(email,findUser)
+    if (findUser.length == 0) {
+        res.status(403).json(formatResponse(null, false, "Tài khoản không tồn tại. Vui lòng thử lại."));
+    }
+    else {
+        const encodeData = {
+            userId: findUser._id.toString(),
+            email: findUser.email
+        }
+        const refeshToken = generateRefreshToken(encodeData);
+        const accessToken = generateAccessToken(encodeData);
+        console.log('encode: ',encodeData)
+
+        const updateUser = await User.findByIdAndUpdate(findUser._id, { refeshToken: refeshToken }, { new: true });
+        const responseData = {
+            _id: findUser?._id,
+            firstName: findUser?.firstName,
+            lastName: findUser?.lastName,
+            email: findUser?.email,
+            mobile: findUser?.mobile,
+            token: accessToken
+        }
+        res.status(200).json(formatResponse(responseData, true, "Đăng nhập thành công"));
     }
 });
 const sendPasswordByEmail = asyncHandle(async (req, res) => {
@@ -157,7 +171,7 @@ const confirmResetPassword = asyncHandle(async (req, res) => {
                     return res.status(403).json(formatResponse(null, false, "Không tìm thấy người dùng."));
                 }
                 //Lấy thông tin dưới cache
-                const tokenConfirmPasswordFromRedis =await getKeyValue(`confirm_otp_${decoded.id}`);
+                const tokenConfirmPasswordFromRedis = await getKeyValue(`confirm_otp_${decoded.id}`);
                 if (!tokenConfirmPasswordFromRedis) {
                     return res.status(400).json(formatResponse(null, false, "Mã OTP hết hạn. Vui lòng thử lại"));
                 }
@@ -174,8 +188,8 @@ const confirmResetPassword = asyncHandle(async (req, res) => {
                     }
                     const dataFromRedis = JSON.parse(resetCodeData);
 
-                    console.log("dataFromRedis",dataFromRedis)
-                    console.log("decoded",decoded)
+                    console.log("dataFromRedis", dataFromRedis)
+                    console.log("decoded", decoded)
                     if (decoded.resetCode != dataFromRedis.resetCode) {
                         return res.status(400).json(formatResponse(null, false, "Cập nhật mật khẩu thất bại. Vui lòng thử lại"));
                     }
@@ -230,4 +244,4 @@ const upload = asyncHandle(async (req, res) => {
     return res.status(200).json(data)
 
 });
-module.exports = {registerUser, loginUser, sendPasswordByEmail, authenticateOTP, confirmResetPassword,upload }
+module.exports = { registerUser, loginUser, sendPasswordByEmail, authenticateOTP, confirmResetPassword, upload, loginByEmail }

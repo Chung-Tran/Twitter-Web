@@ -1,15 +1,21 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import SinglePost from '../component/SinglePost'
 import SweetComment from '../component/SweetComment'
 import { AiOutlineFileGif } from "react-icons/ai";
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom'; 
+import axiosClient from '../authenticate/authenticationConfig';
+import { toast } from 'react-toastify';
+
 function SweetDetail() {
     const { id } = useParams(); 
+    const [sweetDetail, setSweetDetail] = useState();
+    console.log(sweetDetail)
     useEffect(() => {
         const fetchData = async () => {
-            const response = await axiosClient.get(`/sweet/getManySweet?limit=${limit}&skip=${skip}`);
+            const response = await axiosClient.get(`/sweet/getOneSweet?SweetID=${id}`);
+            console.log(response)
               if (response.data.isSuccess) {
-                  setSweetList(response.data.data.InFo_Sweet)
+                setSweetDetail(response.data.data)
               } else {
                   toast.error(response.errorMessage);
               }
@@ -20,7 +26,7 @@ function SweetDetail() {
         <div className='hompage-container'>
             <div className='homepage-post'>
                 <div className='post-content'>
-                    {/* <SinglePost sweetData={}/> */}
+                   {sweetDetail &&  <SinglePost sweetData={sweetDetail}/>}
                 </div>
                 <div className='sweet-detail-comment'>
                     <div className='comment-frame'>
