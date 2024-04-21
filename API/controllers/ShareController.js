@@ -15,7 +15,8 @@ moment.tz('Asia/Ho_Chi_Minh')
 const create_Share = asyncHandle(async (req, res) => {
 
     const sweet_id = req.params.SweetID;
-    const user_id = req.body.user_id;
+    const user_id = req.user.userId
+    // const user_id = req.body.user_id;
     const content = req.body.content;
     const image = await uploadImage(req.files);
 
@@ -177,23 +178,30 @@ const delete_Share = asyncHandle(async(req, res) => {
   
 const add_OR_Delete_User_To_List_Like_Share = asyncHandle(async(req,res) =>{
     const share_id = req.params.ShareID;
-    const user_id = req.body.user_id;
+    const user_id = req.user.userId
   
     try {
       const share = await Share.findById(share_id);
-      const user_id_In_List_Like_Share = share.likes.findIndex(user => user._id.toString() === user_id);
+      const user_id_In_List_Like_Share = share.likes.findIndex(userId => userId?.toString() === user_id);
       if(user_id_In_List_Like_Share === -1){
         share.likes.push(user_id);
         share.save();
-        res.status(200).json(formatResponse("Đã like bài Share!", true, ""));
+        const data = {
+          quantityShare: share.likes.length
+        }
+        res.status(200).json(formatResponse(data, true, "Đã like bài Share!"));
       }else{
         share.likes.splice(user_id_In_List_Like_Share, 1);
         share.save();
-        res.status(200).json(formatResponse("Bỏ thích bài Share thành công!", true, ""));
+        const data = {
+          quantityShare: share.likes.length
+        }
+        res.status(200).json(formatResponse(data, true, "Bỏ thích bài Share thành công!"));
       }
   
   
     } catch (error) {
+      console.error(error.message);
       res.status(404).json(formatResponse("", false, "Lỗi khi tương tác với bài Share"));
     }
   
@@ -201,14 +209,13 @@ const add_OR_Delete_User_To_List_Like_Share = asyncHandle(async(req,res) =>{
 
 async function get_List_DisplayName_By_UserID(listUserID){
     const displayNameS = [];
-    for (const userID of listUserID) {
+    for (let i = listUserID.length - 1; i >= 0; i--) {
+      const userID = listUserID[i];
       const displayName = await getDisplayName_By_ID(userID);
-      if(displayName){
-        console.log("Tìm thấy UserID và có thể biết được DisplayName");
-        displayNameS.push(displayName);
-        
+      if (displayName) {
+          console.log("Tìm thấy UserID và có thể biết được DisplayName");
+          displayNameS.push(userID);
       }
-      
     }
     return displayNameS;
   }
@@ -216,7 +223,7 @@ async function get_List_DisplayName_By_UserID(listUserID){
 const get_List_User_To_Like = asyncHandle(async (req, res) => {
 
     const id_Share = req.query.ShareID;
-    const share = await Share.findById(id_Share).populate("likes");
+    const share = await Share.findById(id_Share).populate("likes", "displayName username");
        
     try {
        if(!share){
@@ -281,19 +288,150 @@ const get_List_User_To_Like = asyncHandle(async (req, res) => {
     return comment_Info;
   }
   
-  const get_List_Comment_To_Share = asyncHandle(async(req, res)=>{
+  async function get_Comment_Info_To_Share_OutStanding(list_CommentID){
+    const comment_Info = [];
+    const sortData = list_CommentID.sort((a, b) => {
+      const interactionCount_a = (a.likes ? a.likes.length : 0) + (a.comment_Reply ? a.comment_Reply.length : 0);
+      const interactionCount_b = (b.likes ? b.likes.length : 0) + (b.comment_Reply ? b.comment_Reply.length : 0);
+      
+      if(interactionCount_b === interactionCount_a){
+        return new Date(b.created_at) - new Date(a.created_at);
+      }else return interactionCount_b - interactionCount_a;
+    });
+    for (const commentID of sortData) {
+      const comment = await Comment.findById(commentID).populate('likes', 'displayName');
+      const userName = await getDisplayName_By_ID(comment.user_id);
+      const countLike = comment.likes.length;
+      const duration = await formatTimeDifference(moment(comment.created_at), moment())
 
+      comment_Info.push({DisplayName : userName,
+                        Content: comment.content, 
+                        Image: comment.image,
+                        QuantityLike: countLike, 
+                        User_Like: comment.likes,
+                        QuantityReplyComment: comment.comment_reply.length, 
+                        CreateAt: duration});
+    }
+    return comment_Info;
+  }
+
+  const get_List_Comment_To_Share_OutStanding = asyncHandle(async(req, res)=>{
+    let skipNumble = parseInt(req.query.skip) || 0;
+    let limitNumble = parseInt(req.query.limit) || 3;
+  
     const id_Share = req.query.ShareID;
     
     try {
         const share = await Share.findById(id_Share).populate("comments");
          
         const list_Comment = share.comments;
-        const getComment = await get_Comment_Info_To_Share(list_Comment);
+        const getComment = await get_Comment_Info_To_Share_OutStanding(list_Comment);
     
         const data = {
             QuantityComment: share.comments.length,
-            List_UserName_ToComment: getComment
+            QuantityCommentGetOut: limitNumble,
+            List_UserName_ToComment: getComment.slice(skipNumble, skipNumble + limitNumble)
+        }
+
+        res.status(200).json(formatResponse(data, true, ""));
+
+    } catch (error) {
+        console.log("Lỗi khi lấy danh sách Comment của bài Share", error);
+        res.status(404).json(formatResponse("", false, "Lỗi khi lấy danh sách Comment của bài Share!"))
+    }
+    
+  })
+
+
+  async function get_Comment_Info_To_Share_Recently(list_CommentID){
+    const comment_Info = [];
+    const sortData = list_CommentID.sort((a, b) => {
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
+    for (const commentID of sortData) {
+      const comment = await Comment.findById(commentID).populate('likes', 'displayName');
+      const userName = await getDisplayName_By_ID(comment.user_id);
+      const countLike = comment.likes.length;
+      const duration = await formatTimeDifference(moment(comment.created_at), moment())
+
+      comment_Info.push({DisplayName : userName,
+                        Content: comment.content, 
+                        Image: comment.image,
+                        QuantityLike: countLike, 
+                        User_Like: comment.likes,
+                        QuantityReplyComment: comment.comment_reply.length, 
+                        CreateAt: duration});
+    }
+    return comment_Info;
+  }
+
+  const get_List_Comment_To_Share_Recently = asyncHandle(async(req, res)=>{
+    let skipNumble = parseInt(req.query.skip) || 0;
+    let limitNumble = parseInt(req.query.limit) || 3;
+  
+    const id_Share = req.query.ShareID;
+    
+    try {
+        const share = await Share.findById(id_Share).populate("comments");
+         
+        const list_Comment = share.comments;
+        const getComment = await get_Comment_Info_To_Share_Recently(list_Comment);
+    
+        const data = {
+            QuantityComment: share.comments.length,
+            QuantityCommentGetOut: limitNumble,
+            List_UserName_ToComment: getComment.slice(skipNumble, skipNumble + limitNumble)
+        }
+
+        res.status(200).json(formatResponse(data, true, ""));
+
+    } catch (error) {
+        console.log("Lỗi khi lấy danh sách Comment của bài Share", error);
+        res.status(404).json(formatResponse("", false, "Lỗi khi lấy danh sách Comment của bài Share!"))
+    }
+    
+  })
+
+  
+  async function get_Comment_Info_To_Share_Furthest(list_CommentID){
+    const comment_Info = [];
+    const sortData = list_CommentID.sort((a, b) => {
+      return new Date(a.created_at) - new Date(b.created_at);
+    });
+    for (const commentID of sortData) {
+      const comment = await Comment.findById(commentID).populate('likes', 'displayName');
+      const userName = await getDisplayName_By_ID(comment.user_id);
+      const countLike = comment.likes.length;
+      const duration = await formatTimeDifference(moment(comment.created_at), moment())
+
+      comment_Info.push({DisplayName : userName,
+                        Content: comment.content, 
+                        Image: comment.image,
+                        QuantityLike: countLike, 
+                        User_Like: comment.likes, 
+                        QuantityReplyComment: comment.comment_reply.length,
+                        CreateAt: duration});
+    }
+    return comment_Info;
+  }
+
+
+  const get_List_Comment_To_Share_Furthest = asyncHandle(async(req, res)=>{
+    let skipNumble = parseInt(req.query.skip) || 0;
+    let limitNumble = parseInt(req.query.limit) || 3;
+  
+    const id_Share = req.query.ShareID;
+    
+    try {
+        const share = await Share.findById(id_Share).populate("comments");
+         
+        const list_Comment = share.comments;
+        const getComment = await get_Comment_Info_To_Share_Furthest(list_Comment);
+    
+        const data = {
+            QuantityComment: share.comments.length,
+            QuantityCommentGetOut: limitNumble,
+            List_UserName_ToComment: getComment.slice(skipNumble, skipNumble + limitNumble)
         }
 
         res.status(200).json(formatResponse(data, true, ""));
@@ -311,4 +449,7 @@ module.exports = {create_Share,
                 delete_Share,
                 add_OR_Delete_User_To_List_Like_Share,
                 get_List_User_To_Like,
-                get_List_Comment_To_Share};
+                get_List_Comment_To_Share_OutStanding,
+                get_List_Comment_To_Share_Recently,
+                get_List_Comment_To_Share_Furthest,
+              };

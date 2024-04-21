@@ -17,6 +17,9 @@ const { create_Sweet,
     delete_User_To_List_Share_Sweet,
     get_List_User_To_Share, 
     get_List_Comment_To_Sweet, 
+    get_List_Comment_To_Sweet_OutStanding,
+    get_List_Comment_To_Sweet_Recently,
+    get_List_Comment_To_Sweet_Furthest,
     get_A_Sweet,
     get_Many_sweet,
     get_Many_Sweet_And_Share_For_You,
@@ -48,6 +51,11 @@ router.delete('/deleteUserShare/:SweetID', delete_User_To_List_Share_Sweet);
 router.get('/getListShare', get_List_User_To_Share);
 
 router.get('/getListComment', get_List_Comment_To_Sweet);
+router.get('/getListCommentOutStanding', get_List_Comment_To_Sweet_OutStanding);
+router.get('/getListCommentRecently', get_List_Comment_To_Sweet_Recently);
+router.get('/getListCommentFurthest', get_List_Comment_To_Sweet_Furthest);
+
+
 router.get('/getOneSweet',get_A_Sweet);
 router.get('/getManySweet',get_Many_sweet);
 router.get('/getManySweetAndShareForYou',get_Many_Sweet_And_Share_For_You);
