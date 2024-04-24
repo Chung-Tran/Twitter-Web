@@ -16,10 +16,10 @@ function Post() {
   const [postSweetContent, setPostSweetContent] = useState();
   const [selectedFile, setSelectedFile] = useState([]);
   // const [previewImage, setPreviewImage] = useState(null); 
-  let limit = 50;
+  let limit = 40;
   let skip = 0;
   const fetchData = async () => {
-    const response = await axiosClient.get(`/sweet/getManySweet?limit=${limit}&skip=${skip}`);
+    const response = await axiosClient.get(`/sweet/getManySweetAndShareForYou?limit=${limit}&skip=${skip}`);
     if (response.data.isSuccess) {
       setSweetList(response.data.data.InFo_Sweet)
     } else {

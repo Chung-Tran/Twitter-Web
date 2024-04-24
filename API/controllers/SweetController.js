@@ -1071,8 +1071,11 @@ const get_Many_Sweet_And_Share_For_You = asyncHandle((async (req, res) => {
     }));
   
     const paginatedData = processedData.slice(skipNumble, skipNumble + limitNumble)
+    const data = {
+      InFo_Sweet: paginatedData,
+    }
 
-    return res.status(200).json(formatResponse(paginatedData, true, `Lấy ra ${paginatedData.length} bài viết thành công!`));
+    return res.status(200).json(formatResponse(data, true, `Lấy ra ${paginatedData.length} bài viết thành công!`));
   
   } catch (error) {
     console.error('Lỗi khi lấy danh sách bài viết:', error.message);
