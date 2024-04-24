@@ -1,8 +1,6 @@
 //Controller xử lí người dùng đăng nhập, xác thực người dùng
 const User = require('../model/User');
-const crypto = require('crypto');
 const asyncHandle = require('express-async-handler');
-const { generateSessionToken, authenticationToken } = require('../middleware/authMiddleware')
 const { generateRefreshToken, generateAccessToken } = require("../common/CommonFunctions");
 const formatResponse = require('../common/ResponseFormat');
 const { connectRedis } = require('../config/redisConfig');
@@ -11,13 +9,11 @@ const jwt = require('jsonwebtoken');
 const { uploadImage } = require('../config/cloudinaryConfig');
 const redisClient = connectRedis();
 const secretKey = process.env.JWT_CODE;
-const cloudinary = require('cloudinary').v2;
 
 
 const registerUser = asyncHandle(async (req, res) => {
     const email = req.body.email;
     const username = req.body.username;
-
 
     const existData = await User.findOne({ email: email } || { username: username });
     if (existData) {
@@ -68,7 +64,6 @@ const loginByEmail = asyncHandle(async (req, res) => {
         }
         const refeshToken = generateRefreshToken(encodeData);
         const accessToken = generateAccessToken(encodeData);
-        console.log('encode: ',encodeData)
 
         const updateUser = await User.findByIdAndUpdate(findUser._id, { refeshToken: refeshToken }, { new: true });
         const responseData = {

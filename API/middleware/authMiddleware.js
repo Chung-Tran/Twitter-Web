@@ -22,14 +22,13 @@ const authenticationToken = async (req, res, next) => {
         console.log(req.user)
         next();
     } catch (err) {
-        console.log(err)
         if (err.name === 'TokenExpiredError') {
             decodedToken = jwt.decode(token);
             try {
-                if (!decodedToken || !decodedToken.user?.userId) {
+                if (!decodedToken || !decodedToken?.userId) {
                     return res.status(401).json(formatResponse(null, false, "Xác thực người dùng thất bại. Thông tin không hợp lệ"));
                 }
-                const user = await User.findOne({ _id: decodedToken?.user.userId });
+                const user = await User.findOne({ _id: decodedToken?.userId });
 
                 if (!user || !user.refreshToken) {
                     return res.status(401).json(formatResponse(null, false, "Xác thực người dùng thất bại. Không tìm thấy người dùng."));

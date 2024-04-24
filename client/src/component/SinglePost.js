@@ -6,6 +6,7 @@ import { BsReverseListColumnsReverse } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import axiosClient from '../authenticate/authenticationConfig';
 import { toast } from 'react-toastify';
+
 function SinglePost({ sweetData }) {
     const navigate = useNavigate();
     const handleGetSweetDetail = (_id) => {
@@ -28,7 +29,7 @@ function SinglePost({ sweetData }) {
                 <div className='info-content'>
                     <div className='user-info-name'>
                         <span>{ sweetData.UserName.displayName}</span>
-                        <span>@user_12345</span>
+                        <span>{ sweetData.UserName.username}</span>
                     </div>
                     <span className='post-createdAt'>17h</span>
 
@@ -37,11 +38,11 @@ function SinglePost({ sweetData }) {
             </div>
             <div className='single-post-content'>
                 <div className='text-content' onClick={() => handleGetSweetDetail(sweetData._id)}>
-                    <span >{sweetData.content}</span>
+                    <span >{sweetData.Content}</span>
                 </div>
                 <div className='image-content' onClick={() => handleGetSweetDetail(sweetData._id)}>
                     {
-                        sweetData.image && sweetData.image.map((item, index) => (
+                        sweetData.Image && sweetData.Image.map((item, index) => (
                             <img src={item} />
                         ))
                     }

@@ -19,9 +19,9 @@ moment.tz('Asia/Ho_Chi_Minh')
 
 const create_Sweet = asyncHandle(async (req, res) => {
 
-    const user_id = req.body.user_id;
+    const user_id = req.user.userId;
     const content = req.body.content;
-    const image = await uploadImage(req.files);
+    const image = req.files && await uploadImage(req.files);
     
     try {
       const createNew = await Sweet.create({
@@ -44,6 +44,7 @@ const create_Sweet = asyncHandle(async (req, res) => {
 
       return res.status(200).json(formatResponse(data, true, "Tạo bài viết thành công"));
     } catch (error) {
+      console.log(error)
       return res.status(400).json(formatResponse(null, false, "Lỗi khi tạo bài viết!"));
     }
     
