@@ -18,10 +18,11 @@ const create_Comment = asyncHandle(async (req, res)=>{
 
     const sweet_id= req.params.SweetID;
 
-    const user_id = req.user.userId
+    const user_id = req.user.userId;
+    //const user_id = req.user.userId
     //const user_id = req.body.user_id;
     const content = req.body.content;
-    const image = await uploadImage(req.files);
+    const image =req.files ? await uploadImage(req.files) : null;
 
 
     let comment = null;
@@ -98,7 +99,7 @@ const update_Comment = asyncHandle(async (req, res) =>{
   const commentID = req.params.CommentID;
 
   const content = req.body.content;
-  const image = await uploadImage(req.files);
+  const image = req.files ? await uploadImage(req.files) : null;
 
   const comment = await Comment.findById(commentID);
     
