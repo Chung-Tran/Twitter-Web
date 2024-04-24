@@ -19,7 +19,7 @@ function Post() {
   let limit = 40;
   let skip = 0;
   const fetchData = async () => {
-    const response = await axiosClient.get(`/sweet/getManySweetAndShareForYou?limit=${limit}&skip=${skip}`);
+    const response = await axiosClient.get(`/sweet/getManySweet?limit=${limit}&skip=${skip}`);
     if (response.data.isSuccess) {
       setSweetList(response.data.data.InFo_Sweet)
     } else {
