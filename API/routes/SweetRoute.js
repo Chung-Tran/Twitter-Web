@@ -11,6 +11,7 @@ const { create_Sweet,
     restore_Sweet,
     add_User_To_List_Like_Sweet, 
     delete_User_To_List_Like_Sweet,  
+    check_User_Like_Sweet,
     add_OR_Delete_User_To_List_Like_Sweet,
     get_List_User_To_Like, 
     add_User_To_List_Share_Sweet, 
@@ -43,8 +44,10 @@ router.put('/restoreSweet/:SweetID', restore_Sweet);
 
 router.post('/addUserLike/:SweetID', add_User_To_List_Like_Sweet);
 router.delete('/deleteUserLike/:SweetID', delete_User_To_List_Like_Sweet);
+router.get('/checkUserLike', check_User_Like_Sweet);
 router.put('/addOrDeleleLike/:SweetID', add_OR_Delete_User_To_List_Like_Sweet);
 router.get('/getListLike', get_List_User_To_Like);
+
 
 router.post('/addUserShare/:SweetID', add_User_To_List_Share_Sweet);
 router.delete('/deleteUserShare/:SweetID', delete_User_To_List_Share_Sweet);

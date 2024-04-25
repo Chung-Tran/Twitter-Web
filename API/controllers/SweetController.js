@@ -438,6 +438,39 @@ const delete_User_To_List_Like_Sweet = asyncHandle(async(req, res)=> {
   
 });
 
+const check_User_Like_Sweet = asyncHandle(async(req,res) =>{
+  const sweet_id = req.query.SweetID;
+  const user_id = req.user.userId
+  const sweet = await Sweet.findById(sweet_id);
+  if(!sweet){
+    console.log("Không thấy bài viết!");
+    return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết!"));
+  }
+  
+  try {
+    const sweet = await Sweet.findById(sweet_id);
+    const user_id_In_List_Like_Sweet = sweet.likes.findIndex(userId => userId?.toString() === user_id.toString());
+    if(user_id_In_List_Like_Sweet === 1){
+      const data = {
+        State: true,
+        QuantityLike: sweet.likes.length
+      }
+      res.status(200).json(formatResponse(data, true, "Người dùng đang like bài viết!"));
+    }else{
+      const data = {
+        State: false,
+        QuantityLike: sweet.likes.length
+      }
+      res.status(200).json(formatResponse(data, true, "Người dùng chưa like bài viết!"));
+    }
+
+
+  } catch (error) {
+    res.status(404).json(formatResponse(null, false, "Lỗi khi tương tác với bài viết"));
+  }
+
+});
+
 const add_OR_Delete_User_To_List_Like_Sweet = asyncHandle(async(req,res) =>{
   const sweet_id = req.params.SweetID;
   const user_id = req.user.userId
@@ -456,6 +489,7 @@ const add_OR_Delete_User_To_List_Like_Sweet = asyncHandle(async(req,res) =>{
       sweet.likes.push(user_id);
       sweet.save();
       const data = {
+        State: false,
         QuantityLike: sweet.likes.length
       }
       res.status(200).json(formatResponse(data, true, "Đã like bài viết!"));
@@ -463,6 +497,7 @@ const add_OR_Delete_User_To_List_Like_Sweet = asyncHandle(async(req,res) =>{
       sweet.likes.splice(user_id_In_List_Like_Sweet, 1);
       sweet.save();
       const data = {
+        State: true,
         QuantityLike: sweet.likes.length
       }
       res.status(200).json(formatResponse(data, true, "Bỏ thích bài viết thành công!"));
@@ -842,7 +877,7 @@ async function formatTimeDifference(fromDate, toDate){
     } else {
         // const weeks = Math.floor(duration.asDays() / 7);
         // return `${weeks} tuần trước`;
-        return moment(fromDate).format();
+        return moment(fromDate).format("DD/MM/YYYY - HH:mm");
     }
 }
 
@@ -941,6 +976,7 @@ const get_A_Sweet = asyncHandle(async (req, res)=>{
 const get_Many_sweet = asyncHandle(async(req,res) =>{
   const skipNumble = req.query.skip || 0;
   const limitNumble = req.query.limit || 10;
+  const user_id = req.user.userId
 
   const sweet = Sweet.find({isDelete: false}, "content image created_at ").skip(skipNumble).limit(limitNumble)
   .populate('user_id', 'displayName username')
@@ -968,7 +1004,14 @@ const get_Many_sweet = asyncHandle(async(req,res) =>{
       //sweet.quantityLike = sweet.likes.length;
       //sweet.quantityComment = sweet.comments.length;
       //sweet.quantityShare = sweet.shares.length;
-      
+      const user_id_In_List_Like_Sweet = sweet.likes.findIndex(userId => userId?.toString() === user_id.toString());
+      let state
+      if(user_id_In_List_Like_Sweet === 1){
+          state = true;
+
+      }else{
+          state = false;
+      }
       return {
               _id:sweet._id,
               UserName: sweet.user_id,
@@ -980,8 +1023,9 @@ const get_Many_sweet = asyncHandle(async(req,res) =>{
               
               QuantityShare: sweet.shares.length,
 
-              CreateAt: moment(sweet.created_at).format(),
+              CreateAt: moment(sweet.created_at).format("DD/MM/YYYY - HH:mm"),
               Duration: durationByText,
+              State: state,
       };
       
     }));
@@ -1364,6 +1408,7 @@ module.exports= {
   restore_Sweet,
   add_User_To_List_Like_Sweet, 
   delete_User_To_List_Like_Sweet,
+  check_User_Like_Sweet,
   add_OR_Delete_User_To_List_Like_Sweet,
   add_User_To_List_Share_Sweet, 
   delete_User_To_List_Share_Sweet,

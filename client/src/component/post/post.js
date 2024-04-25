@@ -19,7 +19,8 @@ function Post() {
   let limit = 40;
   let skip = 0;
   const fetchData = async () => {
-    const response = await axiosClient.get(`/sweet/getManySweet?limit=${limit}&skip=${skip}`);
+   const response = await axiosClient.get(`/sweet/getManySweetAndShareForYou?limit=${limit}&skip=${skip}`);
+    //const response = await axiosClient.get(`/sweet/getManySweetAndShareForYou`);
     if (response.data.isSuccess) {
       setSweetList(response.data.data.InFo_Sweet)
     } else {
@@ -29,6 +30,7 @@ function Post() {
   useEffect(() => {
     fetchData();
   }, [limit, skip]);
+
   const postContentHandle = async () => {
     try {
       const formData = new FormData();
@@ -52,6 +54,7 @@ function Post() {
       toast.error("Lỗi khi tạo mới bài viết");
     }
   };
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setSelectedFile(file);
@@ -63,6 +66,7 @@ function Post() {
     // };
     // reader.readAsDataURL(file);
   };
+
   return (
     <div className='homepage-post'>
       <div className='post-type-sweet'>
@@ -124,9 +128,9 @@ function Post() {
 
       
       <div>
-        {sweetList && sweetList.map((item, index) => (
-          <div key={index} className='post-content'>
-            <SinglePost sweetData={item} />
+        {sweetList && sweetList.map((item) => (
+          <div key={item._id} className='post-content'>
+            <SinglePost key={item._id} sweetData={item} />
           </div>
         ))}
       </div>

@@ -1,4 +1,6 @@
-import React from 'react'
+//import React, { useEffect, useState }from 'react'
+import React, { useState, useEffect } from 'react';
+
 import { FaRegComment } from "react-icons/fa";
 import { GiRapidshareArrow } from "react-icons/gi";
 import { AiOutlineHeart } from "react-icons/ai";
@@ -12,16 +14,70 @@ function SinglePost({ sweetData }) {
     const handleGetSweetDetail = (_id) => {
         navigate(`/status/${_id}`)
     }
+
+    const [checkIsLiked, setCheckIsLiked] = useState(false);
+    const [isLiked, setIsLiked] = useState(false);
+    const [quantityLike, setQuantityLike] = useState(sweetData.QuantityLike); 
+
+
+
+
+    // const handleIconClick = () => {
+    //   setIsLiked(!isLiked); // Đảo ngược trạng thái isLiked khi click vào icon
+    // };
+  
+    const fetchLikeStatus = async () => {
+        try {
+          const response = await axiosClient.get(`/sweet/checkUserLike?SweetID=${sweetData._id}`);
+          if(response.data.isSuccess){
+            if(response.data.data.State){
+                setIsLiked(true);
+            }else {
+                setIsLiked(false);
+            }
+
+            setCheckIsLiked(response.data.isSuccess);
+        }
+
+        } catch (error) {
+          toast.error(error.response?.data.errorMessage ?? "Unexpected error");
+        }
+      };
+
+    useEffect(() => {
+      fetchLikeStatus();
+    }, [sweetData._id]); // Khi sweetData._id thay đổi, useEffect sẽ được gọi lại để kiểm tra lại trạng thái like
+
+    
     const likeSweetHandle = async () => {
         try {
             const response = await axiosClient.put(`/sweet/addOrDeleleLike/${sweetData._id}`);
             console.log(response)
+            
+            if(response.data.isSuccess){
+                if(response.data.data.State){
+                    setIsLiked(false);
+                }else{
+                    setIsLiked(true);
+                }
+                setCheckIsLiked(response.data.isSuccess);
+
+                setQuantityLike(response.data.data.QuantityLike);
+                
+            }
+
         } catch (error) {
             toast.error(error.response?.data.errorMessage ?? "Unexpected error");
         }
-       
-
     }
+
+    // useEffect(() => {
+    //     likeSweetHandle();
+    // }, [sweetData._id, sweetData.likes])
+    //Khởi tạo state để lưu trữ số lượt thích
+
+  
+
     return (
         <div className='single-post' >
             <div className='user-info'>
@@ -31,7 +87,7 @@ function SinglePost({ sweetData }) {
                         <span>{ sweetData.UserName.displayName}</span>
                         <span>{ sweetData.UserName.username}</span>
                     </div>
-                    <span className='post-createdAt'>17h</span>
+                    <span className='post-createdAt'>{sweetData.Duration}</span>
 
                 </div>
 
@@ -49,10 +105,26 @@ function SinglePost({ sweetData }) {
                 </div>
                 <div className='react-content'>
                     <ul>
-                        <li onClick={() => handleGetSweetDetail(sweetData._id)}><FaRegComment /> &nbsp; { sweetData.QUantityComment}</li>
-                        <li onClick={() => handleGetSweetDetail(sweetData._id)}><GiRapidshareArrow/> &nbsp; { sweetData.QUantityComment}</li>
-                        <li><AiOutlineHeart onClick={()=>likeSweetHandle()}/> &nbsp; { sweetData.QuantityLike}</li>
-                        <li onClick={() => handleGetSweetDetail(sweetData._id)}><BsReverseListColumnsReverse/> &nbsp; { sweetData.QuantityShare}</li>
+                        <li onClick={() => handleGetSweetDetail(sweetData._id)}><FaRegComment /> &nbsp; { sweetData.QuantityComment}</li>
+                        <li onClick={() => handleGetSweetDetail(sweetData._id)}><GiRapidshareArrow/> &nbsp;  {sweetData.QuantityLike}</li>
+                        <li>     <AiOutlineHeart
+        //                 style={{ color: (isLiked) ? 'red' : 'white' , cursor: 'pointer' }}
+        // onClick={()=>likeSweetHandle()}
+        style={{ color: isLiked ? 'red' : 'white', cursor: 'pointer' }}
+        onClick={likeSweetHandle}
+        
+      />
+
+                            
+        {/* onClick={()=>likeSweetHandle()}
+        style={{ color: isLiked ? 'red' : 'white', cursor: 'pointer' }} */}
+      
+        &nbsp;
+        {quantityLike}
+      </li>
+                        {/* <li><AiOutlineHeart onClick={()=>likeSweetHandle()}/> &nbsp; { sweetData.QuantityLike}</li> */}
+                        
+                        <li onClick={() => handleGetSweetDetail(sweetData._id)}><BsReverseListColumnsReverse/> &nbsp; {835}</li>
                     </ul>
                 </div>
             </div>
