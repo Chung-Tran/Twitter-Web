@@ -441,31 +441,50 @@ const delete_User_To_List_Like_Sweet = asyncHandle(async(req, res)=> {
 const check_User_Like_Sweet = asyncHandle(async(req,res) =>{
   const sweet_id = req.query.SweetID;
   const user_id = req.user.userId
-  const sweet = await Sweet.findById(sweet_id);
-  if(!sweet){
-    console.log("Không thấy bài viết!");
-    return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết!"));
-  }
+  // const user_id = req.query.userId
   
   try {
     const sweet = await Sweet.findById(sweet_id);
-    const user_id_In_List_Like_Sweet = sweet.likes.findIndex(userId => userId?.toString() === user_id.toString());
-    if(user_id_In_List_Like_Sweet === 1){
-      const data = {
-        State: true,
-        QuantityLike: sweet.likes.length
-      }
-      res.status(200).json(formatResponse(data, true, "Người dùng đang like bài viết!"));
-    }else{
-      const data = {
-        State: false,
-        QuantityLike: sweet.likes.length
-      }
-      res.status(200).json(formatResponse(data, true, "Người dùng chưa like bài viết!"));
-    }
+    const share = await Share.findById(sweet_id);
 
+    if(sweet){
+      user_id_In_List_Like_Sweet = sweet && sweet.likes && sweet.likes.findIndex(userId => userId && userId.toString() === user_id);
+  
+      if(user_id_In_List_Like_Sweet !== -1 ){
+        const data = {
+          State: true,
+          QuantityLike: sweet.likes
+        }
+        res.status(200).json(formatResponse(data, true, "Người dùng đang like bài viết!"));
+      }
+      else{
+        const data = {
+          State: false,
+          QuantityLike: sweet.likes
+        }
+        res.status(200).json(formatResponse(data, true, "Người dùng chưa like bài viết!"));
+      }  
+    }else if(share){
+      user_id_In_List_Like_Share = share && share.likes && share.likes.findIndex(userId => userId && userId._id.toString() === user_id);
+    
+      if(user_id_In_List_Like_Share !== -1 ){
+        const data = {
+          State: true,
+          QuantityLike: share.likes
+        }
+        res.status(200).json(formatResponse(data, true, "Người dùng đang like bài Share!"));
+      }
+      else{
+        const data = {
+          State: false,
+          QuantityLike: share.likes
+        }
+        res.status(200).json(formatResponse(data, true, "Người dùng chưa like bài Share!"));
+      }
+    }else return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết!"));
 
   } catch (error) {
+    console.error("Lỗi: ", error.message)
     res.status(404).json(formatResponse(null, false, "Lỗi khi tương tác với bài viết"));
   }
 
@@ -1132,7 +1151,8 @@ const get_Many_Sweet_And_Share_Following = asyncHandle((async (req, res) => {
   let skipNumble = parseInt(req.query.skip) || 0;
   let limitNumble = parseInt(req.query.limit) || 10;
 
-  const user_id = req.query.UserID;
+  // const user_id = req.query.UserID;
+  const user_id = req.user.userId;
   const user = await User.findById(user_id);
   const followingS = user.following;
   
@@ -1203,7 +1223,11 @@ const get_Many_Sweet_And_Share_Following = asyncHandle((async (req, res) => {
   
     const paginatedData = processedData.slice(skipNumble, skipNumble + limitNumble)
 
-    return res.status(200).json(formatResponse(paginatedData, true, `Lấy ra ${paginatedData.length} bài viết thành công!`));
+    const data = {
+      InFo_Sweet: paginatedData,
+    }
+
+    return res.status(200).json(formatResponse(data, true, `Lấy ra ${paginatedData.length} bài viết thành công!`));
   
   } catch (error) {
     console.error('Lỗi khi lấy danh sách bài viết:', error.message);

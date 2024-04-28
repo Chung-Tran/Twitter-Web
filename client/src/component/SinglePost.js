@@ -35,8 +35,6 @@ function SinglePost({ sweetData }) {
             }else {
                 setIsLiked(false);
             }
-
-            setCheckIsLiked(response.data.isSuccess);
         }
 
         } catch (error) {
@@ -44,9 +42,9 @@ function SinglePost({ sweetData }) {
         }
       };
 
-    useEffect(() => {
-      fetchLikeStatus();
-    }, [sweetData._id]); // Khi sweetData._id thay đổi, useEffect sẽ được gọi lại để kiểm tra lại trạng thái like
+    // useEffect(() => {
+    //   fetchLikeStatus();
+    // }, [sweetData._id]); // Khi sweetData._id thay đổi, useEffect sẽ được gọi lại để kiểm tra lại trạng thái like
 
     
     const likeSweetHandle = async () => {

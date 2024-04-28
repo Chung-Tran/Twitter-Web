@@ -377,9 +377,15 @@
         display: flex;
         font-size: 17px;
         font-weight: bolder;
+        cursor: pointer;
+      }
+      .selected-tab {
+        font-weight: bold; 
+        color: red;
       }
 
     }
+    
 
     .post-create-box {
       height: auto;

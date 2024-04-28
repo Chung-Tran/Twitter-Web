@@ -29,7 +29,7 @@ const editUser = asyncHandle(async (req, res) => {
     }
 });
 
-const addFollowUser = asyncHandle(async (req, res) => {
+/*const addFollowUser = asyncHandle(async (req, res) => {
     const followUserId = req.body.followUserId;
     if (!followUserId) {
         return res.status(400).json(formatResponse(null, false, "Not found user id"));
@@ -76,6 +76,57 @@ const addFollowUser = asyncHandle(async (req, res) => {
         console.error('Error following user:', error);
         res.status(500).json(formatResponse(null, false, error.message));
     }
+});*/
+
+const addFollowUser = asyncHandle(async (req, res) => {
+    const userId = req.query.UserId;
+    const followUserId = req.body.followUserId;
+    if (!followUserId) {
+        return res.status(400).json(formatResponse(null, false, "Not found user id"));
+    }
+    try {
+        // Tìm người dùng hiện tại và người dùng được theo dõi
+        const user = await User.findById(userId);
+        const followUser = await User.findById(followUserId);
+        if (!user || !followUser) {
+            return res.status(400).json(formatResponse(null, false, "Not found user"));
+            //remove return res.status(404).json({ message: 'User or follow user not found' });
+        }
+
+        // Thêm người dùng được theo dõi vào danh sách theo dõi của người dùng hiện tại
+        if (!followUser.followers.includes(userId)) {
+
+            followUser.followers.push(userId);
+            user.following.push(followUserId);
+            await followUser.save();
+            await user.save();
+            //Trả về dữ liệu
+            const data = {
+                userId: user._id,
+                following: user.following.length,
+                followUser: user.followers.length,
+                message: "Follow user successfully"
+            }
+            res.status(200).json(formatResponse(data, true, ""));
+        } else {
+            followUser.followers = followUser.followers.filter(id => id != userId);
+
+            await followUser.save();
+            user.following = user.following.filter(id => id != followUserId);
+            await user.save();
+            const data = {
+                userId: user._id,
+                following: user.following.length,
+                followUser: user.followers.length,
+                message: "Unfollow user successfully"
+            }
+            res.status(200).json(formatResponse(data, true, ""));
+        }
+    } catch (error) {
+        console.error('Error following user:', error);
+        res.status(500).json(formatResponse(null, false, error.message));
+    }
+
 });
 
 const getUser = asyncHandle(async (req, res) => {

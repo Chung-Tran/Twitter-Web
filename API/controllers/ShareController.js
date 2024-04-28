@@ -176,6 +176,46 @@ const delete_Share = asyncHandle(async(req, res) => {
     }
   })
   
+  const check_User_Share = asyncHandle(async(req,res) =>{
+    const share_id = req.query.ShareID;
+    //const user_id = req.user.userId
+    const user_id = req.query.userId
+  
+    const share = await Share.findById(share_id);
+    if(!share){
+      console.log("Không thấy bài viết!");
+      return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết!"));
+    }
+    
+    try {
+      const share = await Sweet.findById(share_id);
+  
+      user_id_In_List_Like_Sweet = share && share.likes && share.likes.findIndex(userId => userId && userId._id.toString() === user_id);
+  
+      if(user_id_In_List_Like_Sweet !== -1){
+        const data = {
+          State: true,
+          QuantityLike: share.likes
+        }
+        res.status(200).json(formatResponse(data, true, "Người dùng đang like bài viết!"));
+      }
+      else{
+        const data = {
+          State: false,
+          QuantityLike: share.likes
+        }
+        res.status(200).json(formatResponse(data, true, "Người dùng chưa like bài viết!"));
+      }
+  
+  
+    } catch (error) {
+      console.error("Lỗi: ", error.message)
+      res.status(404).json(formatResponse(null, false, "Lỗi khi tương tác với bài viết"));
+    }
+  
+  });
+  
+
 const add_OR_Delete_User_To_List_Like_Share = asyncHandle(async(req,res) =>{
     const share_id = req.params.ShareID;
     const user_id = req.user.userId
