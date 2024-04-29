@@ -16,18 +16,19 @@ function SinglePost({ sweetData }) {
     }
 
     const [checkIsLiked, setCheckIsLiked] = useState(false);
-    const [isLiked, setIsLiked] = useState(false);
+    const [isLiked, setIsLiked] = useState(true);
     const [quantityLike, setQuantityLike] = useState(sweetData.QuantityLike); 
 
 
 
 
     // const handleIconClick = () => {
-    //   setIsLiked(!isLiked); // Đảo ngược trạng thái isLiked khi click vào icon
+    //   setIsLiked(!isLiked);
     // };
   
     const fetchLikeStatus = async () => {
         try {
+            if (sweetData && sweetData._id) {
           const response = await axiosClient.get(`/sweet/checkUserLike?SweetID=${sweetData._id}`);
           if(response.data.isSuccess){
             if(response.data.data.State){
@@ -35,19 +36,19 @@ function SinglePost({ sweetData }) {
             }else {
                 setIsLiked(false);
             }
-        }
+        }}
 
         } catch (error) {
           toast.error(error.response?.data.errorMessage ?? "Unexpected error");
         }
       };
 
-    // useEffect(() => {
-    //   fetchLikeStatus();
-    // }, [sweetData._id]); // Khi sweetData._id thay đổi, useEffect sẽ được gọi lại để kiểm tra lại trạng thái like
+    useEffect(() => {
+      fetchLikeStatus();
+    }, [sweetData._id]); // Khi sweetData._id thay đổi, useEffect sẽ được gọi lại để kiểm tra lại trạng thái like
 
     
-    const likeSweetHandle = async () => {
+   /* const likeSweetHandle = async () => {
         try {
             const response = await axiosClient.put(`/sweet/addOrDeleleLike/${sweetData._id}`);
             console.log(response)
@@ -67,12 +68,30 @@ function SinglePost({ sweetData }) {
         } catch (error) {
             toast.error(error.response?.data.errorMessage ?? "Unexpected error");
         }
-    }
+    }*/
+    const likeSweetHandle = () => {
+        axiosClient.put(`/sweet/addOrDeleleLike/${sweetData._id}`)
+            .then(response => {
+                console.log(response);
+                if (response.data.isSuccess) {
+                    if (response.data.data.State) {
+                        setIsLiked(false);
+                    } else {
+                        setIsLiked(true);
+                    }
+                    setCheckIsLiked(response.data.isSuccess);
+                    setQuantityLike(response.data.data.QuantityLike);
+                }
+            })
+            .catch(error => {
+                toast.error(error.response?.data.errorMessage ?? "Unexpected error");
+            });
+    };
+
 
     // useEffect(() => {
     //     likeSweetHandle();
-    // }, [sweetData._id, sweetData.likes])
-    //Khởi tạo state để lưu trữ số lượt thích
+    // }, [sweetData._id])
 
   
 
@@ -109,7 +128,12 @@ function SinglePost({ sweetData }) {
         //                 style={{ color: (isLiked) ? 'red' : 'white' , cursor: 'pointer' }}
         // onClick={()=>likeSweetHandle()}
         style={{ color: isLiked ? 'red' : 'white', cursor: 'pointer' }}
-        onClick={likeSweetHandle}
+        
+        onClick={(sweetData && sweetData._id) ?
+            likeSweetHandle():
+         
+            console.error("Sweet data or sweet ID is invalid.")
+        }
         
       />
 

@@ -12,7 +12,7 @@ import SinglePost from '../SinglePost';
 import { toast } from 'react-toastify';
 
 function Post() {
-  const [selectedTab, setSelectedTab] = useState();
+  const [selectedTab, setSelectedTab] = useState('');
   const [sweetList, setSweetList] = useState([]);
   const [postSweetContent, setPostSweetContent] = useState();
   const [selectedFile, setSelectedFile] = useState([]);
@@ -48,7 +48,6 @@ function Post() {
   }, [selectedTab, limit, skip]);
 
   useEffect(() => {
-    // Thiết lập giá trị mặc định cho tab "For you" khi component được render lần đầu tiên
     setSelectedTab('For You');
   }, []);
 
@@ -58,8 +57,8 @@ function Post() {
   };
 
   /*const fetchData = async () => {
-   const response = await axiosClient.get(`/sweet/getManySweetAndShareForYou?limit=${limit}&skip=${skip}`);
-    //const response = await axiosClient.get(`/sweet/getManySweetAndShareForYou`);
+   const response = await axiosClient.get(`/sweet/getManySweet?limit=${limit}&skip=${skip}`);
+    //const response = await axiosClient.get(` /sweet/getManySweetAndShareForYou`);
     if (response.data.isSuccess) {
       setSweetList(response.data.data.InFo_Sweet)
     } else {
@@ -70,6 +69,7 @@ function Post() {
   useEffect(() => {
     fetchData();
   }, [limit, skip]);*/
+
 
   const postContentHandle = async () => {
     try {
@@ -114,6 +114,7 @@ function Post() {
       <div className='post-type-sweet'>
         <span className={selectedTab === 'For You' ? 'selected-tab' : ''} onClick={() => handleTabClick('For You')}>For you</span>
         <span className={selectedTab === 'Following' ? 'selected-tab' : ''} onClick={() => handleTabClick('Following')}>Following</span>
+        
         <AiOutlineSetting width={20} color='white' fontSize={23} style={{ marginRight: '1px', marginTop: '10px', right: '0' }} />
       </div>
       <div className='post-create-box'>
@@ -170,12 +171,13 @@ function Post() {
 
       
       <div>
-        {sweetList && sweetList.map((item) => (
-          <div key={item._id} className='post-content'>
+        {sweetList && sweetList.map((item, index) => (
+          <div key={index} className='post-content'>
             <SinglePost sweetData={item} />
           </div>
         ))}
       </div>
+
     </div>
   );
 };

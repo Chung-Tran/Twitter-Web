@@ -160,5 +160,60 @@ const getUser = asyncHandle(async (req, res) => {
     }
 });
 
+const searchUser = asyncHandle( async (req, res) => {
+    
+    const keyWord = req.query.KeyWord;
 
-module.exports = {editUser, addFollowUser,getUser}
+    const searchKeyWord = await User.find({
+        $or: [
+            { email: { $regex: keyWord, $options: "i" } },
+            { username: { $regex: keyWord, $options: "i" } }
+        ]
+    });
+
+    try {
+        if(searchKeyWord.length > 0){
+            const data = {
+                QuantityResult: searchKeyWord.length,
+                InFo_User: searchKeyWord
+            }
+            return res.status(200).json(formatResponse(data, true, "Tìm kiếm thành công!!"))
+        }else return res.status(400).json(formatResponse("", false, "Không tìm thấy User!!"))
+
+    } catch (error) {
+        console.error("Lỗi khi tìm kiếm: ", error.message);
+        return res.status(400).json(formatResponse("", false, "Lỗi khi tìm kiếm User!!"));
+    }
+})
+
+const getListUserUnFollow = asyncHandle( async (req, res) => {
+    
+    const user_id = req.user.UserID;
+    //const user_id = req.query.UserID;
+
+    const allUsers = await User.find({});
+    
+    const user = await User.findById(user_id);
+    
+    const following = user.following;
+    
+    const usersNotFollowing = allUsers.filter((user) => !following.includes(user._id) && user._id.toString() !== user_id);
+    
+    console.log("Danh sách người dùng chưa theo dõi:", usersNotFollowing);
+    
+    try {
+        const data = {
+            QuantityResult: usersNotFollowing.length,
+            InFo_User: usersNotFollowing
+        }
+        return res.status(200).json(formatResponse(data, true, "Lấy danh sách người dùng chưa follow thành công!!"))
+
+    } catch (error) {
+        console.error("Lỗi Lấy danh sách người dùng chưa Follow: ", error.message);
+        return res.status(400).json(formatResponse("", false, "Lỗi khi Lấy danh sách người dùng chưa Follow!!"));
+    }
+})
+
+
+
+module.exports = {editUser, addFollowUser,getUser, searchUser, getListUserUnFollow}
