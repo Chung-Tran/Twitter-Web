@@ -48,7 +48,7 @@ function SinglePost({ sweetData }) {
     }, [sweetData._id]); // Khi sweetData._id thay đổi, useEffect sẽ được gọi lại để kiểm tra lại trạng thái like
 
     
-   /* const likeSweetHandle = async () => {
+    const likeSweetHandle = async () => {
         try {
             const response = await axiosClient.put(`/sweet/addOrDeleleLike/${sweetData._id}`);
             console.log(response)
@@ -68,8 +68,8 @@ function SinglePost({ sweetData }) {
         } catch (error) {
             toast.error(error.response?.data.errorMessage ?? "Unexpected error");
         }
-    }*/
-    const likeSweetHandle = () => {
+    }
+    /*const likeSweetHandle = () => {
         axiosClient.put(`/sweet/addOrDeleleLike/${sweetData._id}`)
             .then(response => {
                 console.log(response);
@@ -86,7 +86,7 @@ function SinglePost({ sweetData }) {
             .catch(error => {
                 toast.error(error.response?.data.errorMessage ?? "Unexpected error");
             });
-    };
+    };*/
 
 
     // useEffect(() => {
