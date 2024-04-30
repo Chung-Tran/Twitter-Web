@@ -16,7 +16,7 @@ const tweetSchema = new mongoose.Schema({
         updated_at: { type: Date, default: Date.now }, // Ngày giờ chỉnh sửa
         images: [{ type: String }]
     }],
-    
+    isPin: { type: Boolean, default: false},
     isDelete: { type: Boolean, default: false },
     // created_at: { type: Date, default: () => moment.tz('Asia/Ho_Chi_Minh').toDate()},
     created_at: { type: Date, default: Date.now},

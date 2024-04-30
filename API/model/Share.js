@@ -7,6 +7,9 @@ const shareSchema = new mongoose.Schema({
     image: [{type: String}],
     likes: [{type:mongoose.Schema.Types.ObjectId, ref: 'User'}],
     comments: [{type:mongoose.Schema.Types.ObjectId, ref: 'Comment'}],
+    shares: [],
+    isPin: { type: Boolean, default: false},
+    isDelete: { type: Boolean, default: false },
     created_at: { type: Date, default: Date.now },
     updated_at: { type: Date, default: Date.now },
 });
