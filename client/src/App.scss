@@ -379,13 +379,14 @@
         font-weight: bolder;
         cursor: pointer;
       }
+
       .selected-tab {
-        font-weight: bold; 
+        font-weight: bold;
         color: red;
       }
 
     }
-    
+
 
     .post-create-box {
       height: auto;
@@ -927,6 +928,7 @@
 
 
         }
+
       }
 
       .message-user-list {
@@ -991,6 +993,7 @@
       max-height: 100%;
       height: 100%;
       padding-bottom: 0;
+
       .message-info {
         .message-content-header {
           width: 100%;
@@ -1133,4 +1136,119 @@
     }
 
   }
+
+
+}
+
+.notify-container {
+  width: 100%;
+  height: auto;
+  border: 1px solid #393737;
+  min-height: 100vh;
+  .notify-header {
+    width: 100%;
+    color: white;
+    font-size: 20px;
+    padding-bottom: 5px;
+    border: 1px solid #393737;
+    .notify-title {
+      width: 100%;
+      height: 28px;
+      padding-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-family: 'font-bold';
+      span{
+        &:first-child{
+          margin-left: 15px;
+        }
+      }
+    }
+
+    .list-type-notify {
+      margin-bottom: 15px;
+      margin-top: 15px;
+      height: 45px;
+
+      ul {
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+        height: 100%;
+        position: relative;
+        li {
+          width: 30%;
+          height: 100%;
+          justify-content: center;
+          display: flex;
+          align-items: center;
+          font-family: 'font-medium';
+          font-size: 18px;
+          position: relative;
+          &:hover {
+            background-color: #1c1a1a;
+          }
+
+          &:first::after { 
+            content: '';
+            width: 100%;
+            height: 1px;
+            background-color: blue; /* Màu xanh */
+            position: absolute;
+            bottom: -5px; 
+            left: 0;
+          }
+        }
+      }
+    }
+  }
+
+  .notify-list {
+    margin-top: 3px;
+    height: auto;
+
+    .notify-single {
+      width: 100%;
+      min-height: 100px;
+      padding: 7px;
+      border-bottom: 1px solid #393737;
+      color: white;
+      .notify-title {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 3px;
+        
+        img {
+          width: 33px;
+          border-radius: 20px;
+
+        }
+        span{
+          color: white;
+        }
+
+      }
+
+      .notify-content {
+        width: 100%;
+        padding: 4px 25px;
+
+        p {
+          font-size: 18px;
+
+          &:last-child {
+            margin-top: 10px;
+            color: #555555;
+            font-size: 17px;
+          }
+        }
+
+      }
+    }
+  }
+
+
+
 }

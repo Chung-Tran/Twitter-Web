@@ -159,13 +159,15 @@ const getUser = asyncHandle(async (req, res) => {
 
 const searchUser = asyncHandle( async (req, res) => {
     
-    const keyWord = req.query.KeyWord;
+    const email = req.query.email;
+    const username = req.query.username;
+    console.log(email,username)
 
     const searchKeyWord = await User.find({
         $or: [
-            { email: { $regex: keyWord, $options: "i" } },
-            { username: { $regex: keyWord, $options: "i" } }
-        ]
+            email && { email: { $regex: email, $options: "i" } },
+            username && { username: { $regex: username, $options: "i" } }
+        ].filter(Boolean)
     });
 
     try {

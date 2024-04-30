@@ -24,10 +24,10 @@ const Navbar = () => {
                 <ul>
                     <li onClick={()=>navigate("/")}><AiFillHome /><span>Home</span></li>
                     <li><AiOutlineSearch /><span>Explore</span></li>
-                    <li><BsBell /><span>Notifications</span></li>
+                    <li onClick={()=>navigate("/notifications")}><BsBell /><span>Notifications</span></li>
                     <li onClick={()=>navigate("/messages")}><SlEnvolopeLetter /><span>Messages</span></li>
                     <li><IoListSharp /><span>Lists</span></li>
-                    <li><PiBookmarkSimple /><span>Notifications</span></li>
+                    <li onClick={()=>navigate("/notifications")}><PiBookmarkSimple /><span>Notifications</span></li>
                     <li><BsFillPeopleFill /><span>Bookmarks</span></li>
                     <li><BsTwitterX /><span>Communities</span></li>
                     <li><BsPerson /><span>Premium</span></li>

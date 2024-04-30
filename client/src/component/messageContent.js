@@ -10,7 +10,6 @@ import { w3cwebsocket as W3CWebSocket } from "websocket";
 import { useNavigate } from 'react-router-dom'; 
 const client = new W3CWebSocket('ws://localhost:8080');
 function MessageContent({ receiverId,resetData }) {
-  console.log(receiverId)
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [receiver, setReceiver] = useState(null);
@@ -56,7 +55,6 @@ function MessageContent({ receiverId,resetData }) {
     // Lắng nghe tin nhắn từ server
     client.onmessage = function (event) {
       const receivedMessage = JSON.parse(event.data);
-      
       setMessages(prevMessages => [...prevMessages, receivedMessage]);
     };
     // return () => {
@@ -74,7 +72,6 @@ function MessageContent({ receiverId,resetData }) {
   
   const sendMessage =async () => {
     if (messageSendContent.trim() !== '') {
-      console.log("send message:",messageSendContent,"state: ",client.readyState)
       const message = {
         content: messageSendContent,
         senderId: userId,

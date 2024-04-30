@@ -8,13 +8,14 @@ const cookieParser = require('cookie-parser');
 const dbConnect = require('./config/dbConnect');
 const { connectRedis, addUserOnlineToList } = require('./config/redisConfig'); 
 const cloudinary = require('cloudinary').v2;
-const WebSocket = require('ws');
-const {sendMessage}= require("./controllers/MessageController")
-// const firebase = require('firebase');
+const { sendMessage } = require("./controllers/MessageController")
+const {wss,userConnection} = require('./config/webSocketConfig');
+
+
 cloudinary.config({
     secure: true
 });
-const wss = new WebSocket.Server({ port: 8080 });//Config khởi tạo server websocket cho chức năng chat
+// const wss = new WebSocket.Server({ port: 8080 });//Config khởi tạo server websocket cho chức năng chat
 
 //Config firebase
 // firebase.auth().languageCode = 'it';
@@ -26,15 +27,17 @@ dbConnect();
 //config websocket
 const userListConnections = new Set();
 wss.on('connection', function connection(ws) {
-    userListConnections.add(ws);
+    userConnection.add(ws);
     // Xử lý các tin nhắn nhận được từ client
     ws.on('message', function incoming(message) {
         try {
+            console.log('receive')
             const parsedMessage = JSON.parse(message);
             if (parsedMessage.type === 'chat') {
                 // Tin nhắn là loại chat, gọi hàm sendMessage để xử lý
-                sendMessage(parsedMessage,userListConnections);
+                sendMessage(parsedMessage,userConnection);
             }
+            
         } catch (error) {
             console.error('Error parsing message:', error);
         }
@@ -59,7 +62,7 @@ const userRoute = require("./routes/UserRoute");
 const sweetRoute = require('./routes/SweetRoute');
 const commentRoute = require('./routes/CommentRoute');
 const authenticationRoute = require("./routes/AuthenticationRoute");
-// const authenticateToken = require("./middleware/authMiddleware");
+ const authenticateToken = require("./middleware/authMiddleware");
 const shareRoute = require("./routes/ShareRoute");
 const messageRoute = require("./routes/MessageRoute");
 const authenticationToken = require("./middleware/authMiddleware");
@@ -73,9 +76,9 @@ app.use(express.json());
 app.use(cors());
 
 //Middleware xác thực người dùng
-// app.use('/api/authentication', authenticationRoute);
+app.use('/api/authentication', authenticationRoute);
 
-//  app.use(authenticationToken);
+  app.use(authenticationToken);
 
 //Use routes
 app.use('/api/users', userRoute);
