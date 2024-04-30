@@ -16,7 +16,6 @@ function SweetDetail() {
     const [selectedFile, setSelectedFile] = useState([]);
     const fetchData = async () => {
         const response = await axiosClient.get(`/sweet/getOneSweet?SweetID=${id}`);
-        console.log(response)
         if (response.data.isSuccess) {
             setSweetDetail(response.data.data)
         } else {

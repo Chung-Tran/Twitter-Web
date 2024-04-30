@@ -22,12 +22,14 @@
     "jsonwebtoken": "^9.0.2",
     "moment-duration-format": "^2.3.2",
     "moment-timezone": "^0.5.45",
+    "mongodb": "^6.5.0",
     "mongoose": "^8.2.0",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.13",
     "nodemon": "^3.1.0",
     "path": "^0.12.7",
     "redis": "^4.6.13",
-    "winston": "^3.13.0"
+    "winston": "^3.13.0",
+    "ws": "^8.17.0"
   }
 }

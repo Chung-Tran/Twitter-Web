@@ -377,9 +377,16 @@
         display: flex;
         font-size: 17px;
         font-weight: bolder;
+        cursor: pointer;
+      }
+
+      .selected-tab {
+        font-weight: bold;
+        color: red;
       }
 
     }
+
 
     .post-create-box {
       height: auto;
@@ -782,7 +789,7 @@
           .images-content {
             width: 100%;
             margin: 10px 0;
-            
+
 
             img {
               width: 100%;
@@ -842,5 +849,406 @@
   padding-left: 0px;
   padding-right: 48px;
   margin-left: 30px;
+
+}
+
+.message-page-container {
+  width: 100%;
+  height: 100%;
+  border: 1px solid #35393a;
+  border-top: none;
+  border-bottom: none;
+  display: flex;
+  color: white;
+
+  .list-user-container {
+    width: 38%;
+    border-right: 1px solid #35393a;
+    height: 100%;
+
+    .message-list {
+      width: 100%;
+      height: 100%;
+      padding: 10px;
+
+      .message-list-header {
+        height: 42px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 22px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        font-family: 'font-medium', "Verdana", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+        span {
+          font-size: 21px;
+        }
+
+        ul {
+          list-style: none;
+          display: flex;
+
+          li {
+            font-size: 22px;
+            margin: 0 6px;
+            cursor: pointer;
+          }
+        }
+      }
+
+      .message-search {
+        width: 100%;
+        display: flex;
+        height: 43px;
+        /* background: none; */
+        /* color: transparent; */
+        border: 1px solid #5e5a5a;
+        padding: 3px;
+        border-radius: 22px;
+        overflow: hidden;
+
+        span {
+          width: 28px;
+          font-size: 21px;
+          justify-content: center;
+          align-items: center;
+          display: flex;
+        }
+
+        input {
+          border: none;
+          flex: 1 1;
+          outline: none;
+          height: 100%;
+          background: none;
+          color: white;
+          font-size: 18px;
+          padding-left: 8px;
+
+
+        }
+
+      }
+
+      .message-user-list {
+        width: 100%;
+        display: flex;
+
+        margin-top: 13px;
+        cursor: pointer;
+
+        img {
+          max-width: 43px;
+          border-radius: 20px;
+          margin: 5px;
+        }
+
+        .message-user-single-content {
+          width: 100%;
+          margin-left: 5px;
+
+          .message-user-single-info {
+            margin-bottom: 5px;
+
+            span {
+              padding: 1px;
+              font-size: 18px;
+              padding: 2px;
+              /* margin-bottom: 42px; */
+              font-weight: bolder;
+
+              &:last-child {
+                font-size: 17px;
+                color: #878787;
+                font-weight: revert;
+                margin-left: 15px;
+              }
+
+
+            }
+
+
+
+          }
+
+          span {
+            margin-top: 5px;
+          }
+
+        }
+      }
+    }
+  }
+
+  .message-content-container {
+    width: 62%;
+    height: 100%;
+    padding: 0 10px;
+    overflow: auto;
+    padding-bottom: 0;
+
+    .message-content {
+      padding: 10px;
+      max-height: 100%;
+      height: 100%;
+      padding-bottom: 0;
+
+      .message-info {
+        .message-content-header {
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+          height: 37px;
+          font-size: 20px;
+          font-weight: bolder;
+          padding-top: 10px;
+          margin-bottom: 30px;
+        }
+
+        .message-content-userinfo {
+          display: flex;
+          flex-direction: column;
+          margin: auto;
+          align-items: center;
+          min-height: 85px;
+          border-bottom: 1px solid #35393a;
+
+          img {
+            width: 55px;
+            width: 73px;
+            border-radius: 38px;
+            margin-bottom: 10px;
+          }
+
+          #message-userinfo-username {
+            font-size: 21px;
+            font-weight: bolder;
+            margin-bottom: 5px;
+          }
+
+          #message-userinfo-displayname {
+            font-size: 17px;
+            font-family: "font-regular";
+            margin-bottom: 12px;
+            color: #729191;
+          }
+
+          #message-userinfo-jointime {
+            font-size: 17px;
+            font-family: "font-regular";
+            margin-bottom: 12px;
+            color: #729191;
+          }
+
+        }
+      }
+
+      .message-detail {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+        overflow-y: auto;
+        //max-height: 400px;
+        width: 100%;
+        height: auto;
+        min-height: 393px;
+
+        .message {
+          max-width: 70%;
+          padding: 10px;
+          border-radius: 8px;
+          font-size: 18px;
+          word-wrap: break-word;
+        }
+
+        .message-sent {
+          align-self: flex-end;
+          background-color: #100cef;
+        }
+
+        .message-received {
+          align-self: flex-start;
+          background-color: #373751;
+        }
+      }
+
+      .handle-sent-message {
+        display: flex;
+        position: relative;
+        border-radius: 16px;
+        background: #161616;
+        height: 50px;
+        align-items: center;
+
+        ul {
+          list-style: none;
+          display: flex;
+          margin: 5px;
+          font-size: 23px;
+          width: 110px;
+          justify-content: space-around;
+          color: #8080ff;
+          align-items: center;
+
+          li {
+            margin-top: 2px;
+            cursor: pointer;
+          }
+        }
+
+        .handle-send {
+          flex: 1;
+          height: 100%;
+          margin-left: 20px;
+          padding: 5px 0;
+
+          input {
+            width: 90%;
+            height: 100%;
+            background: transparent;
+            outline: none;
+            border: none;
+            font-size: 18px;
+            color: white;
+            overflow: inherit;
+
+          }
+
+          button {
+            color: #5b5bf5;
+            height: 100%;
+            width: 39px;
+            background: none;
+            outline: none;
+            border: none;
+            font-size: 24px;
+            align-items: center;
+            margin: auto 2px;
+            /* display: flex; */
+            margin-top: 0px;
+            cursor: pointer;
+          }
+        }
+      }
+
+    }
+
+  }
+
+
+}
+
+.notify-container {
+  width: 100%;
+  height: auto;
+  border: 1px solid #393737;
+  min-height: 100vh;
+  .notify-header {
+    width: 100%;
+    color: white;
+    font-size: 20px;
+    padding-bottom: 5px;
+    border: 1px solid #393737;
+    .notify-title {
+      width: 100%;
+      height: 28px;
+      padding-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-family: 'font-bold';
+      span{
+        &:first-child{
+          margin-left: 15px;
+        }
+      }
+    }
+
+    .list-type-notify {
+      margin-bottom: 15px;
+      margin-top: 15px;
+      height: 45px;
+
+      ul {
+        list-style: none;
+        display: flex;
+        justify-content: space-between;
+        height: 100%;
+        position: relative;
+        li {
+          width: 30%;
+          height: 100%;
+          justify-content: center;
+          display: flex;
+          align-items: center;
+          font-family: 'font-medium';
+          font-size: 18px;
+          position: relative;
+          &:hover {
+            background-color: #1c1a1a;
+          }
+
+          &:first::after { 
+            content: '';
+            width: 100%;
+            height: 1px;
+            background-color: blue; /* Màu xanh */
+            position: absolute;
+            bottom: -5px; 
+            left: 0;
+          }
+        }
+      }
+    }
+  }
+
+  .notify-list {
+    margin-top: 3px;
+    height: auto;
+
+    .notify-single {
+      width: 100%;
+      min-height: 100px;
+      padding: 7px;
+      border-bottom: 1px solid #393737;
+      color: white;
+      .notify-title {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 3px;
+        
+        img {
+          width: 33px;
+          border-radius: 20px;
+
+        }
+        span{
+          color: white;
+        }
+
+      }
+
+      .notify-content {
+        width: 100%;
+        padding: 4px 25px;
+
+        p {
+          font-size: 18px;
+
+          &:last-child {
+            margin-top: 10px;
+            color: #555555;
+            font-size: 17px;
+          }
+        }
+
+      }
+    }
+  }
+
+
 
 }
