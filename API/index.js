@@ -73,9 +73,9 @@ app.use(express.json());
 app.use(cors());
 
 //Middleware xác thực người dùng
-app.use('/api/authentication', authenticationRoute);
+// app.use('/api/authentication', authenticationRoute);
 
- app.use(authenticationToken);
+//  app.use(authenticationToken);
 
 //Use routes
 app.use('/api/users', userRoute);

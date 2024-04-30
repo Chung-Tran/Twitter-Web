@@ -19,6 +19,8 @@ const create_Comment = asyncHandle(async (req, res)=>{
     const sweet_id= req.params.SweetID;
 
     const user_id = req.user.userId;
+    //const user_id = req.user.userId
+    //const user_id = req.body.user_id;
     const content = req.body.content;
     const image =req.files ? await uploadImage(req.files) : null;
 
@@ -27,14 +29,20 @@ const create_Comment = asyncHandle(async (req, res)=>{
     const sweet = await Sweet.findById(sweet_id);
     const share = await Share.findById(sweet_id);
 
+    let QuantityComment_Sweet = 0;
+    let QuantityComment_Share = 0;
+    let QuantityComment = 0;
+
     if(sweet){
       comment= await Comment.create({
         tweet_id : sweet_id,
         user_id : user_id,
         content : content,
-        image: image
+        image: image,
       });
-    const add_Comment_To_Sweet = await Sweet.findByIdAndUpdate(sweet_id, {$addToSet : {comments:comment._id}});
+      const add_Comment_To_Sweet = await Sweet.findByIdAndUpdate(sweet_id, {$addToSet : {comments:comment._id}});
+      const sweetPresent = await Sweet.findById(sweet_id);
+      QuantityComment_Sweet = sweetPresent.comments.length;
 
     }else if(share){
       comment = await Comment.create({
@@ -43,18 +51,28 @@ const create_Comment = asyncHandle(async (req, res)=>{
         content : content,
         image: image
       });
-    const add_Comment_To_Share = await Share.findByIdAndUpdate(sweet_id, {$addToSet : {comments:comment._id}});
+      const add_Comment_To_Share = await Share.findByIdAndUpdate(sweet_id, {$addToSet : {comments:comment._id}});
+      const sharePresent = await Share.findById(sweet_id);
+      QuantityComment_Share = sharePresent.comments.length;
 
     }else return res.status(400).json(formatResponse("", false, "Không tìm thấy bài đăng!!"));
 
+    try {
+      if(sweet){
+        QuantityComment = QuantityComment_Sweet;
+      }else QuantityComment = QuantityComment_Share;
+    } catch (error) {
+      return res.status(400).json(formatResponse("", false, "Không tìm thấy bài đăng!!"));
+    }
 
     const data = {
         UserName: await getDisplayName_By_ID(user_id),
         SweetID: comment.tweet_id,
         Content: comment.content,
         Image: comment.image,
-        CreateComment: moment(comment.created_at).format()
-        
+        CreateComment: moment(comment.created_at).format(),
+        QuantityComment: QuantityComment,
+            
     }
 
     return res.status(200).json(formatResponse(data, true, 'Đã tạo comment từ bài viết thành công!'));
@@ -205,6 +223,10 @@ const delete_Comment = asyncHandle(async(req, res) => {
   const sweet = await Sweet.findById(sweetID);
   const share = await Share.findById(sweetID);
  
+  let QuantityComment_Sweet = 0;
+  let QuantityComment_Share = 0;
+  let QuantityComment = 0;
+
   try {
     if (sweet) {
       const indexToRemove = sweet.comments.findIndex(comment => comment._id.toString() === commentID);
@@ -212,6 +234,8 @@ const delete_Comment = asyncHandle(async(req, res) => {
         sweet.comments.splice(indexToRemove, 1);
         try {
           await sweet.save();
+          const sweetPresent = await Sweet.findById(sweetID);
+          QuantityComment_Sweet = sweetPresent.comments.length;    
           console.log('Đã lưu sweet thành công.');
         } catch (error) {
           console.error('Lỗi khi lưu sweet:', error);
@@ -226,6 +250,8 @@ const delete_Comment = asyncHandle(async(req, res) => {
         share.comments.splice(indexToRemove, 1);
         try {
           await share.save();
+          const sharePresent = await Share.findById(sweetID);
+          QuantityComment_Share = sharePresent.comments.length;    
           console.log('Đã lưu bài Share thành công.');
         } catch (error) {
           console.error('Lỗi khi lưu bài Share:', error);
@@ -239,13 +265,26 @@ const delete_Comment = asyncHandle(async(req, res) => {
   }
         
   const commentD = await Comment.findByIdAndDelete(commentID);
-  
-  return res.status(200).json(formatResponse(null, true, "Xóa Comment thành công!!"));
+
+  try {
+    if(sweet){
+      QuantityComment = QuantityComment_Sweet;
+    }else QuantityComment = QuantityComment_Share;
+  } catch (error) {
+    return res.status(400).json(formatResponse("", false, "Không tìm thấy bài đăng!!"));
+  }
+
+  const data = {
+    SweetID: sweetID,
+    QuantityComment: QuantityComment,
+  }
+  return res.status(200).json(formatResponse(data, true, "Xóa Comment thành công!!"));
 })
 
 const add_OR_Delete_User_To_List_Like_Comment = asyncHandle(async(req,res) =>{
   const comment_id = req.params.CommentID;
-  const user_id = req.body.user_id;
+  const user_id = req.user.userId
+  //const user_id = req.body.user_id;
 
   try {
     const comment = await Comment.findById(comment_id);  
@@ -255,11 +294,17 @@ const add_OR_Delete_User_To_List_Like_Comment = asyncHandle(async(req,res) =>{
     if(user_id_In_List_Like_Comment === -1){
       comment.likes.push(user_id);
       comment.save();
-      return res.status(200).json(formatResponse("Đã like comment!", true, ""));
+      const data = {
+        QuantityLike: comment.likes.length
+      }
+      return res.status(200).json(formatResponse(data, true, "Đã like comment!"));
     }else if(user_id_In_List_Like_Comment === 1){
       comment.likes.splice(user_id_In_List_Like_Comment, 1);
       comment.save();
-      return res.status(200).json(formatResponse("Bỏ thích comment thành công!", true, ""));
+      const data = {
+        QuantityLike: comment.likes.length
+      }
+      return res.status(200).json(formatResponse(data, true, "Bỏ thích comment thành công!"));
     }
 
   } catch (error) {
@@ -272,7 +317,7 @@ const add_OR_Delete_User_To_List_Like_Comment = asyncHandle(async(req,res) =>{
 const get_List_User_To_Like_Comment = asyncHandle(async (req, res) => {
 
   const id_Comment = req.query.CommentID;
-  const comment = await Comment.findById(id_Comment).populate("likes", "displayName");
+  const comment = await Comment.findById(id_Comment).populate("likes", "displayName username");
      
   try {
     try {
@@ -286,9 +331,19 @@ const get_List_User_To_Like_Comment = asyncHandle(async (req, res) => {
     }
     
     const List_Userid_ToLike = comment.likes;
+    const displayNameS = [];
+    for (let i = List_Userid_ToLike.length - 1; i >= 0; i--) {
+      const userID = List_Userid_ToLike[i];
+      const displayName = await getDisplayName_By_ID(userID);
+      if (displayName) {
+          console.log("Tìm thấy UserID và có thể biết được DisplayName");
+          displayNameS.push(userID);
+      }
+    }
+  
 
     const data = {
-      List_UserName_ToLike: List_Userid_ToLike
+      List_UserName_ToLike: displayNameS
     }
 
     return res.status(200).json(formatResponse(data, true, "Lấy danh sách User đã like Comment thành công"));
@@ -302,7 +357,8 @@ const get_List_User_To_Like_Comment = asyncHandle(async (req, res) => {
 const create_ReplyComment = asyncHandle(async(req, res) => {
   const comment_id = req.params.CommentID;
 
-  const user_id = req.body.user_id;
+  const user_id = req.user.userId
+  //const user_id = req.body.user_id;
   const content = req.body.content;
   const image = await uploadImage(req.files);
 
@@ -316,12 +372,14 @@ const create_ReplyComment = asyncHandle(async(req, res) => {
     }
 
     const add_Reply_To_Comment = await Comment.findByIdAndUpdate(comment_id, {$push : {comment_reply: commentReply}});
-  
+    
+    const commentPresent = await Comment.findById(comment_id);
     const data = {
       UserName: await getDisplayName_By_ID(commentReply.user_id._id),
       Content: commentReply.content,
       Image: commentReply.image,
       CreateAt: moment(commentReply.create_at).format(),
+      QuantityCommentReply: commentPresent.comment_reply.length,
     }
     return res.status(200).json(formatResponse(data, true, `Trả lời Comment có id: ${comment_id} thành công!!`))
   
@@ -336,7 +394,8 @@ const add_OR_Delete_User_To_List_Like_ReplyComment = asyncHandle(async(req,res) 
   const comment_id = req.params.CommentID;
   const replyComment_id = req.params.ReplyCommentID;
 
-  const user_id = req.body.user_id;
+  const user_id = req.user.userId
+  //const user_id = req.body.user_id;
 
   try {
     const comment = await Comment.findById(comment_id);
@@ -347,12 +406,18 @@ const add_OR_Delete_User_To_List_Like_ReplyComment = asyncHandle(async(req,res) 
         const user_id_In_List_Like_ReplyComment = comment_reply.likes.findIndex(cr => cr._id.toString() === user_id);
         if(user_id_In_List_Like_ReplyComment === -1){
           comment_reply.likes.push(user_id);
-          comment.save(); 
-          return res.status(200).json(formatResponse("Đã like Reply_Comment!", true, ""));
+          comment.save();
+          const data = {
+            QuantityLike: comment_reply.likes.length
+          } 
+          return res.status(200).json(formatResponse(data, true, "Đã like Reply_Comment!"));
         }else {
           comment_reply.likes.splice(user_id_In_List_Like_ReplyComment, 1);
           comment.save();
-          return res.status(200).json(formatResponse("Bỏ thích Reply_Comment!", true, ""));
+          const data = {
+            QuantityLike: comment_reply.likes.length
+          }
+          return res.status(200).json(formatResponse(data, true, "Bỏ thích Reply_Comment!"));
         } 
       }
     }
@@ -366,7 +431,14 @@ const get_List_User_To_Like_ReplyComment = asyncHandle(async (req, res) => {
   const comment_id = req.query.CommentID;
   const replyComment_id = req.query.ReplyCommentID;
 
-  const comment = await Comment.findById(comment_id).populate("likes", "displayName");
+  const comment = await Comment.findById(comment_id)
+  .populate({
+    path: 'comment_reply',
+    populate: [
+      { path: 'likes', select: 'displayName username' }
+    ]
+  })
+              
   const replyComment = comment.comment_reply;
   
       try {
@@ -378,8 +450,13 @@ const get_List_User_To_Like_ReplyComment = asyncHandle(async (req, res) => {
           replyComment.forEach(rc => {
             if(rc._id.toString() === replyComment_id){
               const List_Userid_ToLike = rc.likes;
+              const List_Userid_ToLikeSort = [];
+              for (let i = List_Userid_ToLike.length - 1; i >= 0; i--) {
+                const userID = List_Userid_ToLike[i];
+                    List_Userid_ToLikeSort.push(userID);
+              }            
               const data = {
-                List_UserName_ToLike: List_Userid_ToLike
+                List_UserName_ToLike: List_Userid_ToLikeSort
               }
               return res.status(200).json(formatResponse(data, true, "Lấy danh sách User đã like Reply Comment thành công"));     
             }
@@ -554,8 +631,10 @@ const delete_ReplyComment = asyncHandle(async(req, res) => {
   
     comment.comment_reply = comment.comment_reply.filter(cr => cr._id.toString() !== replyComment_id);
     await comment.save();
-
-    return res.status(200).json(formatResponse(null, true, "Xóa ReplyComment thành công!!"));
+    const data = {
+      QuantityCommentReply: comment.comment_reply.length
+    }
+    return res.status(200).json(formatResponse(data, true, "Xóa ReplyComment thành công!!"));
 
   }catch (error) {
     console.error("Lỗi khi xóa comment", error);
@@ -587,6 +666,7 @@ async function formatTimeDifference(fromDate, toDate){
 }
 
 
+
 const get_List_ReplyComment = asyncHandle(async(req, res) => {
 
   const comment_id = req.query.CommentID;
@@ -607,7 +687,12 @@ const get_List_ReplyComment = asyncHandle(async(req, res) => {
     const replyCommentS = []; 
     let duration;
     let quantityReplyComment=0;
-    for (const rc of replyComment) {
+
+    const sortData = replyComment.sort((a, b) => {
+      return new Date(a.create_at) - new Date(b.create_at);
+    });
+
+    for (const rc of sortData) {
       quantityReplyComment++,
       quantityLike = rc.likes.length,
       duration = await formatTimeDifference(moment(rc.create_at), moment())

@@ -1,7 +1,7 @@
 import React from 'react';
 import Navbar from '../component/Navbar/Navbar.js';
 import Menu from '../component/Menu/Menu.js';
-import Post from '../component/post/Post.js';
+import Post from '../component/post/post.js';
 
 const HomePage = () => {
   return (

@@ -12,23 +12,65 @@ import SinglePost from '../SinglePost';
 import { toast } from 'react-toastify';
 
 function Post() {
+  const [selectedTab, setSelectedTab] = useState('');
   const [sweetList, setSweetList] = useState([]);
   const [postSweetContent, setPostSweetContent] = useState();
   const [selectedFile, setSelectedFile] = useState([]);
   // const [previewImage, setPreviewImage] = useState(null); 
-  let limit = 50;
+  let limit = 40;
   let skip = 0;
   const fetchData = async () => {
-    const response = await axiosClient.get(`/sweet/getManySweet?limit=${limit}&skip=${skip}`);
+    try {
+      let response;
+      if (selectedTab === 'For You') {
+        response = await axiosClient.get(`/sweet/getManySweetAndShareForYou?limit=${limit}&skip=${skip}`);
+        if (response.data.isSuccess) {
+          setSweetList(response.data.data.InFo_Sweet)
+        } else {
+          toast.error(response.errorMessage);
+        }
+      } else if (selectedTab === 'Following') {
+        response = await axiosClient.get(`/sweet/getManySweetAndShareFollowing?limit=${limit}&skip=${skip}`);
+        if (response.data.isSuccess) {
+          setSweetList(response.data.data.InFo_Sweet)
+        } else {
+          toast.error(response.errorMessage);
+        }
+      }
+      
+    } catch (error) {
+      console.error("Error occurred while fetching sweet data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [selectedTab, limit, skip]);
+
+  useEffect(() => {
+    setSelectedTab('For You');
+  }, []);
+
+  const handleTabClick = (tab) => {
+    setSelectedTab(tab);
+    console.log(selectedTab);
+  };
+
+  /*const fetchData = async () => {
+   const response = await axiosClient.get(`/sweet/getManySweet?limit=${limit}&skip=${skip}`);
+    //const response = await axiosClient.get(` /sweet/getManySweetAndShareForYou`);
     if (response.data.isSuccess) {
       setSweetList(response.data.data.InFo_Sweet)
     } else {
       toast.error(response.errorMessage);
     }
   };
+  
   useEffect(() => {
     fetchData();
-  }, [limit, skip]);
+  }, [limit, skip]);*/
+
+
   const postContentHandle = async () => {
     try {
       const formData = new FormData();
@@ -52,6 +94,7 @@ function Post() {
       toast.error("Lỗi khi tạo mới bài viết");
     }
   };
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setSelectedFile(file);
@@ -63,11 +106,15 @@ function Post() {
     // };
     // reader.readAsDataURL(file);
   };
+
+  
+
   return (
     <div className='homepage-post'>
       <div className='post-type-sweet'>
-        <span>For you</span>
-        <span>Following</span>
+        <span className={selectedTab === 'For You' ? 'selected-tab' : ''} onClick={() => handleTabClick('For You')}>For you</span>
+        <span className={selectedTab === 'Following' ? 'selected-tab' : ''} onClick={() => handleTabClick('Following')}>Following</span>
+        
         <AiOutlineSetting width={20} color='white' fontSize={23} style={{ marginRight: '1px', marginTop: '10px', right: '0' }} />
       </div>
       <div className='post-create-box'>
@@ -130,6 +177,7 @@ function Post() {
           </div>
         ))}
       </div>
+
     </div>
   );
 };
