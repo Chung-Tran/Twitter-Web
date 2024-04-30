@@ -23,7 +23,17 @@ const connectRedis = () => {
     }
     return redisClient;
 }
+const addUserOnlineToList = async (ws) => {
+    // Thêm thông tin của client vào redis
+    redisClient.sadd("online-users", ws, (err, reply) => {
+        if (err) {
+            console.error('Error adding user to online list:', err);
+        } else {
+            console.log('User added to online list:', ws);
+        }
+    });
+}
 
 
 
-module.exports = { connectRedis };
+module.exports = { connectRedis,addUserOnlineToList };

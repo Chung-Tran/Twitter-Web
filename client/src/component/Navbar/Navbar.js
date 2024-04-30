@@ -10,8 +10,10 @@ import { BsFillPeopleFill } from "react-icons/bs";
 import { BsPerson } from "react-icons/bs";
 import { CiCircleMore } from "react-icons/ci";
 import styles from './Navbar.css';
+import { useNavigate, useNavigation } from 'react-router-dom';
 
 const Navbar = () => {
+    const navigate = useNavigate();
   return (
     <div className='homepage-navbar'>
         <div className='navbar-content'>
@@ -20,16 +22,16 @@ const Navbar = () => {
             </div>
             <nav>
                 <ul>
-                    <li><AiFillHome /><span>Home</span></li>
+                    <li onClick={()=>navigate("/")}><AiFillHome /><span>Home</span></li>
                     <li><AiOutlineSearch /><span>Explore</span></li>
                     <li><BsBell /><span>Notifications</span></li>
-                    <li><SlEnvolopeLetter /><span>Messages</span></li>
+                    <li onClick={()=>navigate("/messages")}><SlEnvolopeLetter /><span>Messages</span></li>
                     <li><IoListSharp /><span>Lists</span></li>
                     <li><PiBookmarkSimple /><span>Notifications</span></li>
                     <li><BsFillPeopleFill /><span>Bookmarks</span></li>
                     <li><BsTwitterX /><span>Communities</span></li>
                     <li><BsPerson /><span>Premium</span></li>
-                    <li><CiCircleMore /><span>Profile</span></li>
+                    <li onClick={()=>navigate("/profile")}><CiCircleMore /><span>Profile</span></li>
                 </ul>
             </nav>
             <div
@@ -47,7 +49,7 @@ const Navbar = () => {
                 >
                 POST
             </div>
-            <div style={{ display: 'flex', height: '200px', alignItems: 'flex-end' }}>
+            <div style={{ display: 'flex', height: '85px', alignItems: 'flex-end' }}>
             <div
                 style={{
                 width: '50px',

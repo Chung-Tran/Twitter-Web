@@ -14,12 +14,10 @@ const authenticationToken = async (req, res, next) => {
     }
     try {
         decodedToken = await jwt.verify(token, secretKey);
-        console.log(decodedToken)
         req.user = { 
             userId: decodedToken.userId,
             email: decodedToken.email,
          }; 
-        console.log(req.user)
         next();
     } catch (err) {
         if (err.name === 'TokenExpiredError') {

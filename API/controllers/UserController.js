@@ -81,9 +81,6 @@ const addFollowUser = asyncHandle(async (req, res) => {
 const getUser = asyncHandle(async (req, res) => {
     try {
         const id = req.params.id;
-        
-        console.log("user id: ", id);
-
         // Query the database to find the user by id
         const user = await User.findById(id);
 
