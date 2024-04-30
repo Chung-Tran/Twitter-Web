@@ -31,7 +31,8 @@ const loginUser = asyncHandle(async (req, res) => {
     if (findUser && (await findUser.isPasswordMatched(password))) {
         const encodeData = {
             userId: findUser._id,
-            email: findUser.email
+            email: findUser.email,
+            displayName:findUser.displayName
         }
         const refeshToken = generateRefreshToken(encodeData);
         const accessToken = generateAccessToken(encodeData);
@@ -60,7 +61,8 @@ const loginByEmail = asyncHandle(async (req, res) => {
     else {
         const encodeData = {
             userId: findUser._id.toString(),
-            email: findUser.email
+            email: findUser.email,
+            displayName:findUser.displayName
         }
         const refeshToken = generateRefreshToken(encodeData);
         const accessToken = generateAccessToken(encodeData);

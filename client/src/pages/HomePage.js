@@ -1,11 +1,11 @@
-import React from 'react';
-import Navbar from '../component/Navbar/Navbar.js';
-import Menu from '../component/Menu/Menu.js';
+import React, { useEffect, useRef, useState } from 'react';
+
 import Post from '../component/post/post.js';
 
 const HomePage = () => {
+
   return (
-    <div className='hompage-container'>
+    <div className='hompage-container' >
       <Post />
     </div>
 
