@@ -42,7 +42,6 @@ function MessagePage() {
     fetchData()
   }
   const changeReceiverId = (id) => {
-    console.log(id)
     setDefaultReceiverId(id);
   }
   return (

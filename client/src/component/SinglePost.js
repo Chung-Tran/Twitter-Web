@@ -18,14 +18,7 @@ function SinglePost({ sweetData }) {
     const [checkIsLiked, setCheckIsLiked] = useState(false);
     const [isLiked, setIsLiked] = useState(true);
     const [quantityLike, setQuantityLike] = useState(sweetData.QuantityLike); 
-
-
-
-
-    // const handleIconClick = () => {
-    //   setIsLiked(!isLiked);
-    // };
-  
+    
     const fetchLikeStatus = async () => {
         try {
             if (sweetData && sweetData._id) {
@@ -51,8 +44,6 @@ function SinglePost({ sweetData }) {
     const likeSweetHandle = async () => {
         try {
             const response = await axiosClient.put(`/sweet/addOrDeleleLike/${sweetData._id}`);
-            console.log(response)
-            
             if(response.data.isSuccess){
                 if(response.data.data.State){
                     setIsLiked(false);
@@ -126,14 +117,14 @@ function SinglePost({ sweetData }) {
                         <li onClick={() => handleGetSweetDetail(sweetData._id)}><GiRapidshareArrow/> &nbsp;  {sweetData.QuantityLike}</li>
                         <li>     <AiOutlineHeart
         //                 style={{ color: (isLiked) ? 'red' : 'white' , cursor: 'pointer' }}
-        // onClick={()=>likeSweetHandle()}
+        onClick={()=>likeSweetHandle()}
         style={{ color: isLiked ? 'red' : 'white', cursor: 'pointer' }}
         
-        onClick={(sweetData && sweetData._id) ?
-            likeSweetHandle():
+        // onClick={(sweetData && sweetData._id) ?
+        //     likeSweetHandle():
          
-            console.error("Sweet data or sweet ID is invalid.")
-        }
+        //     console.error("Sweet data or sweet ID is invalid.")
+        // }
         
       />
 

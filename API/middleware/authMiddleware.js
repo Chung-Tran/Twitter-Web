@@ -17,6 +17,7 @@ const authenticationToken = async (req, res, next) => {
         req.user = { 
             userId: decodedToken.userId,
             email: decodedToken.email,
+            displayName:decodedToken.displayName
          }; 
         next();
     } catch (err) {
@@ -34,17 +35,18 @@ const authenticationToken = async (req, res, next) => {
                 //Kiểm tra refresh token còn hạn hay không
                 jwt.verify(user.refreshToken, secretKey);
 
-                const newAccessToken = jwt.sign({ userId: user._id, email: user.email }, secretKey, { expiresIn: '15m' });
+                const newAccessToken = jwt.sign({ userId: user._id, email: user.email,displayName:user.displayName }, secretKey, { expiresIn: '15m' });
                 const userResponse = {
                     userId: user._id.toString(),
                     email: user.email,
-
+                    displayName:user.displayName
                 }
                 // Gửi access token mới trong header
                 res.setHeader('Authorization', `Bearer ${newAccessToken}`);
                 req.user = {
                     userId: user._id.toString(),
                     email: user.email,
+                    displayName:user.displayName
                 }
                 next();
             } catch (error) {
