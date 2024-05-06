@@ -21,12 +21,10 @@ function DialogHistoryComment({comment, onCloseDialog}) {
     };
     
     const getListHistoryUpdateHandle = async () => {
-        console.log("ID: " ,comment._id);
         const response = await axiosClient.get(`/comment/getListHistoryUpdate?CommentID=${comment._id}`);
         if(response.data.isSuccess){
             setListHistoryUpdate(response.data.data.History_Update)
             setQuantityUpdate(response.data.data.UpdateNumber)
-            console.log("Data:" ,response.data.data.History_Update);
         }else {
             toast.error(response.errorMessage);
         }

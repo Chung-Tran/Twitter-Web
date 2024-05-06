@@ -51,7 +51,6 @@ function LoginModal({ visible, setVisible, type }) {
         setIsSuccess(true); // Thay đổi thành true nếu đặt lại thành công
     };
     const handleSubmit = async (data) => {
-        console.log(isForgotPassword, otpSent)
         try {
             if (!isRegister && !isForgotPassword ) //login
             {
@@ -109,7 +108,6 @@ function LoginModal({ visible, setVisible, type }) {
             }
 
         } catch (error) {
-            console.log(error)
             toast.error(error.response?.data.errorMessage ?? "Unexpected error");
             // Handle login failure
         }

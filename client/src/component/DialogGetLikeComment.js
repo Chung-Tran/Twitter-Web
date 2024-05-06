@@ -26,26 +26,21 @@ function DialogGetLikeComment({comment, getList, onCloseDialog}) {
     
 
     const getListLikeCommentHandle = async () => {
-        console.log("ID: " ,comment._id);
-             
         const response = await axiosClient.get(`/comment/getListlikeComment?CommentID=${comment._id}`);
         if(response.data.isSuccess){
             setListLike(response.data.data.List_UserName_ToLike)
             setQuantityLikeComment(response.data.data.QuantityLike);
-            console.log("Data:" ,response.data.data.List_UserName_ToLike);
         }else {
             toast.error(response.errorMessage);
         }
     }
 
     const getListLikeReplyCommentHandle = async () => {
-        console.log("ID: " ,comment._id);
 
         const response = await axiosClient.get(`/comment/getListlikeReplyComment?CommentID=${comment._id}`);
         if(response.data.isSuccess){
             setListLike(response.data.data.List_UserName_ToLike)
             setQuantityLikeReplyComment(response.data.data.QuantityLike);
-            console.log("Data:" ,response.data.data.List_UserName_ToLike);
         }else {
             toast.error(response.errorMessage);
         }

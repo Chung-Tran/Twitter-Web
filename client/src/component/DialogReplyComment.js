@@ -68,7 +68,6 @@ function DialogReplyComment({comment, onCloseDialog}) {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         setSelectedFile(file);
-        console.log(file);
         
         // Create a preview image URL for the selected file
         // const reader = new FileReader();

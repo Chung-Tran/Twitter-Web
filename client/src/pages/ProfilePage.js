@@ -1,58 +1,84 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { IoArrowBackSharp } from "react-icons/io5";
 import Post from '../component/post/post';
+import { FaCalendarAlt } from "react-icons/fa";
+import { useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import axiosClient from '../authenticate/authenticationConfig';
+import SinglePost from '../component/SinglePost';
 function ProfilePage() {
-    return (
-        <div className='profile-container'>
-            <div className='profile-page-header'>
-                <IoArrowBackSharp />
-                <div className='header-title'>
-                    <span>Díplayname</span>
-                    <span>username</span>
+    const { id } = useParams();
+    const [userInfo, setUserInfo] = useState();
+    useEffect(() => {
+        fetchData(id)
+    }, [id]);
+    const fetchData = async (id) => {
+        try {
+            let response;
+            response = await axiosClient.get(`/users/${id}`);
+            if (response.data.isSuccess) {
+                setUserInfo(response.data.data)
+            } else {
+                toast.error(response.errorMessage);
+            }
+        } catch (error) {
+            toast.error("Unexpected error");
+        };
+    }
+        return userInfo && (
+            <div className='profile-container'>
+                <div className='profile-page-header'>
+                    <span><IoArrowBackSharp /></span>
+                    <div className='header-title'>
+                        <span>{userInfo.displayName}</span>
+                        <span>{userInfo.statusList?.length} posts</span>
+                    </div>
                 </div>
-            </div>
-            <div className='user-profile-container'>
+                <div className='user-profile-container'>
 
-                <div className='profile-avatar'>
-                    <div className='cover-images'>
-                        <img src='../../assets/images/cover-image.jpg' />
+                    <div className='profile-avatar'>
+                        <div className='cover-images'>
+                            <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbrcbieHSe__U37eq3JOSPIGi4WVjdzn0GDw_jVv7Rnqq_UTvaAw3GkeXd_O575NU_nGw&usqp=CAU' />
+                        </div>
+                        <div className='avatar-image'>
+                            <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' alt="Avatar" />
+                            <button >Edit profile</button>
+                        </div>
                     </div>
-                    <div className='avatar-image'>
-                        <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' alt="Avatar" />
-                        <button >Edit profile</button>
-                    </div>
-                </div>
-                <div className='profile-user-info'>
-                    <div className='username'>
-                        <span>Displayname</span>
-                        <span>username</span>
-                    </div>
-                    <ul>
-                        <li id='profile-desc'>Description</li>
-                        <li id='profile-join-time'>Joined August 2023</li>
-                        <ul >
-                            <li>5 Following</li>
-                            <li>0 Followers</li>
+                    <div className='profile-user-info'>
+                        <div className='username'>
+                            <span>{userInfo.displayName}</span>
+                            <span>@{userInfo.userName}</span>
+                        </div>
+                        <ul>
+                            {userInfo?.dob && <li id='profile-desc'>{userInfo?.dob}</li>}
+                            <li id='profile-join-time'><FaCalendarAlt style={{ color: 'rgb(115 95 95)' }} /> &nbsp;{userInfo?.createdAt}</li>
+                            <ul >
+                                <li>{userInfo?.following ?? 0} &nbsp;&nbsp;<p>Following</p></li>
+                                <li>{userInfo?.followUser ?? 0} &nbsp;&nbsp;<p>Followers</p></li>
+                            </ul>
                         </ul>
+                    </div>
+                </div>
+                <div className='style-show-profile'>
+                    <ul>
+                        <li id='select-type-post'>Posts</li>
+                        <li>Replies</li>
+                        <li>Hightlights</li>
+                        <li>Articles</li>
+                        <li>Media</li>
+                        <li>Likes</li>
                     </ul>
+                    <div className='profile-show-tweet'>
+                        {/* {userInfo?.statusList && userInfo.statusList.map((item, index) => (
+                            <SinglePost sweetData={item} selectedTab="For you"/>
+                        ))} */}
+                        
+                    </div>
                 </div>
-            </div>
-            <div className='style-show-profile'>
-                <ul>
-                    <li>Posts</li>
-                    <li>Replies</li>
-                    <li>Hightlights</li>
-                    <li>Articles</li>
-                    <li>Media</li>
-                    <li>Likes</li>
-                </ul>
-                <div className='profile-show-tweet'>
-                {/* <Post/> */}
-                </div>
-            </div>
 
-        </div>
-    )
-}
+            </div>
+        )
+    }
 
-export default ProfilePage
+    export default ProfilePage;

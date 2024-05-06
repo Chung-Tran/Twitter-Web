@@ -1,8 +1,10 @@
 const asyncHandle = require('express-async-handler')
 const User = require('../model/User');
+const Sweet = require('../model/Sweet');
 const formatResponse = require('../common/ResponseFormat');
 const { getUsersOnline } = require('../config/redisConfig');
 const { createNotification } = require('./NotifyController');
+const {ObjectId} = require('mongodb')
 const editUser = asyncHandle(async (req, res) => {
     const userId = req.user.userId;
     const email = req.user.email;
@@ -94,7 +96,7 @@ const getUser = asyncHandle(async (req, res) => {
         const id = req.params.id;
         // Query the database to find the user by id
         const user = await User.findById(id);
-
+        const sweetList=await Sweet.find({user_id: user?._id})
         // Check if user exists
         if (!user) {
             return res.status(404).json(formatResponse(null, false, "User not found"));
@@ -105,8 +107,10 @@ const getUser = asyncHandle(async (req, res) => {
             followUser: user.followers.length,
             userName: user.username,
             displayName: user.displayName,
-            bio: user.bio,
-            dob: user.dob,
+            bio: user.bio ?? "",
+            dob: user.dob ?? "",
+            createdAt:user.created_at.toLocaleDateString(),
+            statusList:sweetList
 
         }
         return res.status(200).json(formatResponse(data, true, ""));
@@ -147,6 +151,7 @@ const searchUser = asyncHandle(async (req, res) => {
 
 const getListUserUnFollow = asyncHandle(async (req, res) => {
     const user_id = req.user.userId;
+    console.log('userId',user_id)
     //const user_id = req.query.UserID;
 
     // Lấy người dùng hiện tại
@@ -160,23 +165,23 @@ const getListUserUnFollow = asyncHandle(async (req, res) => {
     try {
         return res.status(200).json(formatResponse(usersNotFollowing, true, "Lấy danh sách người dùng chưa follow thành công!!"))
     } catch (error) {
-        console.error("Lỗi Lấy danh sách người dùng chưa Follow: ", error.message);
-        return res.status(400).json(formatResponse("", false, "Lỗi khi Lấy danh sách người dùng chưa Follow!!"));
+        return res.status(400).json(formatResponse("", false, "Lỗi khi Lấy danh sách người dùng liên quan!"));
     }
 });
 
 //API lấy user đang follow và đang online
 const getListUserOnline = asyncHandle(async (req, res) => {
     const userId = req.user.userId;
-
+    console.log(userId)
     try {
         // Lấy danh sách người dùng đang online
         const onlineUsers = await getUsersOnline();
 
         const userFollowing = await User.findById(userId).populate('following', 'displayName username _id');
+        console.log('userFollow',userFollowing)
 
         // Lọc danh sách người dùng đang online mà cũng được theo dõi bởi người dùng hiện tại
-        const followingOnlineUsers = userFollowing.following.filter(user => onlineUsers.includes(user._id.toString()));
+        const followingOnlineUsers = userFollowing.following.filter(user => onlineUsers.includes(user?._id.toString()));
 
         return res.status(200).json(formatResponse(followingOnlineUsers, true, "Lấy danh sách người dùng đang online thành công!!"));
     } catch (error) {

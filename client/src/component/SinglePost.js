@@ -36,10 +36,8 @@ function SinglePost({sweetData, selectedTab, resetData}) {
           if(response.data.isSuccess){
             if(response.data.data.State){
                 setIsShare(false);
-                console.log(sweetData);
             }else {
                 setIsShare(true);
-                console.log(sweetData)
             }
         }}
 
@@ -50,7 +48,6 @@ function SinglePost({sweetData, selectedTab, resetData}) {
 
     useEffect(() => {
         checkIsShare();
-        console.log("chạy");
         
     }, [selectedTab, sweetData._id]); 
   
@@ -83,7 +80,6 @@ function SinglePost({sweetData, selectedTab, resetData}) {
 
     const handleCreateShareClick = () => {
         setShowDialogCreateShare(true);
-        console.log("Click")
     };
 
     const handleShowDialogCreateShare = (value) => {
@@ -93,13 +89,11 @@ function SinglePost({sweetData, selectedTab, resetData}) {
     const handleGetListShareClick = () => {
         setShowDialog(true);
         setGetList(true);
-        console.log("Click")
     };
 
     const handleGetListLikeClick = () => {
         setShowDialog(true);
         setGetList(false);
-        console.log("Click")
     };
 
     const handleShowDialog = (value) => {
@@ -108,7 +102,6 @@ function SinglePost({sweetData, selectedTab, resetData}) {
 
     const likeSweetHandle = async () => {
         try {
-            console.log('sweet id',sweetData._id)
             const response = await axiosClient.put(`/sweet/addOrDeleleLike/${sweetData._id}`);
             
             if (response.data.isSuccess) {
