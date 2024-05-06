@@ -8,12 +8,30 @@ import { toast } from 'react-toastify';
 import { CiImageOn } from "react-icons/ci";
 import { BsEmojiSmile } from "react-icons/bs";
 import { SlCalender } from "react-icons/sl";
+import { AiOutlineArrowLeft } from 'react-icons/ai';
+import Post from '../component/post/post'
+import { useNavigate } from "react-router-dom";
 
 function SweetDetail() {
     const { id } = useParams();
+    const navigate = useNavigate();
+    const handleReturnPort = () => {
+        navigate("/")
+    }
+
     const [sweetDetail, setSweetDetail] = useState();
     const [postCommentContent, setPostCommentContent] = useState();
     const [selectedFile, setSelectedFile] = useState([]);
+    
+    const [isPostView, setIsPostView] = useState(false);
+
+    const handleBackButtonClick = () => {
+        setIsPostView(true); 
+      };
+    const handleReturnToPost = () => {
+        setIsPostView(false);
+      };
+    
     const fetchData = async () => {
         const response = await axiosClient.get(`/sweet/getOneSweet?SweetID=${id}`);
         if (response.data.isSuccess) {
@@ -26,6 +44,9 @@ function SweetDetail() {
         fetchData();
         window.scrollTo(0, 0);
     }, []);
+
+    
+
     const potstCommentHandle = async () => {
         try {
             const formData = new FormData();
@@ -51,6 +72,7 @@ function SweetDetail() {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         setSelectedFile(file);
+        // console.log("file: ", file);
 
         // Create a preview image URL for the selected file
         // const reader = new FileReader();
@@ -58,10 +80,14 @@ function SweetDetail() {
         //   setPreviewImage(reader.result);
         // };
         // reader.readAsDataURL(file);
-    };
-    return (
-        <div className='hompage-container'>
-            <div className='homepage-post'>
+    };    
+    return (    
+        <div className='hompage-container'>         
+            <div className='homepage-post'>       
+                <div class="sticky-popup">
+                    <button class="close-button" onClick={()=> handleReturnPort()}><AiOutlineArrowLeft/></button>
+                    <p>POST</p>
+                </div>
                 <div className='post-content'>
                     {sweetDetail && <SinglePost sweetData={sweetDetail} />}
                 </div>
@@ -106,14 +132,29 @@ function SweetDetail() {
                         </div>
                     </div>
                     {
-                        sweetDetail && sweetDetail.ListUserToComment.map((item, index) => (
-                            <SweetComment commentData={item} resetData={fetchData} />
-                        ))
+                        // sweetDetail && sweetDetail.ListUserToComment.map((item, index) => (
+                        //     <SweetComment commentData={item} resetData={fetchData} />
+                        // ))
+                            // <SweetComment sweet={sweetDetail} resetData={fetchData} />
+                            
                     }
+                    <div className='comment'>
+                    {
+                    sweetDetail && sweetDetail.ListUserToComment.map((item, index) => (
+                            <SweetComment commentData={item} resetData={fetchData}/>
+                        ))
+                        }
+                        
+                        {/* {sweetDetail && <SweetComment sweet={sweetDetail} resetData={fetchData}/>} */}
+                    </div>
+
 
                 </div>
+                
             </div>
+          
         </div>
+                
     )
 }
 

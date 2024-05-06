@@ -99,13 +99,21 @@ async function get_Sweet_By_Id(id) {
       .populate('likes', 'displayName username')
       .populate('shares', 'displayName username');
 
-    if (!sweet) {
+    const share = await Share.findById(id)
+      .populate('user_id', 'displayName username')
+      .populate('likes', 'displayName username')
+
+    if(sweet){
+      console.log('Đối tượng Sweet được tìm thấy:', sweet);
+      return sweet;
+    }else if(share){
+      console.log('Đối tượng Sweet được tìm thấy:', share);
+      return share;
+    }else{
       console.log('Ko tìm thấy bài viết');
       return null;
     }
-
-    console.log('Đối tượng Sweet được tìm thấy:', sweet);
-    return sweet;
+    
   } catch (error) {
     console.error('Lỗi khi lấy đối tượng Sweet:', error.message);
     return null;
@@ -498,37 +506,61 @@ const add_OR_Delete_User_To_List_Like_Sweet = asyncHandle(async (req, res) => {
   const user_id = req.user.userId
 
   const sweet = await Sweet.findById(sweet_id);
-  if (!sweet) {
-    console.log("Không thấy bài viết!");
-    return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết!"));
-  }
+  const share = await Share.findById(sweet_id);
 
   try {
-    const sweet = await Sweet.findById(sweet_id);
-    const user_id_In_List_Like_Sweet = sweet.likes.findIndex(userId => userId?.toString() === user_id.toString());
-    if (user_id_In_List_Like_Sweet === -1) {
-      sweet.likes.push(user_id);
-      sweet.save();
-      const data = {
-        State: false,
-        QuantityLike: sweet.likes.length
+    if(sweet){
+      const user_id_In_List_Like_Sweet = sweet.likes.findIndex(userId => userId?.toString() === user_id.toString());
+      if (user_id_In_List_Like_Sweet === -1) {
+        sweet.likes.push(user_id);
+        sweet.save();
+        const data = {
+          State: false,
+          QuantityLike: sweet.likes.length
+        }
+        const dataAddNotify = {
+          userId:sweet.user_id,
+          content: "Đã thích bài viết của bạn.",
+        }
+        await createNotification(dataAddNotify);
+        return res.status(200).json(formatResponse(data, true, "Đã like bài viết!"));
+      } else {
+        sweet.likes.splice(user_id_In_List_Like_Sweet, 1);
+        sweet.save();
+        const data = {
+          State: true,
+          QuantityLike: sweet.likes.length
+        }
+        return res.status(200).json(formatResponse(data, true, "Bỏ thích bài viết thành công!"));
+      }  
+    }else if (share){
+      const user_id_In_List_Like_Share = share.likes.findIndex(userId => userId?.toString() === user_id.toString());
+      if (user_id_In_List_Like_Share === -1) {
+        share.likes.push(user_id);
+        share.save();
+        const data = {
+          State: false,
+          QuantityLike: share.likes.length
+        }
+        const dataAddNotify = {
+          userId:share.user_id,
+          content: "Đã thích bài viết của bạn.",
+        }
+        await createNotification(dataAddNotify);
+        return res.status(200).json(formatResponse(data, true, "Đã like bài Share!"));
+      } else {
+        share.likes.splice(user_id_In_List_Like_Share, 1);
+        share.save();
+        const data = {
+          State: true,
+          QuantityLike: share.likes.length
+        }
+        return res.status(200).json(formatResponse(data, true, "Bỏ thích bài Share thành công!"));
       }
-      const dataAddNotify = {
-        userId:sweet.user_id,
-        content: "Đã thích bài viết của bạn.",
-      }
-      await createNotification(dataAddNotify);
-      res.status(200).json(formatResponse(data, true, "Đã like bài viết!"));
-    } else {
-      sweet.likes.splice(user_id_In_List_Like_Sweet, 1);
-      sweet.save();
-      const data = {
-        State: true,
-        QuantityLike: sweet.likes.length
-      }
-      res.status(200).json(formatResponse(data, true, "Bỏ thích bài viết thành công!"));
+    }else{
+      console.log("Không thấy bài viết!");
+      return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết!"));
     }
-
 
   } catch (error) {
     console.log(error)
@@ -608,7 +640,7 @@ async function get_List_DisplayName_By_UserID(listUserID) {
     const displayName = await getDisplayName_By_ID(userID);
     if (displayName) {
       console.log("Tìm thấy UserID và có thể biết được DisplayName");
-      displayNameS.push(userID);
+      displayNameS.push(displayName);
     }
   }
   return displayNameS;
@@ -618,29 +650,44 @@ const get_List_User_To_Like = asyncHandle(async (req, res) => {
 
   const id_Sweet = req.query.SweetID;
   const sweet = await Sweet.findById(id_Sweet).populate('likes', 'displayName username');
+  const share = await Share.findById(id_Sweet).populate('likes', 'displayName username');
 
+  let quantityLike;
   try {
-    try {
-      if (!sweet) {
-        console.log("Không thấy bài viết!");
-        return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết!"));
+    if(sweet){
+      const sweetPresent = await get_Sweet_By_Id(id_Sweet);
+
+      const List_Userid_ToLike = sweetPresent.likes;
+  
+      const list_NameUser_ToLike = await get_List_DisplayName_By_UserID(List_Userid_ToLike);
+  
+      quantityLike = sweetPresent.likes.length;
+
+      const data = {
+        QuantityLike: quantityLike,
+        List_UserName_ToLike: list_NameUser_ToLike
       }
-    } catch (error) {
-      console.log("Lỗi khi lấy danh sách like", error);
-      return res.status(400).json(formatResponse(null, false, "Lỗi khi tìm bài viết!"));
+      return res.status(200).json(formatResponse(data, true, "Lấy danh sách User đã like Sweet thành công"));  
+    
+    }else if(share){
+      const sweetPresent = await get_Sweet_By_Id(id_Sweet);
+
+      const List_Userid_ToLike = sweetPresent.likes;
+  
+      const list_NameUser_ToLike = await get_List_DisplayName_By_UserID(List_Userid_ToLike);
+  
+      quantityLike = sweetPresent.likes.length;
+      
+      const data = {
+        QuantityLike: quantityLike,
+        List_UserName_ToLike: list_NameUser_ToLike
+      }
+      return res.status(200).json(formatResponse(data, true, "Lấy danh sách User đã like bài Share thành công"));
+    }else {
+      console.log("Không thấy bài viết!");
+      return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết!"));
     }
 
-    const sweetPresent = await get_Sweet_By_Id(id_Sweet);
-
-    const List_Userid_ToLike = sweetPresent.likes;
-
-    const list_NameUser_ToLike = await get_List_DisplayName_By_UserID(List_Userid_ToLike);
-
-    const data = {
-      List_UserName_ToLike: list_NameUser_ToLike
-    }
-
-    return res.status(200).json(formatResponse(data, true, "Lấy danh sách User đã like Sweet thành công"));
 
   } catch (error) {
     return res.status(400).json(formatResponse(null, false, "Lấy danh sách User đã like Sweet thất bại!"));
@@ -653,6 +700,7 @@ const get_List_User_To_Share = asyncHandle(async (req, res) => {
   const id_Sweet = req.query.SweetID;
   const sweet = await Sweet.findById(id_Sweet).populate("shares", "displayName username");
 
+  let quantityShare;
   try {
     try {
       if (!sweet) {
@@ -670,8 +718,11 @@ const get_List_User_To_Share = asyncHandle(async (req, res) => {
 
     const list_NameUser_ToShare = await get_List_DisplayName_By_UserID(List_Userid_ToShare);
 
+    quantityShare = sweetPresent.shares.length;
+
     const data = {
-      List_UserName_ToLike: list_NameUser_ToShare
+      QuantityShare: quantityShare,
+      List_UserName_ToShare: list_NameUser_ToShare
     }
 
     return res.status(200).json(formatResponse(data, true, "Lấy danh sách User đã Share Sweet thành công"));
@@ -753,6 +804,7 @@ async function get_Comment_Info_To_Sweet_OutStanding(list_CommentID) {
     const duration = await formatTimeDifference(moment(comment.created_at), moment())
 
     comment_Info.push({
+      _id: comment._id,
       DisplayName: userName,
       Content: comment.content,
       Image: comment.image,
@@ -771,24 +823,41 @@ const get_List_Comment_To_Sweet_OutStanding = asyncHandle(async (req, res) => {
 
   const id_Sweet = req.query.SweetID;
 
+  const sweet = await Sweet.findById(id_Sweet).populate("comments");
+  const share = await Share.findById(id_Sweet).populate("comments");
+
   try {
-    const sweet = await Sweet.findById(id_Sweet).populate("comments");
-
-    const list_Comment = sweet.comments;
-    const getComment = await get_Comment_Info_To_Sweet_OutStanding(list_Comment);
-
-    const data = {
-      QuantityComment: sweet.comments.length,
-      QuantityCommentGetOut: limitNumble,
-      List_UserName_ToComment: getComment.slice(skipNumble, skipNumble + limitNumble)
-    }
-
-    res.status(200).json(formatResponse(data, true, ""));
-
-  } catch (error) {
-    console.log("Lỗi khi lấy danh sách Comment của bài Share", error);
-    res.status(404).json(formatResponse("", false, "Lỗi khi lấy danh sách Comment của bài Share!"))
+    if(sweet){
+      const list_Comment = sweet.comments;
+      const getComment = await get_Comment_Info_To_Sweet_OutStanding(list_Comment);
+  
+      const data = {
+        QuantityComment: sweet.comments.length,
+        QuantityCommentGetOut: limitNumble,
+        List_UserName_ToComment: getComment.slice(skipNumble, skipNumble + limitNumble)
+      }
+  
+      return res.status(200).json(formatResponse(data, true, ""));
+  
+    }else if(share){
+      const list_Comment = share.comments;
+      const getComment = await get_Comment_Info_To_Sweet_OutStanding(list_Comment);
+  
+      const data = {
+        QuantityComment: share.comments.length,
+        QuantityCommentGetOut: limitNumble,
+        List_UserName_ToComment: getComment.slice(skipNumble, skipNumble + limitNumble)
+      }
+  
+      return res.status(200).json(formatResponse(data, true, ""));
+    }else return res.status(400).json(formatResponse("", false, "Không tìm thấy bài viết!!"));
+  
+  }catch (error) {
+      console.log("Lỗi khi lấy danh sách Comment của bài Share", error);
+      res.status(404).json(formatResponse("", false, "Lỗi khi lấy danh sách Comment của bài Share!"))
   }
+  
+    
 
 })
 
@@ -804,6 +873,7 @@ async function get_Comment_Info_To_Sweet_Recently(list_CommentID) {
     const duration = await formatTimeDifference(moment(comment.created_at), moment())
 
     comment_Info.push({
+      _id: comment._id,
       DisplayName: userName,
       Content: comment.content,
       Image: comment.image,
@@ -821,24 +891,38 @@ const get_List_Comment_To_Sweet_Recently = asyncHandle(async (req, res) => {
   let limitNumble = parseInt(req.query.limit) || 3;
 
   const id_Sweet = req.query.SweetID;
+  const sweet = await Sweet.findById(id_Sweet).populate("comments");
+  const share = await Share.findById(id_Sweet).populate("comments");
 
   try {
-    const sweet = await Sweet.findById(id_Sweet).populate("comments");
-
-    const list_Comment = sweet.comments;
-    const getComment = await get_Comment_Info_To_Sweet_Recently(list_Comment);
-
-    const data = {
-      QuantityComment: sweet.comments.length,
-      QuantityCommentGetOut: limitNumble,
-      List_UserName_ToComment: getComment.slice(skipNumble, skipNumble + limitNumble)
-    }
-
-    res.status(200).json(formatResponse(data, true, ""));
-
-  } catch (error) {
-    console.log("Lỗi khi lấy danh sách Comment của bài Share", error);
-    res.status(404).json(formatResponse("", false, "Lỗi khi lấy danh sách Comment của bài Share!"))
+    if(sweet){
+      const list_Comment = sweet.comments;
+      const getComment = await get_Comment_Info_To_Sweet_Recently(list_Comment);
+  
+      const data = {
+        QuantityComment: sweet.comments.length,
+        QuantityCommentGetOut: limitNumble,
+        List_UserName_ToComment: getComment.slice(skipNumble, skipNumble + limitNumble)
+      }
+  
+      return res.status(200).json(formatResponse(data, true, ""));
+  
+    }else if(share){
+      const list_Comment = share.comments;
+      const getComment = await get_Comment_Info_To_Sweet_Recently(list_Comment);
+  
+      const data = {
+        QuantityComment: share.comments.length,
+        QuantityCommentGetOut: limitNumble,
+        List_UserName_ToComment: getComment.slice(skipNumble, skipNumble + limitNumble)
+      }
+  
+      return res.status(200).json(formatResponse(data, true, ""));
+    }else return res.status(400).json(formatResponse("", false, "Không tìm thấy bài viết!!"));
+  
+  }catch (error) {
+      console.log("Lỗi khi lấy danh sách Comment của bài Share", error);
+      res.status(404).json(formatResponse("", false, "Lỗi khi lấy danh sách Comment của bài Share!"))
   }
 
 })
@@ -855,6 +939,7 @@ async function get_Comment_Info_To_Sweet_Furthest(list_CommentID) {
     const duration = await formatTimeDifference(moment(comment.created_at), moment())
 
     comment_Info.push({
+      _id: comment._id,
       DisplayName: userName,
       Content: comment.content,
       Image: comment.image,
@@ -871,25 +956,38 @@ const get_List_Comment_To_Sweet_Furthest = asyncHandle(async (req, res) => {
   let skipNumble = parseInt(req.query.skip) || 0;
   let limitNumble = parseInt(req.query.limit) || 3;
 
-  const id_Sweet = req.query.SweetID;
+  const sweet = await Sweet.findById(id_Sweet).populate("comments");
+  const share = await Share.findById(id_Sweet).populate("comments");
 
   try {
-    const sweet = await Sweet.findById(id_Sweet).populate("comments");
-
-    const list_Comment = sweet.comments;
-    const getComment = await get_Comment_Info_To_Sweet_Furthest(list_Comment);
-
-    const data = {
-      QuantityComment: sweet.comments.length,
-      QuantityCommentGetOut: limitNumble,
-      List_UserName_ToComment: getComment.slice(skipNumble, skipNumble + limitNumble)
-    }
-
-    res.status(200).json(formatResponse(data, true, ""));
-
-  } catch (error) {
-    console.log("Lỗi khi lấy danh sách Comment của bài Share", error);
-    res.status(404).json(formatResponse("", false, "Lỗi khi lấy danh sách Comment của bài Share!"))
+    if(sweet){
+      const list_Comment = sweet.comments;
+      const getComment = await get_Comment_Info_To_Sweet_Furthest(list_Comment);
+  
+      const data = {
+        QuantityComment: sweet.comments.length,
+        QuantityCommentGetOut: limitNumble,
+        List_UserName_ToComment: getComment.slice(skipNumble, skipNumble + limitNumble)
+      }
+  
+      return res.status(200).json(formatResponse(data, true, ""));
+  
+    }else if(share){
+      const list_Comment = share.comments;
+      const getComment = await get_Comment_Info_To_Sweet_Furthest(list_Comment);
+  
+      const data = {
+        QuantityComment: share.comments.length,
+        QuantityCommentGetOut: limitNumble,
+        List_UserName_ToComment: getComment.slice(skipNumble, skipNumble + limitNumble)
+      }
+  
+      return res.status(200).json(formatResponse(data, true, ""));
+    }else return res.status(400).json(formatResponse("", false, "Không tìm thấy bài viết!!"));
+  
+  }catch (error) {
+      console.log("Lỗi khi lấy danh sách Comment của bài Share", error);
+      res.status(404).json(formatResponse("", false, "Lỗi khi lấy danh sách Comment của bài Share!"))
   }
 
 })
@@ -916,7 +1014,6 @@ async function formatTimeDifference(fromDate, toDate) {
   }
 }
 
-
 const get_A_Sweet = asyncHandle(async (req, res) => {
   const sweetID = req.query.SweetID;
 
@@ -934,6 +1031,7 @@ const get_A_Sweet = asyncHandle(async (req, res) => {
 
     const comment = await Comment.find({ tweet_id: sweetID },
       {
+        _id: 1,
         user_id: 1,
         content: 1,
         image: 1,
@@ -951,6 +1049,10 @@ const get_A_Sweet = asyncHandle(async (req, res) => {
         ]
       })
 
+    const getComment = await get_Comment_Info_To_Sweet_OutStanding(comment);
+
+
+
     const now = moment();
 
     let data = "";
@@ -959,13 +1061,14 @@ const get_A_Sweet = asyncHandle(async (req, res) => {
       const durationByText_Sweet = await formatTimeDifference(createdAt_Sweet, now);
 
       data = {
+        _id: sweet._id,
         UserName: sweet.user_id,
         Content: sweet.content,
         Image: sweet.image,
         QuantityLike: sweet.likes.length,
         ListUserTolike: sweet.likes,
         QuantityComment: sweet.comments.length,
-        ListUserToComment: comment,
+        ListUserToComment: getComment,
         QuantityShare: sweet.shares.length,
         ListUserToShare: sweet.shares,
         CreateAt: moment(sweet.created_at).format(),
@@ -982,11 +1085,12 @@ const get_A_Sweet = asyncHandle(async (req, res) => {
       const durationByText_Sweet = await formatTimeDifference(sweet.created_at, now);
 
       data = {
+        _id: share._id,
         UserName: share.user_id,
         Content: share.content,
         Image: share.image,
 
-        SweetID: sweet.sweet_id,
+        SweetID: sweet._id,
         UserName_Origin: sweet.user_id,
         Duration_Origin: durationByText_Sweet,
         Content_Origin: sweet.content,
@@ -995,7 +1099,7 @@ const get_A_Sweet = asyncHandle(async (req, res) => {
         QuantityLike: share.likes.length,
         ListUserTolike: share.likes,
         QuantityComment: share.comments.length,
-        ListUserToComment: comment,
+        ListUserToComment: getComment,
         QuantityShare: share.shares.length,
         ListUserToShare: share.shares,
         CreateAt: moment(share.created_at).format(),
@@ -1009,6 +1113,105 @@ const get_A_Sweet = asyncHandle(async (req, res) => {
     return res.status(400).json(formatResponse(null, false, "Lấy bài viết thất bại!"));
   }
 })
+
+
+// const get_A_Sweet = asyncHandle(async (req, res) => {
+//   const sweetID = req.query.SweetID;
+
+//   const sweet = await Sweet.findById(sweetID)
+//     .populate('user_id', 'displayName username')
+//     .populate('likes', 'displayName username')
+//     .populate('shares', 'displayName username')
+
+//   const share = await Share.findById(sweetID)
+//     .populate('user_id', 'displayName username')
+//     .populate('likes', 'displayName username')
+//     .populate('shares', 'displayName username');
+
+//   try {
+
+//     const comment = await Comment.find({ tweet_id: sweetID },
+//       {
+//         _id: 1,
+//         user_id: 1,
+//         content: 1,
+//         image: 1,
+//         likes: 1,
+//         comment_reply: { user_id: 1, content: 1, image: 1, likes: 1, create_at: 1 },
+//         created_at: 1
+//       })
+//       .populate("user_id", "displayName username")
+//       .populate("likes", "displayName username")
+//       .populate({
+//         path: 'comment_reply',
+//         populate: [
+//           { path: 'user_id', select: 'displayName username' },
+//           { path: 'likes', select: 'displayName username' }
+//         ]
+//       })
+
+//     const now = moment();
+
+//     let data = "";
+//     if (sweet) {
+//       const createdAt_Sweet = moment(sweet.created_at);
+//       const durationByText_Sweet = await formatTimeDifference(createdAt_Sweet, now);
+
+//       data = {
+//         _id: sweet._id,
+//         UserName: sweet.user_id,
+//         Content: sweet.content,
+//         Image: sweet.image,
+//         QuantityLike: sweet.likes.length,
+//         ListUserTolike: sweet.likes,
+//         QuantityComment: sweet.comments.length,
+//         ListUserToComment: comment,
+//         QuantityShare: sweet.shares.length,
+//         ListUserToShare: sweet.shares,
+//         CreateAt: moment(sweet.created_at).format(),
+//         Duration: durationByText_Sweet,
+//       }
+//     } else if (share) {
+//       const createdAt_Share = moment(share.created_at);
+//       const durationByText_Share = await formatTimeDifference(createdAt_Share, now);
+
+//       const sweet = await Sweet.findById(share.sweet_id)
+//         .populate('user_id', 'displayName username')
+//         .populate('likes', 'displayName username')
+//         .populate('shares', 'displayName username');
+//       const durationByText_Sweet = await formatTimeDifference(sweet.created_at, now);
+
+//       data = {
+//         _id: share._id,
+//         UserName: share.user_id,
+//         Content: share.content,
+//         Image: share.image,
+
+//         SweetID: sweet._id,
+//         UserName_Origin: sweet.user_id,
+//         Duration_Origin: durationByText_Sweet,
+//         Content_Origin: sweet.content,
+//         Image_Origin: sweet.image,
+
+//         QuantityLike: share.likes.length,
+//         ListUserTolike: share.likes,
+//         QuantityComment: share.comments.length,
+//         ListUserToComment: comment,
+//         QuantityShare: share.shares.length,
+//         ListUserToShare: share.shares,
+//         CreateAt: moment(share.created_at).format(),
+//         Duration: durationByText_Share,
+//       }
+//     }
+
+//     return res.status(200).json(formatResponse(data, true, "Lấy bài viết theo id thành công!"));
+//   } catch (error) {
+//     console.error(error.message);
+//     return res.status(400).json(formatResponse(null, false, "Lấy bài viết thất bại!"));
+//   }
+// })
+
+
 
 const get_Many_sweet = asyncHandle(async (req, res) => {
   const skipNumble = req.query.skip || 0;
@@ -1209,7 +1412,7 @@ const get_Many_Sweet_And_Share_Following = asyncHandle((async (req, res) => {
 
       if (item instanceof Sweet) {
         return {
-          _id:item._id,
+          _id: item._id,
           UserName: item.user_id,
           Content: item.content,
           Image: item.image,
@@ -1221,7 +1424,7 @@ const get_Many_Sweet_And_Share_Following = asyncHandle((async (req, res) => {
         };
       } else {
         return {
-          _id:item._id,
+          _id: item._id,
           UserName: item.user_id,
           Content: item.content,
           Image: item.image,
@@ -1432,9 +1635,15 @@ const check_Sweet_Or_Share = asyncHandle(async (req, res) => {
   const share = await Share.findById(sweet_id);
   try {
     if (sweet) {
-      return res.status(200).json(formatResponse(true, true, `ID: ${sweet_id} là một Sweet!`));
+      const data = {
+        State: true
+      }
+      return res.status(200).json(formatResponse(data, true, `ID: ${sweet_id} là một Sweet!`));
     } else if (share) {
-      return res.status(200).json(formatResponse(false, true, `ID: ${sweet_id} là một Share!`));
+      const data = {
+        State: false
+      }
+      return res.status(200).json(formatResponse(data, true, `ID: ${sweet_id} là một Share!`));
     } else return res.status(400).json(formatResponse(null, false, `ID: ${sweet_id} không hợp lệ!`));
 
   } catch (error) {
