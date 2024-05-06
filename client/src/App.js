@@ -15,6 +15,7 @@ import NotificationPage from './pages/NotificationPage';
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 import { toast } from 'react-toastify';
 import { jwtDecode } from 'jwt-decode';
+import ProfilePage from './pages/ProfilePage';
 const client = W3CWebSocket('ws://localhost:8080');
 const App = () => {
   const token = localStorage.getItem("token");
@@ -49,8 +50,10 @@ const App = () => {
             <Route index element={<HomePage />} />
             <Route path="/notifications" element={<NotificationPage />} />
             <Route path="/status/:id" element={<SweetDetail />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="/profile/:id" element={<ProfilePage />} />
+           
           </Route>
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
     </Router>

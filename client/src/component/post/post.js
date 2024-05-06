@@ -10,9 +10,11 @@ import { CiLocationOn } from "react-icons/ci";
 import axiosClient from '../../authenticate/authenticationConfig';
 import SinglePost from '../SinglePost';
 import { toast } from 'react-toastify';
+import DialogShare from '../DialogShare';
 
-function Post() {
-  const [selectedTab, setSelectedTab] = useState('');
+function Post({isCreateShare}) {
+  const [selectedTab, setSelectedTab] = useState('For You');
+  const [isCreateShareSuccess, setIsCreateShareSuccess] = useState(false);
   const [sweetList, setSweetList] = useState([]);
   const [postSweetContent, setPostSweetContent] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
@@ -68,6 +70,24 @@ function Post() {
     }
   };
 
+  useEffect(() => {
+    setSelectedTab('For You');
+  }, []);
+
+  useEffect(() => {
+    setIsCreateShareSuccess(isCreateShare);
+  }, [isCreateShare]);
+
+  useEffect(() => {
+    fetchData();
+  }, [selectedTab, limit, skip, isCreateShareSuccess]);
+
+  useEffect(() => {
+    if(isCreateShareSuccess){
+      fetchData();
+    }
+  }, [isCreateShare]);
+
   const handleTabClick = (tab) => {
     setSelectedTab(tab);
   };
@@ -109,8 +129,10 @@ function Post() {
   }, [isNearBottom]);
 
   return (
-    <div className='homepage-post' >
-      <div className='post-type-sweet'>
+    <div className='homepage-post'>
+      {sweetList ? (
+        <div>
+          <div className='post-type-sweet'>
         <span className={selectedTab === 'For You' ? 'selected-tab' : ''} onClick={() => handleTabClick('For You')}>For you</span>
         <span className={selectedTab === 'Following' ? 'selected-tab' : ''} onClick={() => handleTabClick('Following')}>Following</span>
         
@@ -166,13 +188,23 @@ function Post() {
         </div>
       )} */}
       </div>
-      <div >
+
+      
+      {/* <div>
         {sweetList && sweetList.map((item, index) => (
           <div key={index} className='post-content'>
-            <SinglePost sweetData={item} />
+            <SinglePost sweetData={item} selectedTab={selectedTab} resetData={fetchData}/>
           </div>
         ))}
-      </div>
+      </div> */}
+
+      {sweetList && sweetList.map((item, index) => (
+    <div key={index} className='post-content'>
+        <SinglePost sweetData={item} selectedTab={selectedTab} resetData={fetchData} />
+    </div>
+))}
+        </div>
+      ):(null)}
 
     </div>
   );

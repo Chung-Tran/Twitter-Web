@@ -254,7 +254,7 @@ async function get_List_DisplayName_By_UserID(listUserID){
       const displayName = await getDisplayName_By_ID(userID);
       if (displayName) {
           console.log("Tìm thấy UserID và có thể biết được DisplayName");
-          displayNameS.push(userID);
+          displayNameS.push(displayName);
       }
     }
     return displayNameS;

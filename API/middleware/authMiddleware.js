@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const formatResponse = require('../common/ResponseFormat');
 const User = require('../model/User');
+const { connectRedis, addUserToListOnline } = require('../config/redisConfig'); 
 
 const secretKey = process.env.JWT_CODE;
 
@@ -18,7 +19,8 @@ const authenticationToken = async (req, res, next) => {
             userId: decodedToken.userId,
             email: decodedToken.email,
             displayName:decodedToken.displayName
-         }; 
+        }; 
+        addUserToListOnline(decodedToken.userId);
         next();
     } catch (err) {
         if (err.name === 'TokenExpiredError') {
@@ -48,6 +50,7 @@ const authenticationToken = async (req, res, next) => {
                     email: user.email,
                     displayName:user.displayName
                 }
+                addUserToListOnline( user._id.toString());
                 next();
             } catch (error) {
                 console.log(error)
@@ -58,5 +61,25 @@ const authenticationToken = async (req, res, next) => {
         }
     }
 }
+
+//Hàm mỗi lần req qua sẽ lưu thông tin người dùng đó vào list user online(redis) nếu như xác thực thành công
+// const addUserToListOnline = (userId) => {
+//     try {
+//         const redisClient = connectRedis();
+        
+//         // Thêm ID người dùng vào danh sách thành viên trực tuyến với thời gian tồn tại là 3 phút
+//         redisClient.sadd("online-users", userId, (err, reply) => {
+//             if (err) {
+//                 console.error('Error adding user to online list:', err);
+//                 return res.status(500).json({ error: 'Failed to add user to online list' });
+//             } else {
+//                 redisClient.expire("online-users", 180); 
+//                 next();
+//             }
+//         });
+//     } catch (error) {
+//         console.error('Error add user to list online:', error);
+//     }
+// }
 
 module.exports = authenticationToken;

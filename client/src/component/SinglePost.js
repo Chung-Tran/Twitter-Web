@@ -8,58 +8,120 @@ import { BsReverseListColumnsReverse } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import axiosClient from '../authenticate/authenticationConfig';
 import { toast } from 'react-toastify';
+import  Dialog  from '../component/Dialog'
+import DialogShare from './DialogShare';
 
-function SinglePost({ sweetData }) {
+function SinglePost({sweetData, selectedTab, resetData}) {
     const navigate = useNavigate();
     const handleGetSweetDetail = (_id) => {
-        navigate(`/status/${_id}`)
+        navigate(`/status/${_id}`, { state: { source: 'sweetDetail' } })
+    }
+
+    const handleGetListLike = (_id) => {
+        navigate(`/listLike/${_id}`, { state: { source: 'getListLike' } })
     }
 
     const [checkIsLiked, setCheckIsLiked] = useState(false);
     const [isLiked, setIsLiked] = useState(true);
     const [quantityLike, setQuantityLike] = useState(sweetData.QuantityLike); 
-    
-    const fetchLikeStatus = async () => {
+    const [showDialog, setShowDialog] = useState(false);
+    const [showDialogCreateShare, setShowDialogCreateShare] = useState(false);
+    const [getList, setGetList] = useState();
+    const [isShare, setIsShare] = useState(false)
+
+    const checkIsShare = async () => {
         try {
             if (sweetData && sweetData._id) {
-          const response = await axiosClient.get(`/sweet/checkUserLike?SweetID=${sweetData._id}`);
+          const response = await axiosClient.get(`/sweet/checkSweetOrShare?SweetID=${sweetData._id}`);
           if(response.data.isSuccess){
             if(response.data.data.State){
-                setIsLiked(true);
+                setIsShare(false);
             }else {
-                setIsLiked(false);
+                setIsShare(true);
             }
         }}
 
         } catch (error) {
           toast.error(error.response?.data.errorMessage ?? "Unexpected error");
         }
-      };
+    };
+
+    useEffect(() => {
+        checkIsShare();
+        
+    }, [selectedTab, sweetData._id]); 
+  
+    const fetchLikeStatus = async () => {
+        try {
+            if (sweetData && sweetData._id) {
+                const response = await axiosClient.get(`/sweet/checkUserLike?SweetID=${sweetData._id}`);
+                if (response.data.isSuccess) {
+                    if (response.data.data.State) {
+                        setIsLiked(true);
+                    } else {
+                        setIsLiked(false);
+                    }
+                }
+            }
+
+        } catch (error) {
+            toast.error(error.response?.data.errorMessage ?? "Unexpected error");
+        }
+    };
 
     useEffect(() => {
       fetchLikeStatus();
-    }, [sweetData._id]); // Khi sweetData._id thay đổi, useEffect sẽ được gọi lại để kiểm tra lại trạng thái like
+    }, [selectedTab, sweetData._id]); 
 
+
+    // useEffect(()=>{
+    //     resetData();
+    //   }, [showDialogCreateShare]);
+
+    const handleCreateShareClick = () => {
+        setShowDialogCreateShare(true);
+    };
+
+    const handleShowDialogCreateShare = (value) => {
+        setShowDialogCreateShare(value);
+    };
     
+    const handleGetListShareClick = () => {
+        setShowDialog(true);
+        setGetList(true);
+    };
+
+    const handleGetListLikeClick = () => {
+        setShowDialog(true);
+        setGetList(false);
+    };
+
+    const handleShowDialog = (value) => {
+        setShowDialog(value);
+    };
+
     const likeSweetHandle = async () => {
         try {
             const response = await axiosClient.put(`/sweet/addOrDeleleLike/${sweetData._id}`);
-            if(response.data.isSuccess){
-                if(response.data.data.State){
+            
+            if (response.data.isSuccess) {
+                if (response.data.data.State) {
                     setIsLiked(false);
-                }else{
+                } else {
                     setIsLiked(true);
                 }
                 setCheckIsLiked(response.data.isSuccess);
 
                 setQuantityLike(response.data.data.QuantityLike);
-                
+
             }
 
         } catch (error) {
             toast.error(error.response?.data.errorMessage ?? "Unexpected error");
         }
     }
+
+    
     /*const likeSweetHandle = () => {
         axiosClient.put(`/sweet/addOrDeleleLike/${sweetData._id}`)
             .then(response => {
@@ -79,31 +141,62 @@ function SinglePost({ sweetData }) {
             });
     };*/
 
-
     // useEffect(() => {
     //     likeSweetHandle();
     // }, [sweetData._id])
 
-  
+
 
     return (
         <div className='single-post' >
-            <div className='user-info'>
+            <div className='user-info' onClick={() => handleGetSweetDetail(sweetData._id)}>
                 <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
                 <div className='info-content'>
                     <div className='user-info-name'>
-                        <span>{ sweetData.UserName.displayName}</span>
-                        <span>{ sweetData.UserName.username}</span>
+                        <span>{sweetData.UserName.displayName}</span>
+                        <span>{sweetData.UserName.username}</span>
                     </div>
                     <span className='post-createdAt'>{sweetData.Duration}</span>
 
                 </div>
 
             </div>
+            
             <div className='single-post-content'>
                 <div className='text-content' onClick={() => handleGetSweetDetail(sweetData._id)}>
                     <span >{sweetData.Content}</span>
                 </div>
+                
+                {isShare === true ? (
+                    <div className='post-share' onClick={() => handleGetSweetDetail(sweetData.SweetID)}> 
+                        <div className='user-info'>
+                            <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
+                            <div className='info-content'>
+                            <div className='user-info-name'>
+                                <span>{sweetData.UserName_Origin.displayName}</span>
+                                <span>{sweetData.UserName_Origin.username}</span>
+                            </div>
+                            <span className='post-createdAt'>{sweetData.Duration_Origin}</span>
+                            </div>
+                        </div>
+
+                        <div className='single-post-content'> 
+                            <div className='text-content' onClick={() => handleGetSweetDetail(sweetData._id)}>
+                                <span >{sweetData.Content_Origin}</span>
+                            </div>
+
+                            <div className='image-content' onClick={() => handleGetSweetDetail(sweetData._id)}>
+                            { sweetData.Image_Origin && sweetData.Image_Origin.map((item, index) => (
+                                <img src={item} />
+                                ))
+                            }
+                            </div>
+                        </div>
+                    </div>  
+                
+
+                ) : (null)}
+
                 <div className='image-content' onClick={() => handleGetSweetDetail(sweetData._id)}>
                     {
                         sweetData.Image && sweetData.Image.map((item, index) => (
@@ -111,35 +204,33 @@ function SinglePost({ sweetData }) {
                         ))
                     }
                 </div>
+
                 <div className='react-content'>
                     <ul>
                         <li onClick={() => handleGetSweetDetail(sweetData._id)}><FaRegComment /> &nbsp; { sweetData.QuantityComment}</li>
-                        <li onClick={() => handleGetSweetDetail(sweetData._id)}><GiRapidshareArrow/> &nbsp;  {sweetData.QuantityLike}</li>
-                        <li>     <AiOutlineHeart
-        //                 style={{ color: (isLiked) ? 'red' : 'white' , cursor: 'pointer' }}
-        onClick={()=>likeSweetHandle()}
-        style={{ color: isLiked ? 'red' : 'white', cursor: 'pointer' }}
-        
-        // onClick={(sweetData && sweetData._id) ?
-        //     likeSweetHandle():
-         
-        //     console.error("Sweet data or sweet ID is invalid.")
-        // }
-        
-      />
-
-                            
-        {/* onClick={()=>likeSweetHandle()}
-        style={{ color: isLiked ? 'red' : 'white', cursor: 'pointer' }} */}
-      
-        &nbsp;
-        {quantityLike}
-      </li>
-                        {/* <li><AiOutlineHeart onClick={()=>likeSweetHandle()}/> &nbsp; { sweetData.QuantityLike}</li> */}
+                        <li><GiRapidshareArrow 
+                                onClick={() => handleCreateShareClick(sweetData._id)}
+                            /> 
+                            {!isShare ? (
+                            <span onClick={handleGetListShareClick}>&nbsp; {sweetData.QuantityShare}</span> ) 
+                            : (null)}
+                        </li>
+                        
+                        <li ><AiOutlineHeart
+                                onClick={()=>likeSweetHandle()}
+                                style={{ color: isLiked ? 'red' : 'white', cursor: 'pointer' }}
+                            />      
+                            <span onClick={handleGetListLikeClick}>&nbsp; {quantityLike}</span>
+                        </li>
                         
                         <li onClick={() => handleGetSweetDetail(sweetData._id)}><BsReverseListColumnsReverse/> &nbsp; {835}</li>
                     </ul>
                 </div>
+
+                {showDialog && <Dialog sweet = {sweetData} getList={getList} onCloseDialog={handleShowDialog}/>}
+
+                {showDialogCreateShare && <DialogShare sweet = {sweetData} onCloseDialog={handleShowDialogCreateShare}/>}
+
             </div>
         </div>
     )

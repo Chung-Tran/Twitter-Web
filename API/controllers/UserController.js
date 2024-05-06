@@ -1,7 +1,10 @@
 const asyncHandle = require('express-async-handler')
 const User = require('../model/User');
+const Sweet = require('../model/Sweet');
 const formatResponse = require('../common/ResponseFormat');
-
+const { getUsersOnline } = require('../config/redisConfig');
+const { createNotification } = require('./NotifyController');
+const {ObjectId} = require('mongodb')
 const editUser = asyncHandle(async (req, res) => {
     const userId = req.user.userId;
     const email = req.user.email;
@@ -49,13 +52,21 @@ const addFollowUser = asyncHandle(async (req, res) => {
             user.following.push(followUserId);
             await followUser.save();
             await user.save();
+            //Tạo notify
+            const dataAddNotify = {
+                userId: followUser._id,
+                content: `${req.user.displayName} đã theo dõi bạn.`,
+                relateTo: userId,
+            }
+
+            await createNotification(dataAddNotify);
             //Trả về dữ liệu
             const data = {
                 userId: user._id,
                 following: user.following.length,
                 followUser: user.followers.length,
                 message: "Follow user successfully",
-                action:"follow"
+                action: "follow"
             }
             res.status(200).json(formatResponse(data, true, ""));
         } else {
@@ -69,7 +80,7 @@ const addFollowUser = asyncHandle(async (req, res) => {
                 following: user.following.length,
                 followUser: user.followers.length,
                 message: "Unfollow user successfully",
-                action:"unfollow"
+                action: "unfollow"
             }
             res.status(200).json(formatResponse(data, true, ""));
         }
@@ -85,34 +96,36 @@ const getUser = asyncHandle(async (req, res) => {
         const id = req.params.id;
         // Query the database to find the user by id
         const user = await User.findById(id);
-
+        const sweetList=await Sweet.find({user_id: user?._id})
         // Check if user exists
         if (!user) {
             return res.status(404).json(formatResponse(null, false, "User not found"));
         }
         const data = {
             userId: user._id,
-                following: user.following.length,
-                followUser: user.followers.length,
-                userName: user.username,
-                displayName: user.displayName,
-                bio: user.bio,
-                dob: user.dob,
+            following: user.following.length,
+            followUser: user.followers.length,
+            userName: user.username,
+            displayName: user.displayName,
+            bio: user.bio ?? "",
+            dob: user.dob ?? "",
+            createdAt:user.created_at.toLocaleDateString(),
+            statusList:sweetList
 
         }
         return res.status(200).json(formatResponse(data, true, ""));
-        
+
     } catch (error) {
         console.error(error);
         res.status(500).json(formatResponse(null, false, "Internal Server Error"));
     }
 });
 
-const searchUser = asyncHandle( async (req, res) => {
-    
+const searchUser = asyncHandle(async (req, res) => {
+
     const email = req.query.email;
     const username = req.query.username;
-    console.log(email,username)
+    console.log(email, username)
 
     const searchKeyWord = await User.find({
         $or: [
@@ -122,13 +135,13 @@ const searchUser = asyncHandle( async (req, res) => {
     });
 
     try {
-        if(searchKeyWord.length > 0){
+        if (searchKeyWord.length > 0) {
             const data = {
                 QuantityResult: searchKeyWord.length,
                 InFo_User: searchKeyWord
             }
             return res.status(200).json(formatResponse(data, true, "Tìm kiếm thành công!!"))
-        }else return res.status(400).json(formatResponse("", false, "Không tìm thấy User!!"))
+        } else return res.status(400).json(formatResponse("", false, "Không tìm thấy User!!"))
 
     } catch (error) {
         console.error("Lỗi khi tìm kiếm: ", error.message);
@@ -138,6 +151,7 @@ const searchUser = asyncHandle( async (req, res) => {
 
 const getListUserUnFollow = asyncHandle(async (req, res) => {
     const user_id = req.user.userId;
+    console.log('userId',user_id)
     //const user_id = req.query.UserID;
 
     // Lấy người dùng hiện tại
@@ -151,11 +165,30 @@ const getListUserUnFollow = asyncHandle(async (req, res) => {
     try {
         return res.status(200).json(formatResponse(usersNotFollowing, true, "Lấy danh sách người dùng chưa follow thành công!!"))
     } catch (error) {
-        console.error("Lỗi Lấy danh sách người dùng chưa Follow: ", error.message);
-        return res.status(400).json(formatResponse("", false, "Lỗi khi Lấy danh sách người dùng chưa Follow!!"));
+        return res.status(400).json(formatResponse("", false, "Lỗi khi Lấy danh sách người dùng liên quan!"));
     }
-})
+});
+
+//API lấy user đang follow và đang online
+const getListUserOnline = asyncHandle(async (req, res) => {
+    const userId = req.user.userId;
+    console.log(userId)
+    try {
+        // Lấy danh sách người dùng đang online
+        const onlineUsers = await getUsersOnline();
+
+        const userFollowing = await User.findById(userId).populate('following', 'displayName username _id');
+        console.log('userFollow',userFollowing)
+
+        // Lọc danh sách người dùng đang online mà cũng được theo dõi bởi người dùng hiện tại
+        const followingOnlineUsers = userFollowing.following.filter(user => onlineUsers.includes(user?._id.toString()));
+
+        return res.status(200).json(formatResponse(followingOnlineUsers, true, "Lấy danh sách người dùng đang online thành công!!"));
+    } catch (error) {
+        console.error("Lỗi lấy danh sách người dùng đang online: ", error.message);
+        return res.status(400).json(formatResponse("", false, "Lỗi khi lấy danh sách người dùng đang online!!"));
+    }
+});
 
 
-
-module.exports = {editUser, addFollowUser,getUser, searchUser, getListUserUnFollow}
+module.exports = { editUser, addFollowUser, getUser, searchUser, getListUserUnFollow, getListUserOnline }
