@@ -500,7 +500,6 @@ const add_OR_Delete_User_To_List_Like_Sweet = asyncHandle(async (req, res) => {
 
   const sweet = await Sweet.findById(sweet_id);
   if (!sweet) {
-    console.log("Không thấy bài viết!");
     return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết!"));
   }
 

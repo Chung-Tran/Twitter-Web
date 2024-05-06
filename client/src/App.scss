@@ -1368,3 +1368,110 @@
 
 
 }
+.profile-container{
+  width: 100%;
+  height: auto;
+  border: 1px solid #393737;
+  border-top: none;
+  border-bottom: none;
+  padding: 0 10px;
+  .profile-page-header{
+    display: flex;
+    .header-title{
+      display: flex;
+      flex-direction: column;
+      span{
+      font-size: 22px;
+      font-family: 'font-medium';
+      &:last-child{
+        font-size: 12px;
+        color: rgb(49, 48, 48);
+        font-family: 'font-regular';
+      }
+      }
+    }
+  }
+  .user-profile-container{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    .profile-avatar{
+      width: 100%;
+      .cover-images{
+        width: 100%;
+        img{
+          width: 100%;
+          object-fit: cover;
+          
+        }
+      }
+      .avatar-image{
+        display: flex;
+        justify-content:space-between;
+        height: fit-content;
+        margin-top: -40px;
+        img{
+          border-radius: 50%;
+          width: 50px;
+
+        }
+        button{
+          margin-top: 50%;
+          border-radius: 20px;
+          font-size: 18px;
+          font-family: 'font-medium';
+        }
+      }
+
+      
+    }
+    .profile-user-info{
+      display: flex;
+      flex-direction: column;
+      .username{
+        display: flex;
+      flex-direction: column;
+        span{
+          font-size: 22px;
+          font-family: 'font-medium';
+          &:last-child{
+            font-size: 12px;
+            color: rgb(49, 48, 48);
+            font-family: 'font-regular';
+          }
+          }
+      }
+      ul{
+        display: flex;
+        flex-direction: column;
+        list-style: none;
+        font-size: 17px;
+        #profile-desc{
+          
+        }
+        #profile-join-time{
+
+        }
+        ul{
+          flex-direction: row;
+          list-style: none;
+
+        }
+      }
+    }
+  }
+  .style-show-profile{
+    width: 100%;
+    ul{
+      display: flex;
+      flex-direction: row;
+      list-style: none;
+      justify-content: space-between;
+      li{
+        font-size: 18px;
+        
+      }
+    }
+  }
+}

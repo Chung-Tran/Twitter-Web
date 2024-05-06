@@ -17,43 +17,46 @@ function SinglePost({ sweetData }) {
 
     const [checkIsLiked, setCheckIsLiked] = useState(false);
     const [isLiked, setIsLiked] = useState(true);
-    const [quantityLike, setQuantityLike] = useState(sweetData.QuantityLike); 
-    
+    const [quantityLike, setQuantityLike] = useState(sweetData.QuantityLike);
+
     const fetchLikeStatus = async () => {
         try {
             if (sweetData && sweetData._id) {
-          const response = await axiosClient.get(`/sweet/checkUserLike?SweetID=${sweetData._id}`);
-          if(response.data.isSuccess){
-            if(response.data.data.State){
-                setIsLiked(true);
-            }else {
-                setIsLiked(false);
+                const response = await axiosClient.get(`/sweet/checkUserLike?SweetID=${sweetData._id}`);
+                if (response.data.isSuccess) {
+                    if (response.data.data.State) {
+                        setIsLiked(true);
+                    } else {
+                        setIsLiked(false);
+                    }
+                }
             }
-        }}
 
         } catch (error) {
-          toast.error(error.response?.data.errorMessage ?? "Unexpected error");
+            toast.error(error.response?.data.errorMessage ?? "Unexpected error");
         }
-      };
+    };
 
     useEffect(() => {
-      fetchLikeStatus();
+        fetchLikeStatus();
     }, [sweetData._id]); // Khi sweetData._id thay đổi, useEffect sẽ được gọi lại để kiểm tra lại trạng thái like
 
-    
+
     const likeSweetHandle = async () => {
         try {
+            console.log('sweet id',sweetData._id)
             const response = await axiosClient.put(`/sweet/addOrDeleleLike/${sweetData._id}`);
-            if(response.data.isSuccess){
-                if(response.data.data.State){
+            
+            if (response.data.isSuccess) {
+                if (response.data.data.State) {
                     setIsLiked(false);
-                }else{
+                } else {
                     setIsLiked(true);
                 }
                 setCheckIsLiked(response.data.isSuccess);
 
                 setQuantityLike(response.data.data.QuantityLike);
-                
+
             }
 
         } catch (error) {
@@ -84,7 +87,7 @@ function SinglePost({ sweetData }) {
     //     likeSweetHandle();
     // }, [sweetData._id])
 
-  
+
 
     return (
         <div className='single-post' >
@@ -92,8 +95,8 @@ function SinglePost({ sweetData }) {
                 <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
                 <div className='info-content'>
                     <div className='user-info-name'>
-                        <span>{ sweetData.UserName.displayName}</span>
-                        <span>{ sweetData.UserName.username}</span>
+                        <span>{sweetData.UserName.displayName}</span>
+                        <span>{sweetData.UserName.username}</span>
                     </div>
                     <span className='post-createdAt'>{sweetData.Duration}</span>
 
@@ -113,31 +116,31 @@ function SinglePost({ sweetData }) {
                 </div>
                 <div className='react-content'>
                     <ul>
-                        <li onClick={() => handleGetSweetDetail(sweetData._id)}><FaRegComment /> &nbsp; { sweetData.QuantityComment}</li>
-                        <li onClick={() => handleGetSweetDetail(sweetData._id)}><GiRapidshareArrow/> &nbsp;  {sweetData.QuantityLike}</li>
+                        <li onClick={() => handleGetSweetDetail(sweetData._id)}><FaRegComment /> &nbsp; {sweetData.QuantityComment}</li>
+                        <li onClick={() => handleGetSweetDetail(sweetData._id)}><GiRapidshareArrow /> &nbsp;  {sweetData.QuantityLike}</li>
                         <li>     <AiOutlineHeart
-        //                 style={{ color: (isLiked) ? 'red' : 'white' , cursor: 'pointer' }}
-        onClick={()=>likeSweetHandle()}
-        style={{ color: isLiked ? 'red' : 'white', cursor: 'pointer' }}
-        
-        // onClick={(sweetData && sweetData._id) ?
-        //     likeSweetHandle():
-         
-        //     console.error("Sweet data or sweet ID is invalid.")
-        // }
-        
-      />
+                            //                 style={{ color: (isLiked) ? 'red' : 'white' , cursor: 'pointer' }}
+                            onClick={() => likeSweetHandle()}
+                            style={{ color: isLiked ? 'red' : 'white', cursor: 'pointer' }}
 
-                            
-        {/* onClick={()=>likeSweetHandle()}
+                        // onClick={(sweetData && sweetData._id) ?
+                        //     likeSweetHandle():
+
+                        //     console.error("Sweet data or sweet ID is invalid.")
+                        // }
+
+                        />
+
+
+                            {/* onClick={()=>likeSweetHandle()}
         style={{ color: isLiked ? 'red' : 'white', cursor: 'pointer' }} */}
-      
-        &nbsp;
-        {quantityLike}
-      </li>
+
+                            &nbsp;
+                            {quantityLike}
+                        </li>
                         {/* <li><AiOutlineHeart onClick={()=>likeSweetHandle()}/> &nbsp; { sweetData.QuantityLike}</li> */}
-                        
-                        <li onClick={() => handleGetSweetDetail(sweetData._id)}><BsReverseListColumnsReverse/> &nbsp; {835}</li>
+
+                        <li onClick={() => handleGetSweetDetail(sweetData._id)}><BsReverseListColumnsReverse /> &nbsp; {835}</li>
                     </ul>
                 </div>
             </div>

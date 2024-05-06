@@ -9,8 +9,8 @@ const createNotification = async (notificationData) => {
         const tweetId = notificationData?.tweetId;
         
         const existingNotification = await Notification.findOne({ tweetId: tweetId });
-        
-        if (existingNotification) {
+        console.log('check in notify')
+        if (existingNotification && existingNotification.content != notificationData.content) {
             // Nếu đã tồn tại, cập nhật nội dung thông báo
             existingNotification.content = notificationData.content;
             await existingNotification.save();
