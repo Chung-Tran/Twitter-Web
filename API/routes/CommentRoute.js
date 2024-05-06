@@ -7,6 +7,7 @@ const UploadImageMiddleware = require('../middleware/UploadImageMiddleware');
 const { create_Comment, 
         update_Comment, 
         delete_Comment, 
+        check_User_Like_Comment,
         add_OR_Delete_User_To_List_Like_Comment,
         get_List_User_To_Like_Comment,
         get_History_Update_Comment,
@@ -24,6 +25,7 @@ router.put('/updateComment/:CommentID', UploadImageMiddleware.array('image'), up
 router.get('/getListHistoryUpdate', get_History_Update_Comment);
 router.delete('/deleteComment/:CommentID', delete_Comment);
 
+router.get('/checkLikeComment', check_User_Like_Comment);
 router.put('/likeComment/:CommentID', add_OR_Delete_User_To_List_Like_Comment);
 router.get('/getListlikeComment', get_List_User_To_Like_Comment);
 

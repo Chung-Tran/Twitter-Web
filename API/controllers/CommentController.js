@@ -198,14 +198,18 @@ const get_History_Update_Comment = asyncHandle(async (req, res) => {
   }
 
   let list_History_Update = [];
+  const now = moment();
+  
+  for (let i = edit_historys.length - 1; i >= 0; i--) {
+    const content = edit_historys[i].content;
+    const images = edit_historys[i].images;
+    const updated_at = moment(edit_historys[i].updated_at);
+    const durationByText = await formatTimeDifference(updated_at, now);
 
-  edit_historys.forEach(edit_history => {
-    const content = edit_history.content;
-    const images = edit_history.images.map(image => image.toString());
-    const updated_at = moment(edit_history.updated_at).format();
+    list_History_Update.push({Content: content,Image: images, Duration: durationByText, UpdateAt: moment(updated_at).format("HH:mm - DD/MM/YYYY")});
+  }
 
-    list_History_Update.push({ Content: content, Image: images, UpdateAt: updated_at });
-  });
+  
 
   const data = {
     UpdateNumber: edit_historys.length,
@@ -295,7 +299,41 @@ const delete_Comment = asyncHandle(async (req, res) => {
   return res.status(200).json(formatResponse(data, true, "Xóa Comment thành công!!"));
 })
 
-const add_OR_Delete_User_To_List_Like_Comment = asyncHandle(async (req, res) => {
+const check_User_Like_Comment = asyncHandle(async (req, res) => {
+  const comment_id = req.query.CommentID;
+  const user_id = req.user.userId
+  // const user_id = req.query.userId
+
+  try {
+    const comment = await Comment.findById(comment_id);
+    
+    if (comment) {
+      const user_id_In_List_Like_Comment = comment && comment.likes && comment.likes.findIndex(userId => userId && userId.toString() === user_id);
+
+      if (user_id_In_List_Like_Comment !== -1) {
+        const data = {
+          State: true,
+          QuantityLike: comment.likes
+        }
+        return res.status(200).json(formatResponse(data, true, "Người dùng đang like Comment!"));
+      }
+      else {
+        const data = {
+          State: false,
+          QuantityLike: comment.likes
+        }
+        return res.status(200).json(formatResponse(data, true, "Người dùng chưa like Comment!"));
+      }
+    }else return res.status(400).json(formatResponse(null, false, "Không tìm thấy Comment!"));
+
+  } catch (error) {
+    console.error("Lỗi: ", error.message)
+    res.status(404).json(formatResponse(null, false, "Lỗi khi tương tác với Comment"));
+  }
+
+});
+
+const add_OR_Delete_User_To_List_Like_Comment = asyncHandle(async(req,res) =>{
   const comment_id = req.params.CommentID;
   const user_id = req.user.userId
   //const user_id = req.body.user_id;
@@ -309,13 +347,15 @@ const add_OR_Delete_User_To_List_Like_Comment = asyncHandle(async (req, res) => 
       comment.likes.push(user_id);
       comment.save();
       const data = {
+        State: false,
         QuantityLike: comment.likes.length
       }
       return res.status(200).json(formatResponse(data, true, "Đã like comment!"));
-    } else if (user_id_In_List_Like_Comment === 1) {
+    }else {
       comment.likes.splice(user_id_In_List_Like_Comment, 1);
       comment.save();
       const data = {
+        State: true,
         QuantityLike: comment.likes.length
       }
       return res.status(200).json(formatResponse(data, true, "Bỏ thích comment thành công!"));
@@ -350,13 +390,14 @@ const get_List_User_To_Like_Comment = asyncHandle(async (req, res) => {
       const userID = List_Userid_ToLike[i];
       const displayName = await getDisplayName_By_ID(userID);
       if (displayName) {
-        console.log("Tìm thấy UserID và có thể biết được DisplayName");
-        displayNameS.push(userID);
+          console.log("Tìm thấy UserID và có thể biết được DisplayName");
+          displayNameS.push(displayName);
       }
     }
 
 
     const data = {
+      QuantityLike: comment.likes.length,
       List_UserName_ToLike: displayNameS
     }
 
@@ -464,34 +505,36 @@ const get_List_User_To_Like_ReplyComment = asyncHandle(async (req, res) => {
     })
 
   const replyComment = comment.comment_reply;
-
-  try {
-    if (!comment || !replyComment) {
-      console.log("Không thấy comment!");
-      return res.status(400).json(formatResponse(null, false, "Không tìm thấy Comment!"));
-    }
-    else {
-      replyComment.forEach(rc => {
-        if (rc._id.toString() === replyComment_id) {
-          const List_Userid_ToLike = rc.likes;
-          const List_Userid_ToLikeSort = [];
-          for (let i = List_Userid_ToLike.length - 1; i >= 0; i--) {
-            const userID = List_Userid_ToLike[i];
-            List_Userid_ToLikeSort.push(userID);
-          }
-          const data = {
-            List_UserName_ToLike: List_Userid_ToLikeSort
-          }
-          return res.status(200).json(formatResponse(data, true, "Lấy danh sách User đã like Reply Comment thành công"));
+  
+      try {
+        if(!comment || !replyComment){
+          console.log("Không thấy comment!");
+          return res.status(400).json(formatResponse(null, false, "Không tìm thấy Comment!"));
         }
-      });
-    }
-  } catch (error) {
-    console.error("Lỗi khi lấy danh sách like", error.message);
-    return res.status(400).json(formatResponse(null, false, "Lỗi khi tìm Comment!"));
-  }
-
-
+        else{
+          replyComment.forEach( async rc => {
+            if(rc._id.toString() === replyComment_id){
+              const List_Userid_ToLike = rc.likes;
+              const List_Userid_ToLikeSort = [];
+              for (let i = List_Userid_ToLike.length - 1; i >= 0; i--) {
+                const userID = List_Userid_ToLike[i];
+                const displayNameS = await getDisplayName_By_ID(userID);
+                List_Userid_ToLikeSort.push(displayNameS);
+              }            
+              const data = {
+                QuantityLike: List_Userid_ToLike.length,
+                List_UserName_ToLike: List_Userid_ToLikeSort
+              }
+              return res.status(200).json(formatResponse(data, true, "Lấy danh sách User đã like Reply Comment thành công"));     
+            }
+          });
+        }
+      } catch (error) {   
+        console.error("Lỗi khi lấy danh sách like", error.message);
+        return res.status(400).json(formatResponse(null, false, "Lỗi khi tìm Comment!"));
+      }
+  
+  
 });
 
 const update_ReplyComment = asyncHandle(async (req, res) => {
@@ -670,23 +713,23 @@ async function formatTimeDifference(fromDate, toDate) {
 
   const duration = moment.duration(toDate.diff(fromDate));
 
-  if (duration.asMinutes() < 1) {
-    return 'Vừa xong';
-  } else if (duration.asHours() < 1) {
-    const minutes = Math.floor(duration.asMinutes());
-    return `${minutes} phút trước`;
-  } else if (duration.asDays() < 1) {
-    const hours = Math.floor(duration.asHours());
-    return `${hours} giờ trước`;
-  } else if (duration.asDays() < 7) {
-    const days = Math.floor(duration.asDays());
-    return `${days} ngày trước`;
-  } else {
-    // Nếu lớn hơn 7 ngày, hiển thị số tuần
-    // const weeks = Math.floor(duration.asDays() / 7);
-    // return `${weeks} tuần trước`;
-    return moment(fromDate).format();
-  }
+    if (duration.asMinutes() < 1) {
+        return 'Vừa xong';
+    } else if (duration.asHours() < 1) {
+        const minutes = Math.floor(duration.asMinutes());
+        return `${minutes} phút trước`;
+    } else if (duration.asDays() < 1) {
+        const hours = Math.floor(duration.asHours());
+        return `${hours} giờ trước`;
+    } else if (duration.asDays() < 7) {
+        const days = Math.floor(duration.asDays());
+        return `${days} ngày trước`;
+    } else {
+        // Nếu lớn hơn 7 ngày, hiển thị số tuần
+        // const weeks = Math.floor(duration.asDays() / 7);
+        // return `${weeks} tuần trước`;
+        return moment(fromDate).format("DD/MM/YYYY - HH:mm");
+    }
 }
 
 
@@ -723,8 +766,8 @@ const get_List_ReplyComment = asyncHandle(async (req, res) => {
 
 
       replyCommentS.push({
-        UserName: rc.user_id,
-        Content: rc.content,
+        UserName: await getDisplayName_By_ID(rc.user_id), 
+        Content: rc.content, 
         Image: rc.image,
         CreateAt: duration,
         QuantityLike: quantityLike,
@@ -747,13 +790,13 @@ const get_List_ReplyComment = asyncHandle(async (req, res) => {
 
 
 
-module.exports = {
-  create_Comment,
-  update_Comment,
-  get_History_Update_Comment,
-  delete_Comment,
-  add_OR_Delete_User_To_List_Like_Comment,
-  get_List_User_To_Like_Comment,
+module.exports = {create_Comment, 
+                  update_Comment, 
+                  get_History_Update_Comment,
+                  delete_Comment, 
+                  check_User_Like_Comment,
+                  add_OR_Delete_User_To_List_Like_Comment, 
+                  get_List_User_To_Like_Comment,
 
   create_ReplyComment,
   update_ReplyComment,
