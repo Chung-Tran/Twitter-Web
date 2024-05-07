@@ -6,6 +6,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axiosClient from '../authenticate/authenticationConfig';
 import SinglePost from '../component/SinglePost';
+import SweetInProfile from '../component/SweetInProfile';
 import { BiMessageDots } from "react-icons/bi";
 function ProfilePage() {
     const { id } = useParams();
@@ -33,7 +34,8 @@ function ProfilePage() {
         navigate(`/messages/${id}`)
     }
         return userInfo && (
-            <div className='profile-container'>
+            <div className='profile-container' >
+                    
                 <div className='profile-page-header'>
                     <span><IoArrowBackSharp /></span>
                     <div className='header-title'>
@@ -82,8 +84,19 @@ function ProfilePage() {
                         ))} */}
                         
                     </div>
+
+                    <div style={{marginTop: 20, marginLeft: 20}}>
+                   
+                   {< SweetInProfile user_id = {id}/>}
+
+               </div>
+                   
                 </div>
 
+                
+
+                
+                
             </div>
         )
     }

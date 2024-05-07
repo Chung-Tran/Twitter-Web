@@ -53,21 +53,21 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
     }, [selectedTab]); 
   
     const fetchLikeStatus = async () => {
-        // try {
-        //     if (sweetData && sweetData._id) {
-        //         const response = await axiosClient.get(`/sweet/checkUserLike?SweetID=${sweetData._id}`);
-        //         if (response.data.isSuccess) {
-        //             if (response.data.data.State) {
-        //                 setIsLiked(true);
-        //             } else {
-        //                 setIsLiked(false);
-        //             }
-        //         }
-        //     }
+        try {
+            if (sweetData && sweetData._id) {
+                const response = await axiosClient.get(`/sweet/checkUserLike?SweetID=${sweetData._id}`);
+                if (response.data.isSuccess) {
+                    if (response.data.data.State) {
+                        setIsLiked(true);
+                    } else {
+                        setIsLiked(false);
+                    }
+                }
+            }
 
-        // } catch (error) {
-        //     toast.error(error.response?.data.errorMessage ?? "Unexpected error");
-        // }
+        } catch (error) {
+            toast.error(error.response?.data.errorMessage ?? "Unexpected error");
+        }
     }
 
     const handleCreateShareClick = () => {

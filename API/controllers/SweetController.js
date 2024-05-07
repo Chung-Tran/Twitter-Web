@@ -21,6 +21,7 @@ moment.tz('Asia/Ho_Chi_Minh')
 const create_Sweet = asyncHandle(async (req, res) => {
 
   const user_id = req.user.userId;
+  // const user_id = req.body.user_id;
   const content = req.body.content;
   const image = req.files && await uploadImage(req.files);
 
@@ -504,6 +505,8 @@ const check_User_Like_Sweet = asyncHandle(async (req, res) => {
 const add_OR_Delete_User_To_List_Like_Sweet = asyncHandle(async (req, res) => {
   const sweet_id = req.params.SweetID;
   const user_id = req.user.userId;
+  // const user_id = req.body.user_id;
+
   console.log(req.user)
 
   const sweet = await Sweet.findById(sweet_id);
@@ -579,7 +582,7 @@ const add_User_To_List_Share_Sweet = asyncHandle(async (req, res) => {
   const sweetID = req.params.SweetID;
 
   const user_id = req.user.userId
-  //const userID = req.body.user_id;
+  // const user_id = req.body.user_id;
 
   try {
     const add = await Sweet.findByIdAndUpdate(sweetID, { $addToSet: { shares: user_id } });
@@ -1553,7 +1556,11 @@ const get_Sweet_To_UserID = asyncHandle(async (req, res) => {
   let skipNumble = parseInt(req.query.skip) || 0;
   let limitNumble = parseInt(req.query.limit) || 10;
 
-  const user_id = req.user.userId
+  // const user_id = req.user.userId;
+  // const user_id = req.query.UserID;
+  const user_id = req.params.UserID;
+
+
   //const user_id = req.query.UserID;
 
 
@@ -1591,6 +1598,7 @@ const get_Sweet_To_UserID = asyncHandle(async (req, res) => {
 
       if (item instanceof Sweet) {
         return {
+          _id: item._id,
           UserName: item.user_id,
           Content: item.content,
           Image: item.image,
@@ -1602,6 +1610,7 @@ const get_Sweet_To_UserID = asyncHandle(async (req, res) => {
         };
       } else {
         return {
+          _id: item._id,
           UserName: item.user_id,
           Content: item.content,
           Image: item.image,
@@ -1626,7 +1635,10 @@ const get_Sweet_To_UserID = asyncHandle(async (req, res) => {
 
     const paginatedData = processedData.slice(skipNumble, skipNumble + limitNumble)
 
-    return res.status(200).json(formatResponse(paginatedData, true, `Lấy ra ${paginatedData.length} bài viết theo UserID: ${user_id} thành công!`));
+    const data = {
+      Info: paginatedData
+    }
+    return res.status(200).json(formatResponse(data, true, `Lấy ra ${paginatedData.length} bài viết theo UserID: ${user_id} thành công!`));
 
   } catch (error) {
     console.error(`Lỗi khi lấy danh sách bài viết theo UserID: ${user_id}`, error.message);

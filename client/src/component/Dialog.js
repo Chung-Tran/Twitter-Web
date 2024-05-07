@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import axiosClient from '../authenticate/authenticationConfig';
 import { toast } from 'react-toastify';
-
+import { useParams } from 'react-router-dom';
+import SinglePost from './SinglePost';
 
 
 function Dialog({sweet, getList, onCloseDialog}) {
