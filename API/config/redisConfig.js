@@ -1,4 +1,3 @@
-// redisConfig.js
 const redis = require("redis");
 
 let redisClient;
@@ -15,25 +14,39 @@ const connectRedis = () => {
         });
 
         redisClient.on('connect', function() {
-            console.log('Connected to Redis successfully'); // Hiển thị thông báo khi kết nối thành công
+            console.log('Connected to Redis successfully');
         });
+
         redisClient.on('end', function() {
-            console.log('Connection to Redis has been closed'); // Hiển thị thông báo khi kết nối đã đóng
+            console.log('Connection to Redis has been closed');
         });
     }
     return redisClient;
 }
-const addUserOnlineToList = async (ws) => {
-    // Thêm thông tin của client vào redis
-    redisClient.sadd("online-users", ws, (err, reply) => {
-        if (err) {
-            console.error('Error adding user to online list:', err);
-        } else {
-            console.log('User added to online list:', ws);
-        }
-    });
+
+const addUserToListOnline = async (userId) => {
+    try {
+        // Thêm userId vào Redis với hạn sống là 3 phút
+        await redisClient.set(`online-user:${userId}`, 'true');
+        await redisClient.expire(`online-user:${userId}`, 180);
+
+    } catch (error) {
+        console.error('Error adding user to online list:', error);
+    }
 }
 
+const getUsersOnline = async () => {
+    try {
+        // Lấy danh sách các key bắt đầu bằng 'online-user:'
+        const keys = await redisClient.KEYS("online-user:*");
 
+        // Lấy danh sách userId từ các key
+        const userIds = keys.map(key => key.split(':')[1]);
+        return userIds;
+    } catch (error) {
+        console.error('Error retrieving online users:', error);
+        throw error;
+    }
+}
+module.exports = { connectRedis, addUserToListOnline, getUsersOnline };
 
-module.exports = { connectRedis,addUserOnlineToList };

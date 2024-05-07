@@ -56,7 +56,6 @@ function DialogGetListReplyComment({comment, onCloseDialog}) {
 
     useEffect(() => {
         handleGetListReplyComment();
-        console.log("data: ", replyComment);
     }, [comment._id]);
 
     

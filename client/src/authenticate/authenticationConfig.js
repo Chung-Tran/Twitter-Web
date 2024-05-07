@@ -25,6 +25,10 @@ axiosClient.interceptors.request.use(
 // Thêm interceptor để cập nhật token trong local storage nếu nó được trả về từ phản hồi
 axiosClient.interceptors.response.use(
     (response) => {
+        if (response.status === 401 || response.status === 403) {
+            console.log('response status', response);
+            localStorage.removeItem('token')
+        }
         const { data } = response;
         if (data && data?.data?.token) {
             localStorage.setItem('token', data.data.token); 

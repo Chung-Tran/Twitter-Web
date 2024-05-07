@@ -49,26 +49,22 @@ function Dialog({sweet, getList, onCloseDialog}) {
     // }
 
     const getListLikeHandle = async () => {
-        console.log("ID: " ,sweet._id);
              
         const response = await axiosClient.get(`/sweet/getListLike?SweetID=${sweet._id}`);
         if(response.data.isSuccess){
             setListLike(response.data.data.List_UserName_ToLike)
             setQuantityLike(response.data.data.QuantityLike);
-            console.log("Data:" ,response.data.data.List_UserName_ToLike);
         }else {
             toast.error(response.errorMessage);
         }
     }
 
     const getListShareHandle = async () => {
-        console.log("ID: " ,sweet._id);
 
         const response = await axiosClient.get(`/sweet/getListShare?SweetID=${sweet._id}`);
         if(response.data.isSuccess){
             setListLike(response.data.data.List_UserName_ToShare)
             setQuantityShare(response.data.data.QuantityShare);
-            console.log("Data:" ,response.data.data.List_UserName_ToShare);
         }else {
             toast.error(response.errorMessage);
         }

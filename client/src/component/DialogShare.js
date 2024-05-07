@@ -45,10 +45,8 @@ function DialogShare({sweet, onCloseDialog}) {
                 if(response.data.isSuccess){
                     if(response.data.data.State){
                         setIsShare(false);
-                        console.log(sweet);
                     }else {
                         setIsShare(true);
-                        console.log(sweet)
                     }
                 }
             }
@@ -59,7 +57,6 @@ function DialogShare({sweet, onCloseDialog}) {
 
     useEffect(() => {
         checkIsShare();
-        console.log("chạy");
         
     }, [sweet._id]); 
 

@@ -10,7 +10,6 @@ const { uploadImage } = require('../config/cloudinaryConfig');
 const redisClient = connectRedis();
 const secretKey = process.env.JWT_CODE;
 
-
 const registerUser = asyncHandle(async (req, res) => {
     const email = req.body.email;
     const username = req.body.username;
@@ -31,20 +30,22 @@ const loginUser = asyncHandle(async (req, res) => {
     if (findUser && (await findUser.isPasswordMatched(password))) {
         const encodeData = {
             userId: findUser._id,
-            email: findUser.email
+            email: findUser.email ,
+            displayName:findUser.displayName
         }
         const refeshToken = generateRefreshToken(encodeData);
         const accessToken = generateAccessToken(encodeData);
 
-        const updateUser = await User.findByIdAndUpdate(findUser._id, { refeshToken: refeshToken }, { new: true });
+        const updateUser = await User.findByIdAndUpdate(findUser._id, { refreshToken: refeshToken }, { new: true });
         const responseData = {
             _id: findUser?._id,
-            firstName: findUser?.firstName,
-            lastName: findUser?.lastName,
-            email: findUser?.email,
-            mobile: findUser?.mobile,
+            username: findUser?.username ?? "",
+            displayName: findUser?.displayName ?? "",
+            email: findUser?.email ?? "",
+            mobile: findUser?.mobile ?? "",
             token: accessToken
         }
+        console.log(responseData)
         res.status(200).json(formatResponse(responseData, true, "Đăng nhập thành công"));
     } else {
         res.status(403).json(formatResponse(null, false, "Mật khẩu không hợp lệ. Vui lòng thử lại."));
@@ -60,18 +61,19 @@ const loginByEmail = asyncHandle(async (req, res) => {
     else {
         const encodeData = {
             userId: findUser._id.toString(),
-            email: findUser.email
+            email: findUser.email,
+            displayName:findUser.displayName
         }
         const refeshToken = generateRefreshToken(encodeData);
         const accessToken = generateAccessToken(encodeData);
 
-        const updateUser = await User.findByIdAndUpdate(findUser._id, { refeshToken: refeshToken }, { new: true });
+        const updateUser = await User.findByIdAndUpdate(findUser._id, { refreshToken: refeshToken }, { new: true });
         const responseData = {
             _id: findUser?._id,
-            firstName: findUser?.firstName,
-            lastName: findUser?.lastName,
-            email: findUser?.email,
-            mobile: findUser?.mobile,
+            username: findUser?.username ?? "",
+            displayName: findUser?.displayName ?? "",
+            email: findUser?.email ?? "",
+            mobile: findUser?.mobile ?? "",
             token: accessToken
         }
         res.status(200).json(formatResponse(responseData, true, "Đăng nhập thành công"));
@@ -209,13 +211,16 @@ const confirmResetPassword = asyncHandle(async (req, res) => {
     }
 });
 
+
+
+
 const setKeyValue = async (key, value) => {
     try {
         // Đặt giá trị của key-value
         await redisClient.set(key, value);
 
         // Đặt thời gian sống cho key là 3 phút (180 giây)
-        await redisClient.expire(key, 1000);
+        await redisClient.expire(key, 180);
 
         console.log(`Key ${key} set successfully`);
         return true;
@@ -227,7 +232,6 @@ const setKeyValue = async (key, value) => {
 const getKeyValue = async (key) => {
     try {
         const result = await redisClient.get(key);
-        console.log("r", result);
         return result;
     } catch (err) {
         console.log("Get key value failed. Err:", err);

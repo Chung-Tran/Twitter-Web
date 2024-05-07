@@ -191,7 +191,6 @@ function SweetComment({ commentData ,resetData}) {
   }, [commentData]); 
 
   const likeCommentHandle = async () => {
-    console.log("click")
     try {
         const response = await axiosClient.put(`/comment/likeComment/${commentData._id}`);
         if(response.data.isSuccess){
@@ -211,7 +210,6 @@ function SweetComment({ commentData ,resetData}) {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setSelectedFile(file);
-    console.log(file);
     
     // Create a preview image URL for the selected file
     // const reader = new FileReader();

@@ -1,21 +1,36 @@
 const Notification = require('../model/Notification ');
 const {wss,userConnection} = require('../config/webSocketConfig')
 const { WebSocket } = require('ws');
+const formatResponse = require('../common/ResponseFormat');
+const asyncHandle = require('express-async-handler')
 
 const createNotification = async (notificationData) => {
     try {
-        const notification = await Notification.create(notificationData);
-        console.log(notification)
+        const tweetId = notificationData?.tweetId;
+        
+        const existingNotification = await Notification.findOne({ tweetId: tweetId });
+        console.log('check in notify')
+        if (existingNotification && existingNotification.content != notificationData.content) {
+            // Nếu đã tồn tại, cập nhật nội dung thông báo
+            existingNotification.content = notificationData.content;
+            await existingNotification.save();
+        } else {
+            // Nếu không tồn tại, tạo mới thông báo
+            await Notification.create(notificationData);
+        }
+        
         const notifyData = {
             type: "Notify",
-            content:"Thông báo tạm thời"
+            content: notificationData.content,
+            userId: notificationData.userId.toString()
         }
+        
+        // Gửi thông báo tới tất cả kết nối WebSocket
         userConnection.forEach(connection => {
             if (connection.readyState === WebSocket.OPEN) {
                 connection.send(JSON.stringify(notifyData));
             }
         });
-        // return notification;
     } catch (error) {
         throw error;
     }
@@ -30,14 +45,16 @@ const getNotificationById = async (notificationId) => {
     }
 };
 
-const getNotificationsByUser = async (userId) => {
+const getNotificationsByUser = asyncHandle(async (req, res) => {
     try {
-        const notifications = await Notification.find({ user: userId });
-        return notifications;
+        const userId = req.user.userId;
+        const notifications = await Notification.find({ userId: userId }).populate('userId','_id, displayName').populate('tweetId' ,'images,_id');
+        
+        res.status(200).json(formatResponse(notifications, true, ""));
     } catch (error) {
         throw error;
     }
-};
+})
 
 //update đã đọc
 const markNotificationAsRead = async (notificationId) => {

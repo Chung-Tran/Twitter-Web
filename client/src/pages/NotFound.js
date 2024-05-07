@@ -6,6 +6,7 @@ const NotFound = () => {
     justifyContent: 'center',
     alignItems: 'center',
     height: '100vh',
+    backgroundColor:'black'
   };
 
   const contentStyle = {
@@ -15,10 +16,12 @@ const NotFound = () => {
   const headingStyle = {
     fontSize: '3rem',
     marginBottom: '20px',
+    color:'white'
   };
 
   const paragraphStyle = {
     fontSize: '1.5rem',
+    color:'white'
   };
 
   return (

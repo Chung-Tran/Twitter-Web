@@ -36,10 +36,8 @@ function SinglePost({sweetData, selectedTab, resetData}) {
           if(response.data.isSuccess){
             if(response.data.data.State){
                 setIsShare(false);
-                console.log(sweetData);
             }else {
                 setIsShare(true);
-                console.log(sweetData)
             }
         }}
 
@@ -50,24 +48,24 @@ function SinglePost({sweetData, selectedTab, resetData}) {
 
     useEffect(() => {
         checkIsShare();
-        console.log("chạy");
         
     }, [selectedTab, sweetData._id]); 
   
     const fetchLikeStatus = async () => {
         try {
             if (sweetData && sweetData._id) {
-          const response = await axiosClient.get(`/sweet/checkUserLike?SweetID=${sweetData._id}`);
-          if(response.data.isSuccess){
-            if(response.data.data.State){
-                setIsLiked(true);
-            }else {
-                setIsLiked(false);
+                const response = await axiosClient.get(`/sweet/checkUserLike?SweetID=${sweetData._id}`);
+                if (response.data.isSuccess) {
+                    if (response.data.data.State) {
+                        setIsLiked(true);
+                    } else {
+                        setIsLiked(false);
+                    }
+                }
             }
-        }}
 
         } catch (error) {
-          toast.error(error.response?.data.errorMessage ?? "Unexpected error");
+            toast.error(error.response?.data.errorMessage ?? "Unexpected error");
         }
     };
 
@@ -82,7 +80,6 @@ function SinglePost({sweetData, selectedTab, resetData}) {
 
     const handleCreateShareClick = () => {
         setShowDialogCreateShare(true);
-        console.log("Click")
     };
 
     const handleShowDialogCreateShare = (value) => {
@@ -92,13 +89,11 @@ function SinglePost({sweetData, selectedTab, resetData}) {
     const handleGetListShareClick = () => {
         setShowDialog(true);
         setGetList(true);
-        console.log("Click")
     };
 
     const handleGetListLikeClick = () => {
         setShowDialog(true);
         setGetList(false);
-        console.log("Click")
     };
 
     const handleShowDialog = (value) => {
@@ -108,16 +103,17 @@ function SinglePost({sweetData, selectedTab, resetData}) {
     const likeSweetHandle = async () => {
         try {
             const response = await axiosClient.put(`/sweet/addOrDeleleLike/${sweetData._id}`);
-            if(response.data.isSuccess){
-                if(response.data.data.State){
+            
+            if (response.data.isSuccess) {
+                if (response.data.data.State) {
                     setIsLiked(false);
-                }else{
+                } else {
                     setIsLiked(true);
                 }
                 setCheckIsLiked(response.data.isSuccess);
 
                 setQuantityLike(response.data.data.QuantityLike);
-                
+
             }
 
         } catch (error) {
@@ -149,14 +145,16 @@ function SinglePost({sweetData, selectedTab, resetData}) {
     //     likeSweetHandle();
     // }, [sweetData._id])
 
+
+
     return (
         <div className='single-post' >
             <div className='user-info' onClick={() => handleGetSweetDetail(sweetData._id)}>
                 <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
                 <div className='info-content'>
                     <div className='user-info-name'>
-                        <span>{ sweetData.UserName.displayName}</span>
-                        <span>{ sweetData.UserName.username}</span>
+                        <span>{sweetData.UserName.displayName}</span>
+                        <span>{sweetData.UserName.username}</span>
                     </div>
                     <span className='post-createdAt'>{sweetData.Duration}</span>
 

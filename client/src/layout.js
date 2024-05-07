@@ -1,5 +1,5 @@
 import { Outlet, useNavigate } from "react-router-dom"
-import Menu from "./component/Menu/Menu"
+import Menu from "./component/Menu";
 import Navbar from "./component/Navbar/Navbar"
 import { useEffect, useState } from "react";
 const Layout = ({ children }) => {

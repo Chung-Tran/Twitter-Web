@@ -21,16 +21,15 @@ function LoginOption() {
         const response = await axiosClient.post(`/authentication/login-by-email`, { email: email });
         if (response.data.isSuccess) {
           toast.success("Đăng nhập thành công");
+          localStorage.setItem('twitter-user', JSON.stringify(response.data.data));
           navigate("/");
         } else {
           toast.error(response.errorMessage);
         }
       } catch (error) {
-        console.log(error)
         toast.error(error.response?.data.errorMessage ?? "Unexpected error");
       }
     }
-    console.log(data);
     const config = {
       method: 'POST',
       url: 'your backend server or endpoint',
@@ -58,7 +57,6 @@ function LoginOption() {
               <GoogleLogin
                 onSuccess={handleLogin}
                 onError={() => {
-                  console.log('Login Failed');
                 }}
               />
             </GoogleOAuthProvider>

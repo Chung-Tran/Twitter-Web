@@ -1,5 +1,5 @@
 // Menu.js
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AiOutlineSetting } from "react-icons/ai";
 import { CiImageOn } from "react-icons/ci";
 import { AiOutlineFileGif } from "react-icons/ai";
@@ -16,30 +16,55 @@ function Post({isCreateShare}) {
   const [selectedTab, setSelectedTab] = useState('For You');
   const [isCreateShareSuccess, setIsCreateShareSuccess] = useState(false);
   const [sweetList, setSweetList] = useState([]);
-  const [postSweetContent, setPostSweetContent] = useState();
-  const [selectedFile, setSelectedFile] = useState([]);
-  // const [previewImage, setPreviewImage] = useState(null); 
-  let limit = 40;
-  let skip = 0;
+  const [postSweetContent, setPostSweetContent] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [isNearBottom, setIsNearBottom] = useState(false);
+  const [limit, setLimit] = useState(5);
+  const [skip, setSkip] = useState(0);
+
+//Khởi tạo các biến mặc định
+  useEffect(() => {
+    setSelectedTab('For You');
+    //Check phân trang
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+      const isNearBottom = scrollHeight - scrollTop <= clientHeight + 1000;
+      setIsNearBottom(isNearBottom);
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [limit, skip]);
+  //Nếu như đổi tab data sẽ set lại từ đầu
+  useEffect(() => {
+    setSweetList([]);
+    setSkip(0);
+    setLimit(5);
+    fetchData();
+    
+  },[selectedTab])
+
   const fetchData = async () => {
     try {
       let response;
       if (selectedTab === 'For You') {
         response = await axiosClient.get(`/sweet/getManySweetAndShareForYou?limit=${limit}&skip=${skip}`);
-        if (response.data.isSuccess) {
-          setSweetList(response.data.data.InFo_Sweet)
-        } else {
-          toast.error(response.errorMessage);
-        }
       } else if (selectedTab === 'Following') {
         response = await axiosClient.get(`/sweet/getManySweetAndShareFollowing?limit=${limit}&skip=${skip}`);
-        if (response.data.isSuccess) {
-          setSweetList(response.data.data.InFo_Sweet)
-        } else {
-          toast.error(response.errorMessage);
-        }
       }
-      
+
+      if (response.data.isSuccess) {
+        setSweetList(prevSweetList => [...prevSweetList, ...response.data.data.InFo_Sweet]);
+      } else {
+        toast.error(response.errorMessage);
+      }
     } catch (error) {
       console.error("Error occurred while fetching sweet data:", error);
     }
@@ -65,23 +90,7 @@ function Post({isCreateShare}) {
 
   const handleTabClick = (tab) => {
     setSelectedTab(tab);
-    console.log(selectedTab);
   };
-
-  /*const fetchData = async () => {
-   const response = await axiosClient.get(`/sweet/getManySweet?limit=${limit}&skip=${skip}`);
-    //const response = await axiosClient.get(` /sweet/getManySweetAndShareForYou`);
-    if (response.data.isSuccess) {
-      setSweetList(response.data.data.InFo_Sweet)
-    } else {
-      toast.error(response.errorMessage);
-    }
-  };
-  
-  useEffect(() => {
-    fetchData();
-  }, [limit, skip]);*/
-
 
   const postContentHandle = async () => {
     try {
@@ -94,7 +103,9 @@ function Post({isCreateShare}) {
         }
       });
       if (response.data.isSuccess) {
-        setSweetList(response.data.data.InFo_Sweet);
+        // Reset skip and sweetList to fetch updated data
+        setSkip(0);
+        setSweetList([]);
         setPostSweetContent('');
         toast.success("Tạo bài viết thành công!");
         fetchData();
@@ -108,19 +119,14 @@ function Post({isCreateShare}) {
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setSelectedFile(file);
-    console.log("file: ", file);
-    
-    // Create a preview image URL for the selected file
-    // const reader = new FileReader();
-    // reader.onload = () => {
-    //   setPreviewImage(reader.result);
-    // };
-    // reader.readAsDataURL(file);
+    setSelectedFile(e.target.files[0]);
   };
 
-  
+  useEffect(() => {
+    if (isNearBottom) {
+      setSkip(prevSkip => prevSkip + limit);
+    }
+  }, [isNearBottom]);
 
   return (
     <div className='homepage-post'>
@@ -152,18 +158,17 @@ function Post({isCreateShare}) {
               <nav>
                 <ul>
                     <li>
-                      {/* Hiển thị icon CiImageOn */}
                       <label htmlFor="fileInput" style={{display:'flex', alignItems:'center',justifyContent:'center' ,cursor:'pointer',fontSize:'23px'}}>
                         <CiImageOn />
-                        {/* Ẩn input file */}
                         <input
                           type="file"
                           id="fileInput"
-                        style={{ display: "none" }}
+                         style={{ display: "none" }}
                         accept="image/*" 
-                          onChange={handleFileChange}
-                        />
-                      </label>
+                        onChange={handleFileChange}
+                        multiple 
+                      />
+ <span style={{ position: 'absolute', marginTop: '50px', fontSize: '16px', color: '#c9a4a4', fontWeight: 'normal', marginLeft: '-5px' }}>{selectedFile?.length>0 ? selectedFile.length + " file" : ""}</span>                      </label>
                     </li>
                     <li><AiOutlineFileGif /></li>
                     <li><AiOutlineUnorderedList /></li>

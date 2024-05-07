@@ -503,7 +503,8 @@ const check_User_Like_Sweet = asyncHandle(async (req, res) => {
 
 const add_OR_Delete_User_To_List_Like_Sweet = asyncHandle(async (req, res) => {
   const sweet_id = req.params.SweetID;
-  const user_id = req.user.userId
+  const user_id = req.user.userId;
+  console.log(req.user)
 
   const sweet = await Sweet.findById(sweet_id);
   const share = await Share.findById(sweet_id);
@@ -519,8 +520,9 @@ const add_OR_Delete_User_To_List_Like_Sweet = asyncHandle(async (req, res) => {
           QuantityLike: sweet.likes.length
         }
         const dataAddNotify = {
-          userId:sweet.user_id,
-          content: "Đã thích bài viết của bạn.",
+          content: `${req.user.displayName}${sweet.likes.length > 1 ? ` và ${sweet.likes.length - 1} người khác` : ''} đã thích bài viết của bạn.`,
+          relateTo: user_id,
+          tweetId:sweet_id
         }
         await createNotification(dataAddNotify);
         return res.status(200).json(formatResponse(data, true, "Đã like bài viết!"));

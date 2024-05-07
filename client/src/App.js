@@ -2,7 +2,6 @@ import './App.scss';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import LoginPage from './pages/LoginPage';
 import NotFound from './pages/NotFound';
-import Menu from './component/Menu/Menu'
 import 'react-toastify/dist/ReactToastify.css';
 import { Suspense, useEffect } from 'react';
 import CommonToastContainer from './ultis/ToastNoti';
@@ -15,23 +14,28 @@ import MessagePage from './pages/MessagePage';
 import NotificationPage from './pages/NotificationPage';
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 import { toast } from 'react-toastify';
+import { jwtDecode } from 'jwt-decode';
+import ProfilePage from './pages/ProfilePage';
 const client = W3CWebSocket('ws://localhost:8080');
 const App = () => {
+  const token = localStorage.getItem("token");
+  const userId = token && jwtDecode(token).userId;
+
   useEffect(() => {
     // Lắng nghe tin nhắn từ server
     client.onmessage = function (event) {
       const receivedMessage = JSON.parse(event.data);
-      console.log(receivedMessage)
-      if(receivedMessage && receivedMessage?.type=="Notify")
-      {
-        console.log(receivedMessage)
-        toast.info(receivedMessage.content)
-     }
-      
+      console.log(userId,receivedMessage)
+      if (receivedMessage?.userId == userId) {
+        if (receivedMessage && receivedMessage?.type == "Notify") {
+          toast.info(receivedMessage.content)
+        }
+      }
+
     };
-    return () => {
-      client.close(); // Đóng kết nối khi component unmount
-    };
+    // return () => {
+    //   client.close(); // Đóng kết nối khi component unmount
+    // };
   }, []);
   return (
     <Router>
@@ -44,11 +48,12 @@ const App = () => {
           </Route>
           <Route path="/" element={<Layout />}>
             <Route index element={<HomePage />} />
-            <Route path="/menu" element={<Menu />} />
             <Route path="/notifications" element={<NotificationPage />} />
             <Route path="/status/:id" element={<SweetDetail />} />
-            <Route path="*" element={<NotFound />} />
+            <Route path="/profile/:id" element={<ProfilePage />} />
+           
           </Route>
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
     </Router>
