@@ -54,31 +54,32 @@ function Post({isCreateShare}) {
   },[selectedTab])
 
   const fetchData = async () => {
-    console.log('call fetchdata')
     try {
-      let response;
-      if (selectedTab === 'For You') {
-        response = await axiosClient.get(`/sweet/getManySweetAndShareForYou?limit=${limit}&skip=${skip}`);
-      } else if (selectedTab === 'Following') {
-        response = await axiosClient.get(`/sweet/getManySweetAndShareFollowing?limit=${limit}&skip=${skip}`);
-      }
+        let response;
+        if (selectedTab === 'For You') {
+            response = await axiosClient.get(`/sweet/getManySweetAndShareForYou?limit=${limit}&skip=${skip}`);
+        } else if (selectedTab === 'Following') {
+            response = await axiosClient.get(`/sweet/getManySweetAndShareFollowing?limit=${limit}&skip=${skip}`);
+        }
+            const newSweetList = response.data.data.InFo_Sweet;
 
-      if (response.data.isSuccess) {
-        // setSweetList(prevSweetList => [...prevSweetList, ...response.data.data.InFo_Sweet]);
-        // console.log('sweet total',sweetList.length)
-        const newSweetList = response.data.data.InFo_Sweet;
-        newSweetList.forEach(newSweet => {
-          if (!sweetList.some(sweet => sweet._id === newSweet._id)) {
-            setSweetList(prevSweetList => [...prevSweetList, newSweet]);
-          }
-        });
-      } else {
-        toast.error(response.errorMessage);
-      }
+
+        if (response.data.isSuccess) {
+            // Hàm để loại bỏ các mục đã tồn tại trong danh sách
+            const getUniqueNewSweetList = (newList, existingList) => {
+                const existingIds = new Set(existingList.map(item => item._id));
+                return newList.filter(item => !existingIds.has(item._id));
+            };
+
+            // Loại bỏ các mục đã tồn tại trong danh sách và cập nhật sweetList
+            setSweetList(prevSweetList => [...prevSweetList, ...getUniqueNewSweetList(newSweetList, prevSweetList)]);
+        } else {
+            toast.error(response.errorMessage);
+        }
     } catch (error) {
-      console.error("Error occurred while fetching sweet data:", error);
+        console.error("Error occurred while fetching sweet data:", error);
     }
-  };
+  }; 
 
   useEffect(() => {
     setIsCreateShareSuccess(isCreateShare);

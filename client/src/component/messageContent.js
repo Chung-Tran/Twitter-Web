@@ -7,10 +7,11 @@ import { AiOutlineUnorderedList } from "react-icons/ai";
 import { AiOutlineSend } from "react-icons/ai";
 import axiosClient from '../authenticate/authenticationConfig';
 import { w3cwebsocket as W3CWebSocket } from "websocket";
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate, useParams } from 'react-router-dom'; 
 const client = new W3CWebSocket('ws://localhost:8080');
 function MessageContent({ receiverId,resetData }) {
   const navigate = useNavigate();
+  const {id} =useParams()
   const [messages, setMessages] = useState([]);
   const [receiver, setReceiver] = useState(null);
   const [userId, setUserId] = useState(null);
@@ -29,7 +30,8 @@ function MessageContent({ receiverId,resetData }) {
 
     // Gọi API để lấy thông tin người nhận
     const fetchData = async () => {
-      await axiosClient.get(`users/${receiverId}`)
+      // await axiosClient.get(`users/${receiverId}`)
+      await axiosClient.get(`users/${id}`)
         .then(response => {
           const userData = response.data.data;
           setReceiver(userData);
@@ -40,7 +42,8 @@ function MessageContent({ receiverId,resetData }) {
 
       // Gọi API để lấy toàn bộ tin nhắn
 
-      await axiosClient.get(`chat/${receiverId}`)
+      // await axiosClient.get(`chat/${receiverId}`)
+      await axiosClient.get(`chat/${id}`)
         .then(response => {
           const data = response.data.data;
           setMessages(data);
@@ -74,8 +77,9 @@ function MessageContent({ receiverId,resetData }) {
     if (messageSendContent.trim() !== '') {
       const message = {
         content: messageSendContent,
+        // senderId: userId,
         senderId: userId,
-        receiverId: receiverId,
+        receiverId: id,
         type:"chat"
       };
       const messageString = JSON.stringify(message);
@@ -106,7 +110,7 @@ function MessageContent({ receiverId,resetData }) {
         {messages.map((message) => (
           <div
             key={message._id}
-            className={`message ${message.senderID === receiverId ? 'message-received' : 'message-sent'}`}
+            className={`message ${message.senderID === /*receiverId*/id ? 'message-received' : 'message-sent'}`}
           >
             <span>{message.content}</span>
           </div>

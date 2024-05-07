@@ -11,7 +11,7 @@ import { toast } from 'react-toastify';
 import  Dialog  from '../component/Dialog'
 import DialogShare from './DialogShare';
 
-function SinglePost({sweetData, selectedTab, resetData}) {
+function SinglePost({ sweetData, selectedTab, resetData }) {
     const navigate = useNavigate();
     const handleGetSweetDetail = (_id) => {
         navigate(`/status/${_id}`, { state: { source: 'sweetDetail' } })
@@ -115,7 +115,7 @@ function SinglePost({sweetData, selectedTab, resetData}) {
 
     return (
         <div className='single-post' >
-            <div className='user-info' onClick={() => handleGetSweetDetail(sweetData._id)}>
+            <div className='user-info' onClick={() => {navigate(`/profile/${sweetData.UserName._id}`)}}>
                 <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
                 <div className='info-content'>
                     <div className='user-info-name'>

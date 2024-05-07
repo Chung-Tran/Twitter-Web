@@ -9,7 +9,6 @@ import { useNavigate } from "react-router-dom";
 function LoginModal({ visible, setVisible, type }) {
     const [isForgotPassword, setIsForgotPassword] = useState(false);
     const [otpSent, setOtpSent] = useState(false);
-    const [newPassword, setNewPassword] = useState('');
     const [otpCode, setOtpCode] = useState('');
     const [isSuccess, setIsSuccess] = useState(false);
     const [isRegister, setIsRegister] = useState(false);
@@ -29,7 +28,6 @@ function LoginModal({ visible, setVisible, type }) {
         setVisible(false);
         setIsForgotPassword(false);
         setOtpSent(false);
-        setNewPassword('');
         setOtpCode('');
         setIsSuccess(false);
         setIsRegister(false);
@@ -52,7 +50,7 @@ function LoginModal({ visible, setVisible, type }) {
     };
     const handleSubmit = async (data) => {
         try {
-            if (!isRegister && !isForgotPassword ) //login
+            if (!isRegister && !isForgotPassword) //login
             {
                 const response = await axiosClient.post(`/authentication/login`, data);
                 if (response.data.isSuccess) {
@@ -72,7 +70,7 @@ function LoginModal({ visible, setVisible, type }) {
                 } else {
                     toast.error(response.errorMessage);
                 }
-            } else if (!isRegister && !otpSent && isForgotPassword && !isSuccess ) //send otp
+            } else if (!isRegister && !otpSent && isForgotPassword && !isSuccess) //send otp
             {
                 const response = await axiosClient.post('/authentication/forgot-password', data);
                 if (response.data.isSuccess) {
@@ -98,7 +96,12 @@ function LoginModal({ visible, setVisible, type }) {
             }
             else if (!isRegister && isForgotPassword && !otpSent && isSuccess) //reset password
             {
-                const response = await axiosClient.post('/authentication/confirm-reset-password', {email:data.email, token: tokenResetPassword, newPassword: newPassword});
+                const newPassword = formik.values.newPassword;
+                if (newPassword != formik.values.password) {
+                    console.log(newPassword, formik.values.password)
+                    return toast.error("Mật khẩu không trùng khớp")
+                }
+                const response = await axiosClient.post('/authentication/confirm-reset-password', { email: data.email, token: tokenResetPassword, newPassword: newPassword });
                 if (response.data.isSuccess) {
                     handleSendOtp(true);
                     handleCloseModal();
@@ -185,7 +188,7 @@ function LoginModal({ visible, setVisible, type }) {
                         <form onSubmit={formik.handleSubmit}>
                             <input className='login-input ' placeholder='Mật khẩu mới' name='password' type='password' value={formik.values.password} onChange={formik.handleChange} />
                             <input className='login-input ' placeholder='Nhập lại mật khẩu' type='password' name='newPassword' value={formik.values.newPassword} onChange={formik.handleChange} />
-                            <button  type='submit'>Đặt lại mật khẩu</button>
+                            <button type='submit'>Đặt lại mật khẩu</button>
                         </form>
                     </div>
                     <div className='modal-orther-login'>
@@ -202,10 +205,10 @@ function LoginModal({ visible, setVisible, type }) {
                         <span className='title-input-login'>Thông tin đăng ký</span>
                         {/* Thêm các trường nhập thông tin cho đăng ký */}
                         <form onSubmit={formik.handleSubmit} >
-                            <input className='login-input ' placeholder='Họ tên' name='fullName' value={formik.values.fullName} onChange={formik.handleChange} />
+                            <input className='login-input ' placeholder='Họ tên' name='displayName' value={formik.values.displayName} onChange={formik.handleChange} />
                             <input className='login-input ' placeholder='Tên người dùng' name='username' value={formik.values.username} onChange={formik.handleChange} />
                             <input className='login-input ' placeholder='Email' name='email' value={formik.values.email} onChange={formik.handleChange} />
-                            <input className='login-input ' placeholder='Mật khẩu' name='password' value={formik.values.password} onChange={formik.handleChange} />
+                            <input className='login-input ' placeholder='Mật khẩu' name='password' type='password' value={formik.values.password} onChange={formik.handleChange} />
                             <div className='dob-input' name='email' value={formik.values.dob} onChange={formik.handleChange}>
                                 <span>Ngày sinh</span>
                                 <Space direction="vertical" size={15} className='w-full'>

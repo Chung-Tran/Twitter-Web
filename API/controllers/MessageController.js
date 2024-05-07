@@ -90,6 +90,7 @@ const getAllMessagesBetweenUsers = asyncHandle(async (req, res) => {
 // API để gửi tin nhắn mới
 const sendMessage = asyncHandle(async (message, userList) => {
     try {
+        console.log(message)
         const { senderId, receiverId, content } = message;
         const newMessage = await Message.create({
             senderID: new mongoose.Types.ObjectId(senderId),

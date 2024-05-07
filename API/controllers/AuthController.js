@@ -7,6 +7,8 @@ const { connectRedis } = require('../config/redisConfig');
 const { sendEmail } = require('../config/sendMailConfig');
 const jwt = require('jsonwebtoken');
 const { uploadImage } = require('../config/cloudinaryConfig');
+const bcrypt = require('bcrypt')
+const crypto = require('crypto');
 const redisClient = connectRedis();
 const secretKey = process.env.JWT_CODE;
 
@@ -30,8 +32,8 @@ const loginUser = asyncHandle(async (req, res) => {
     if (findUser && (await findUser.isPasswordMatched(password))) {
         const encodeData = {
             userId: findUser._id,
-            email: findUser.email ,
-            displayName:findUser.displayName
+            email: findUser.email,
+            displayName: findUser.displayName
         }
         const refeshToken = generateRefreshToken(encodeData);
         const accessToken = generateAccessToken(encodeData);
@@ -53,7 +55,7 @@ const loginUser = asyncHandle(async (req, res) => {
 const loginByEmail = asyncHandle(async (req, res) => {
     const { email } = req.body;
     const findUser = await User.findOne({ email: email });
-    console.log(email,findUser)
+    console.log(email, findUser)
     if (findUser.length == 0) {
         res.status(403).json(formatResponse(null, false, "Tài khoản không tồn tại. Vui lòng thử lại."));
     }
@@ -61,7 +63,7 @@ const loginByEmail = asyncHandle(async (req, res) => {
         const encodeData = {
             userId: findUser._id.toString(),
             email: findUser.email,
-            displayName:findUser.displayName
+            displayName: findUser.displayName
         }
         const refeshToken = generateRefreshToken(encodeData);
         const accessToken = generateAccessToken(encodeData);
@@ -188,8 +190,18 @@ const confirmResetPassword = asyncHandle(async (req, res) => {
                 })
 
                 // Cập nhật mật khẩu của người dùng
-                const updateResult = await user.updateUserPassword(newPassword);
-                if (updateResult.isSuccess) {
+                // const updateResult = await user.updateUserPassword(newPassword);
+                const filter = { _id: user._id };
+                const salt = await bcrypt.genSaltSync(10);
+                const update = {
+                    $set: {
+                        password: await bcrypt.hash(newPassword, salt)
+                    }
+                }
+                const result = await User.findOneAndUpdate(filter, update);
+
+                // if (updateResult.isSuccess) {
+                if (result) {
                     // Xóa reset code từ Redis sau khi sử dụng
                     await redisClient.del(`reset_password_code_${user._id}`);
 

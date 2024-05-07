@@ -85,8 +85,8 @@ function MessageList({ messages, userId, changeReceiverId }) {
           <div className='message-user-single-content'>
             <div className='message-user-single-info'>
               {/* Sử dụng user[index] thay vì item.userInfo[0] */}
-              <span>{user[index].displayName}</span>
-              <span>{user[index].username}</span>
+              <span>{user[index]?.displayName}</span>
+              <span>{user[index]?.username}</span>
             </div>
             <span>{item.lastMessage.content}</span>
           </div>

@@ -2,13 +2,17 @@ import React, { useEffect, useState } from 'react'
 import { IoArrowBackSharp } from "react-icons/io5";
 import Post from '../component/post/post';
 import { FaCalendarAlt } from "react-icons/fa";
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axiosClient from '../authenticate/authenticationConfig';
 import SinglePost from '../component/SinglePost';
+import { BiMessageDots } from "react-icons/bi";
 function ProfilePage() {
     const { id } = useParams();
     const [userInfo, setUserInfo] = useState();
+    const userId = JSON.parse(localStorage.getItem("twitter-user"))?._id; //ID người đang sử dụng
+    const navigate=useNavigate()
+
     useEffect(() => {
         fetchData(id)
     }, [id]);
@@ -24,6 +28,9 @@ function ProfilePage() {
         } catch (error) {
             toast.error("Unexpected error");
         };
+    }
+    const ChatNow = () => {
+        navigate(`/messages/${id}`)
     }
         return userInfo && (
             <div className='profile-container'>
@@ -42,7 +49,7 @@ function ProfilePage() {
                         </div>
                         <div className='avatar-image'>
                             <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' alt="Avatar" />
-                            <button >Edit profile</button>
+                            {id==userId ?  <button >Edit profile</button> : <button style={{border:'none'}} onClick={()=>ChatNow()}><BiMessageDots style={{color:'#555', fontSize:'28px'  }}/></button>}
                         </div>
                     </div>
                     <div className='profile-user-info'>

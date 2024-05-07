@@ -43,7 +43,7 @@ const App = () => {
         <CommonToastContainer />
         <Routes>
           <Route index path="/login" element={<LoginPage />} />
-          <Route path="/messages" element={<MessageLayout />}>
+          <Route path="/messages/:id" element={<MessageLayout />}>
             <Route index element={<MessagePage />} />
           </Route>
           <Route path="/" element={<Layout />}>
