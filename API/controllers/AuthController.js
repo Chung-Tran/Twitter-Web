@@ -45,7 +45,6 @@ const loginUser = asyncHandle(async (req, res) => {
             mobile: findUser?.mobile ?? "",
             token: accessToken
         }
-        console.log(responseData)
         res.status(200).json(formatResponse(responseData, true, "Đăng nhập thành công"));
     } else {
         res.status(403).json(formatResponse(null, false, "Mật khẩu không hợp lệ. Vui lòng thử lại."));
@@ -156,9 +155,7 @@ const confirmResetPassword = asyncHandle(async (req, res) => {
     const { email, newPassword, token } = req.body;
 
     try {
-        console.log(email)
         const user = await User.findOne({ email: email });
-        console.log(user)
         jwt.verify(token, secretKey, async (err, decoded) => {
             if (err) {
                 return res.status(400).json(formatResponse(null, false, "Phiên thay đổi mật khẩu hết hạn. Vui lòng thử lại"));
@@ -185,8 +182,6 @@ const confirmResetPassword = asyncHandle(async (req, res) => {
                     }
                     const dataFromRedis = JSON.parse(resetCodeData);
 
-                    console.log("dataFromRedis", dataFromRedis)
-                    console.log("decoded", decoded)
                     if (decoded.resetCode != dataFromRedis.resetCode) {
                         return res.status(400).json(formatResponse(null, false, "Cập nhật mật khẩu thất bại. Vui lòng thử lại"));
                     }

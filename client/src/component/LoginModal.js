@@ -57,6 +57,7 @@ function LoginModal({ visible, setVisible, type }) {
                 const response = await axiosClient.post(`/authentication/login`, data);
                 if (response.data.isSuccess) {
                     toast.success("Đăng nhập thành công");
+                    localStorage.setItem('twitter-user', JSON.stringify(response.data.data));
                     navigate("/");
                 } else {
                     toast.error(response.errorMessage);
@@ -65,7 +66,7 @@ function LoginModal({ visible, setVisible, type }) {
             {
                 const response = await axiosClient.post('/authentication/register', data);
                 if (response.data.isSuccess) {
-                    toast.success("Đăng nhập thành công");
+                    toast.success("Đăng ký thành công");
                     setIsRegister(false);
                     setOtpSent(true);
                 } else {

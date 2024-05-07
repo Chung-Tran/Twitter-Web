@@ -125,7 +125,6 @@ const searchUser = asyncHandle(async (req, res) => {
 
     const email = req.query.email;
     const username = req.query.username;
-    console.log(email, username)
 
     const searchKeyWord = await User.find({
         $or: [
@@ -151,7 +150,6 @@ const searchUser = asyncHandle(async (req, res) => {
 
 const getListUserUnFollow = asyncHandle(async (req, res) => {
     const user_id = req.user.userId;
-    console.log('userId',user_id)
     //const user_id = req.query.UserID;
 
     // Lấy người dùng hiện tại
@@ -159,7 +157,7 @@ const getListUserUnFollow = asyncHandle(async (req, res) => {
 
     // Lấy danh sách người dùng không được theo dõi và giới hạn số lượng kết quả là 10
     const usersNotFollowing = await User.find({
-        _id: { $nin: [...user.following, user_id] } // Không nằm trong danh sách đang theo dõi và không phải chính user_id
+        _id: { $nin: [...user?.following, user_id] } // Không nằm trong danh sách đang theo dõi và không phải chính user_id
     }).limit(10).select('displayName username _id');
 
     try {
@@ -172,13 +170,11 @@ const getListUserUnFollow = asyncHandle(async (req, res) => {
 //API lấy user đang follow và đang online
 const getListUserOnline = asyncHandle(async (req, res) => {
     const userId = req.user.userId;
-    console.log(userId)
     try {
         // Lấy danh sách người dùng đang online
         const onlineUsers = await getUsersOnline();
 
         const userFollowing = await User.findById(userId).populate('following', 'displayName username _id');
-        console.log('userFollow',userFollowing)
 
         // Lọc danh sách người dùng đang online mà cũng được theo dõi bởi người dùng hiện tại
         const followingOnlineUsers = userFollowing.following.filter(user => onlineUsers.includes(user?._id.toString()));
