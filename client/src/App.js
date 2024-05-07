@@ -42,7 +42,7 @@ const App = () => {
       <Suspense fallback={<div>Loading...</div>}>
         <CommonToastContainer />
         <Routes>
-          <Route exact path="/login" element={<LoginPage />} />
+          <Route index path="/login" element={<LoginPage />} />
           <Route path="/messages" element={<MessageLayout />}>
             <Route index element={<MessagePage />} />
           </Route>

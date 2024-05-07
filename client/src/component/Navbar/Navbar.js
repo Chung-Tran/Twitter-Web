@@ -61,15 +61,15 @@ const Navbar = () => {
                 <div className='navbar-userInfo'>
                     <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
                     <div className='navbar-userinfo-name'>
-                        <span>{user.displayName}</span>
-                        <span>@{user.username}</span>
+                        <span>{user?.displayName}</span>
+                        <span>@{user?.username}</span>
                     </div>
                     <div className='logout-section'>
                         <BsThreeDots onClick={()=>setShowSectioLogout(!showSectionLogout)}/>
                         { showSectionLogout &&
-                            <div className='logout'>
+                            <div className='logout' >
                             <span>Add an existing account</span>
-                            <span onClick={handleLogout}>Log out @{ user.username}</span>
+                            <span onClick={handleLogout}>Log out @{ user?.username}</span>
                         </div>
                         }
                     </div>

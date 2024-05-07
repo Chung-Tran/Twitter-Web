@@ -9,7 +9,8 @@ const { query } = require('express');
 const {uploadImage} = require('../config/cloudinaryConfig');
 const UploadImageMiddleware = require('../middleware/UploadImageMiddleware');
 
-const moment = require('moment-timezone')
+const moment = require('moment-timezone');
+const { createNotification } = require('./NotifyController');
 moment.tz('Asia/Ho_Chi_Minh')
 
 const create_Share = asyncHandle(async (req, res) => {
@@ -34,7 +35,15 @@ const create_Share = asyncHandle(async (req, res) => {
       if(index_UserID_In_Share === -1){
         const add_UserID_To_Share = await Sweet.findByIdAndUpdate(sweet_id, {$push: {shares: createNew.user_id}}).populate("user_id", "displayName");
         await sweet.save();
+        const dataAddNotify = {
+          content: `${req.user.displayName}${sweet.shares.length > 1 ? ` và ${sweet.shares.length - 1} người khác` : ''} đã chia sẻ bài viết của bạn.`,
+          relateTo: user_id,
+          tweetId: sweet_id,
+          userId:sweet.user_id
+        }
+        await createNotification(dataAddNotify);
       }
+
 
       const data = {
         UserName: await getDisplayName_By_ID(user_id),
