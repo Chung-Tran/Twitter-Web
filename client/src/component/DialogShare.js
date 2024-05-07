@@ -57,7 +57,6 @@ function DialogShare({sweet, onCloseDialog}) {
 
     useEffect(() => {
         checkIsShare();
-        
     }, [sweet._id]); 
 
     const handleCreateShare = async () => {

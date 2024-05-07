@@ -9,28 +9,19 @@ const Menu = () => {
     const [userListOnline, setUserListOnline] = useState([]);
     useEffect(() => {
         fetchData();
-
-        // Thiết lập interval để gọi fetchData mỗi 3 phút
-        const interval = setInterval(() => {
-            fetchData();
-        }, 3 * 60 * 1000); // 3 phút
-
-        // Xử lý cleanup bằng cách clear interval khi component unmount
+        const interval = setInterval(fetchData, 3 * 60 * 1000); // 3 phút
+    
         return () => clearInterval(interval);
     }, []);
-
     const fetchData = async () => {
         try {
-            const [userUnfollowResponse, userOnlineResponse] = await Promise.all([
-                axiosClient.get('users/getListUserUnFollow'),
-                axiosClient.get('users/getuseronline')
-            ]);
-
+            const userUnfollowResponse = await axiosClient.get('users/getListUserUnFollow');
             if (userUnfollowResponse.data.isSuccess) {
                 const userRelateData = userUnfollowResponse.data.data.map(user => ({ ...user, isFollow: false }));
                 setUserRelateList(userRelateData);
             }
-
+            
+            const userOnlineResponse = await axiosClient.get('users/getuseronline');
             if (userOnlineResponse.data.isSuccess) {
                 setUserListOnline(userOnlineResponse.data.data);
             }
