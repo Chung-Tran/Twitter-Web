@@ -4,9 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axiosClient from '../authenticate/authenticationConfig';
 import { toast } from 'react-toastify';
 import { useParams } from 'react-router-dom';
-import { light } from '@material-ui/core/styles/createPalette';
 import SinglePost from './SinglePost';
-import { colors } from '@material-ui/core';
 
 
 function DialogHistoryComment({comment, onCloseDialog}) {
