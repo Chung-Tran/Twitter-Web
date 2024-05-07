@@ -67,7 +67,7 @@ router.get('/getManySweetAndShareFollowing',get_Many_Sweet_And_Share_Following);
 
 router.get('/checkPinOrUnpin', check_Pin_Or_Unpin_Sweet);
 router.put('/pinSweet/:SweetID', pin_Or_Unpin_Sweet);
-router.get('/getSweetByUserID', get_Sweet_To_UserID);
+router.get('/getSweetByUserID/:UserID', get_Sweet_To_UserID);
 
 router.get('/checkSweetOrShare', check_Sweet_Or_Share);
 

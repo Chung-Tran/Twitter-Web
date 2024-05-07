@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axiosClient from '../authenticate/authenticationConfig';
 import SinglePost from '../component/SinglePost';
+import SweetInProfile from '../component/SweetInProfile';
 function ProfilePage() {
     const { id } = useParams();
     const [userInfo, setUserInfo] = useState();
@@ -26,7 +27,8 @@ function ProfilePage() {
         };
     }
         return userInfo && (
-            <div className='profile-container'>
+            <div className='profile-container' >
+                    
                 <div className='profile-page-header'>
                     <span><IoArrowBackSharp /></span>
                     <div className='header-title'>
@@ -75,8 +77,19 @@ function ProfilePage() {
                         ))} */}
                         
                     </div>
+
+                    <div style={{marginTop: 20, marginLeft: 20}}>
+                   
+                   {< SweetInProfile user_id = {id}/>}
+
+               </div>
+                   
                 </div>
 
+                
+
+                
+                
             </div>
         )
     }
