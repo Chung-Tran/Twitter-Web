@@ -20,9 +20,10 @@ function SinglePost({sweetData, selectedTab, resetData}) {
     const handleGetListLike = (_id) => {
         navigate(`/listLike/${_id}`, { state: { source: 'getListLike' } })
     }
+    const userId = JSON.parse(localStorage.getItem("twitter-user"))?._id;
 
     const [checkIsLiked, setCheckIsLiked] = useState(false);
-    const [isLiked, setIsLiked] = useState(true);
+    const [isLiked, setIsLiked] = useState(false);
     const [quantityLike, setQuantityLike] = useState(sweetData.QuantityLike); 
     const [showDialog, setShowDialog] = useState(false);
     const [showDialogCreateShare, setShowDialogCreateShare] = useState(false);
@@ -48,35 +49,26 @@ function SinglePost({sweetData, selectedTab, resetData}) {
 
     useEffect(() => {
         checkIsShare();
-        
-    }, [selectedTab, sweetData._id]); 
+        fetchLikeStatus();
+    }, [selectedTab]); 
   
     const fetchLikeStatus = async () => {
-        try {
-            if (sweetData && sweetData._id) {
-                const response = await axiosClient.get(`/sweet/checkUserLike?SweetID=${sweetData._id}`);
-                if (response.data.isSuccess) {
-                    if (response.data.data.State) {
-                        setIsLiked(true);
-                    } else {
-                        setIsLiked(false);
-                    }
-                }
-            }
+        // try {
+        //     if (sweetData && sweetData._id) {
+        //         const response = await axiosClient.get(`/sweet/checkUserLike?SweetID=${sweetData._id}`);
+        //         if (response.data.isSuccess) {
+        //             if (response.data.data.State) {
+        //                 setIsLiked(true);
+        //             } else {
+        //                 setIsLiked(false);
+        //             }
+        //         }
+        //     }
 
-        } catch (error) {
-            toast.error(error.response?.data.errorMessage ?? "Unexpected error");
-        }
-    };
-
-    useEffect(() => {
-      fetchLikeStatus();
-    }, [selectedTab, sweetData._id]); 
-
-
-    // useEffect(()=>{
-    //     resetData();
-    //   }, [showDialogCreateShare]);
+        // } catch (error) {
+        //     toast.error(error.response?.data.errorMessage ?? "Unexpected error");
+        // }
+    }
 
     const handleCreateShareClick = () => {
         setShowDialogCreateShare(true);
@@ -121,32 +113,6 @@ function SinglePost({sweetData, selectedTab, resetData}) {
         }
     }
 
-    
-    /*const likeSweetHandle = () => {
-        axiosClient.put(`/sweet/addOrDeleleLike/${sweetData._id}`)
-            .then(response => {
-                console.log(response);
-                if (response.data.isSuccess) {
-                    if (response.data.data.State) {
-                        setIsLiked(false);
-                    } else {
-                        setIsLiked(true);
-                    }
-                    setCheckIsLiked(response.data.isSuccess);
-                    setQuantityLike(response.data.data.QuantityLike);
-                }
-            })
-            .catch(error => {
-                toast.error(error.response?.data.errorMessage ?? "Unexpected error");
-            });
-    };*/
-
-    // useEffect(() => {
-    //     likeSweetHandle();
-    // }, [sweetData._id])
-
-
-
     return (
         <div className='single-post' >
             <div className='user-info' onClick={() => handleGetSweetDetail(sweetData._id)}>
@@ -173,8 +139,8 @@ function SinglePost({sweetData, selectedTab, resetData}) {
                             <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
                             <div className='info-content'>
                             <div className='user-info-name'>
-                                <span>{sweetData.UserName_Origin.displayName}</span>
-                                <span>{sweetData.UserName_Origin.username}</span>
+                                <span>{sweetData.UserName_Origin?.displayName}</span>
+                                <span>{sweetData.UserName_Origin?.username}</span>
                             </div>
                             <span className='post-createdAt'>{sweetData.Duration_Origin}</span>
                             </div>

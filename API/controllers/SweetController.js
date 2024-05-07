@@ -1338,16 +1338,17 @@ const get_Many_Sweet_And_Share_For_You = asyncHandle((async (req, res) => {
         };
       } else {
         return {
+          
           _id: item._id,
           UserName: item.user_id,
           Content: item.content,
           Image: item.image,
 
           SweetID: item.sweet_id,
-          UserName_Origin: sweet.user_id,
+          UserName_Origin: sweet?.user_id,
           Duration_Origin: durationByText_Origin,
-          Content_Origin: sweet.content,
-          Image_Origin: sweet.image,
+          Content_Origin: sweet?.content,
+          Image_Origin: sweet?.image,
 
           QuantityLike: item.likes.length,
 
@@ -1369,6 +1370,7 @@ const get_Many_Sweet_And_Share_For_You = asyncHandle((async (req, res) => {
     return res.status(200).json(formatResponse(data, true, `Lấy ra ${paginatedData.length} bài viết thành công!`));
 
   } catch (error) {
+    console.log(error)
     console.error('Lỗi khi lấy danh sách bài viết:', error.message);
     return res.status(400).json(formatResponse(null, false, "Lấy các bài viết thất bại!"));
   }

@@ -10,7 +10,6 @@ import { CiLocationOn } from "react-icons/ci";
 import axiosClient from '../../authenticate/authenticationConfig';
 import SinglePost from '../SinglePost';
 import { toast } from 'react-toastify';
-import DialogShare from '../DialogShare';
 
 function Post({isCreateShare}) {
   const [selectedTab, setSelectedTab] = useState('For You');
@@ -28,7 +27,7 @@ function Post({isCreateShare}) {
     //Check phân trang
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-      const isNearBottom = scrollHeight - scrollTop <= clientHeight + 1000;
+      const isNearBottom = scrollHeight - scrollTop <= clientHeight + 800;
       setIsNearBottom(isNearBottom);
     };
 
@@ -40,18 +39,22 @@ function Post({isCreateShare}) {
   }, []);
 
   useEffect(() => {
+    console.log('call fetchdata 1')
     fetchData();
+   
   }, [limit, skip]);
   //Nếu như đổi tab data sẽ set lại từ đầu
   useEffect(() => {
     setSweetList([]);
     setSkip(0);
     setLimit(5);
+    console.log('call fetchdata setSweetList')
     fetchData();
     
   },[selectedTab])
 
   const fetchData = async () => {
+    console.log('call fetchdata')
     try {
       let response;
       if (selectedTab === 'For You') {
@@ -61,7 +64,14 @@ function Post({isCreateShare}) {
       }
 
       if (response.data.isSuccess) {
-        setSweetList(prevSweetList => [...prevSweetList, ...response.data.data.InFo_Sweet]);
+        // setSweetList(prevSweetList => [...prevSweetList, ...response.data.data.InFo_Sweet]);
+        // console.log('sweet total',sweetList.length)
+        const newSweetList = response.data.data.InFo_Sweet;
+        newSweetList.forEach(newSweet => {
+          if (!sweetList.some(sweet => sweet._id === newSweet._id)) {
+            setSweetList(prevSweetList => [...prevSweetList, newSweet]);
+          }
+        });
       } else {
         toast.error(response.errorMessage);
       }
@@ -71,22 +81,27 @@ function Post({isCreateShare}) {
   };
 
   useEffect(() => {
-    setSelectedTab('For You');
-  }, []);
-
-  useEffect(() => {
     setIsCreateShareSuccess(isCreateShare);
   }, [isCreateShare]);
-
+  
   useEffect(() => {
-    fetchData();
-  }, [selectedTab, limit, skip, isCreateShareSuccess]);
-
-  useEffect(() => {
-    if(isCreateShareSuccess){
+    if (isCreateShareSuccess) {
       fetchData();
     }
   }, [isCreateShare]);
+  
+  useEffect(() => {
+    if (isNearBottom==true) {
+      console.log('set skip')
+      setSkip(prevSkip => prevSkip + limit);
+    }
+  }, [isNearBottom]);
+
+
+  // useEffect(() => {
+  //   fetchData();
+  // }, [selectedTab, limit, skip, isCreateShareSuccess]);
+
 
   const handleTabClick = (tab) => {
     setSelectedTab(tab);
@@ -122,12 +137,8 @@ function Post({isCreateShare}) {
     setSelectedFile(e.target.files[0]);
   };
 
-  useEffect(() => {
-    if (isNearBottom) {
-      setSkip(prevSkip => prevSkip + limit);
-    }
-  }, [isNearBottom]);
 
+console.log('limit',limit,'skip',skip)
   return (
     <div className='homepage-post'>
       {sweetList ? (
