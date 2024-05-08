@@ -187,6 +187,7 @@ const update_Sweet = asyncHandle(async (req, res) => {
     }
 
     const data = {
+      _id: sweet_id,
       UserID: await getDisplayName_By_ID(sweetAfterUpdate.user_id),
       Content: sweetAfterUpdate.content,
       Image: sweetAfterUpdate.image.map(i => i.toString()),
@@ -208,29 +209,62 @@ const get_History_Update_Sweet = asyncHandle(async (req, res) => {
   const sweet_id = req.query.SweetID;
 
   const sweet = await Sweet.findById(sweet_id);
-  const edit_historys = sweet.edit_history;
+  const share = await Share.findById(sweet_id);
 
-  if (!sweet) {
-    console.log("Không thấy bài viết!");
-    return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết!"));
+  
+  
 
+  try {
+    if(sweet){
+      const edit_historySweet = sweet.edit_history;
+      let list_History_Update = [];
+      const now = moment();
+    
+    
+      for (let i = edit_historySweet.length - 1; i >= 0; i--) {
+        const content = edit_historySweet[i].content;
+        const images = edit_historySweet[i].images;
+        const updated_at = moment(edit_historySweet[i].updated_at);
+        const durationByText = await formatTimeDifference(updated_at, now);
+    
+        list_History_Update.push({Content: content,Image: images, Duration: durationByText, UpdateAt: moment(updated_at).format("HH:mm - DD/MM/YYYY")});
+      }
+    
+      const data = {
+        UpdateNumber: edit_historySweet.length,
+        History_Update: list_History_Update,
+      }
+      return res.status(200).json(formatResponse(data, true, "Đã lấy được danh sách lịch sử chỉnh sửa bài viết"));
+  
+    }else if(share){
+      const edit_historyShare = share.edit_history;
+      let list_History_Update = [];
+      const now = moment();
+    
+    
+      for (let i = edit_historyShare.length - 1; i >= 0; i--) {
+        const content = edit_historyShare[i].content;
+        const images = edit_historyShare[i].images;
+        const updated_at = moment(edit_historyShare[i].updated_at);
+        const durationByText = await formatTimeDifference(updated_at, now);
+    
+        list_History_Update.push({Content: content,Image: images, Duration: durationByText, UpdateAt: moment(updated_at).format("HH:mm - DD/MM/YYYY")});
+      }
+    
+      const data = {
+        UpdateNumber: edit_historyShare.length,
+        History_Update: list_History_Update,
+      }
+      return res.status(200).json(formatResponse(data, true, "Đã lấy được danh sách lịch sử chỉnh sửa bài Share"));
+    }else{
+      console.log("Không thấy bài viết!");
+      return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết!"));
+    }
+
+  } catch (error) {
+    return res.status(400).json(formatResponse(null, false, "Lỗi khi lấy lịch sử chỉnh sửa!"));
   }
 
-  let list_History_Update = [];
-
-  edit_historys.forEach(edit_history => {
-    const content = edit_history.content;
-    const images = edit_history.images.map(image => image.toString());
-    const updated_at = moment(edit_history.updated_at).format();
-
-    list_History_Update.push({ Content: content, Image: images, UpdateAt: updated_at });
-  });
-
-  const data = {
-    UpdateNumber: edit_historys.length,
-    History_Update: list_History_Update,
-  }
-  return res.status(200).json(formatResponse(data, true, "Đã lấy được danh sách lịch sử chỉnh sửa bài viết"));
 
 })
 
@@ -252,28 +286,33 @@ const deleted_Sweet = asyncHandle(async (req, res) => {
   const sweet_id = req.params.SweetID;
 
   const sweet = await Sweet.findById(sweet_id);
-
+  const share = await Share.findById(sweet_id);
   try {
+    if(sweet){
+      const delete_Sweet = await delete_Sweet_By_ID(sweet_id);
+      const delete_Comment = await Comment.deleteMany({ tweet_id: sweet_id })
+  
+      const delete_Share = await Share.deleteMany({ sweet_id: sweet_id })
+  
+      const share = await Share.find({ sweet_id: sweet_id });
+  
+      for (const shareID of share) {
+        const delete_Comment_In_Share = await Comment.deleteMany({ sweet_id: shareID });
+      }
+  
+      return res.status(200).json(formatResponse(null, true, "Đã xóa bài viết!"));
+  
+    }else if(share){
+      const delete_Share = await Share.findByIdAndDelete(sweet_id);
 
-    if (!sweet) {
+      const delete_Comment_In_Share = await Comment.deleteMany({ sweet_id: sweet_id });
+      
+    }else{
       console.log("Không thấy bài viết!");
       return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết!"));
-
     }
 
-    const delete_Sweet = await delete_Sweet_By_ID(sweet_id);
-    const delete_Comment = await Comment.deleteMany({ tweet_id: sweet_id })
-
-    const delete_Share = await Share.deleteMany({ sweet_id: sweet_id })
-
-    const share = await Share.find({ sweet_id: sweet_id });
-
-    for (const shareID of share) {
-      const delete_Comment_In_Share = await Comment.deleteMany({ sweet_id: shareID });
-    }
-
-    return res.status(200).json(formatResponse(null, true, "Đã xóa bài viết!"));
-
+    
   } catch (error) {
     return res.status(400).json(formatResponse(null, false, "Lỗi khi thực hiện xóa bài viết!"));
   }
@@ -284,20 +323,25 @@ const deleted_Sweet_Temporary = asyncHandle(async (req, res) => {
   const sweet_id = req.params.SweetID;
 
   const sweet = await Sweet.findById(sweet_id);
+  const share = await Share.findById(sweet_id);
 
   try {
 
-    if (!sweet) {
+
+    if(sweet){
+      const delete_Sweet = await Sweet.findByIdAndUpdate(sweet_id, { $set: { isDelete: true } });
+      const delete_Share = await Share.updateMany({ sweet_id: sweet_id }, { $set: { isDelete: true } });
+
+      return res.status(200).json(formatResponse(null, true, "Đã xóa bài viết!"));
+    }else if(share){
+      const delete_Share = await Share.findByIdAndUpdate(sweet_id, { $set: { isDelete: true } });
+    }else{
       console.log("Không thấy bài viết!");
       return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết!"));
     }
-
-    const delete_Sweet = await Sweet.findByIdAndUpdate(sweet_id, { $set: { isDelete: true } });
-    const delete_Share = await Share.updateMany({ sweet_id: sweet_id }, { $set: { isDelete: true } });
-
-    return res.status(200).json(formatResponse(null, true, "Đã xóa bài viết!"));
-
+    
   } catch (error) {
+    console.error("Lỗi khi xóa bài viết tạm thời: ". error.message)
     return res.status(400).json(formatResponse(null, false, "Lỗi khi thực hiện xóa bài viết!"));
   }
 });
@@ -1670,6 +1714,23 @@ const check_Sweet_Or_Share = asyncHandle(async (req, res) => {
   }
 })
 
+const countShareInSweet = asyncHandle(async (req, res) => {
+  const sweet_id = req.query.SweetID;
+  const sweet = await Sweet.findById(sweet_id);
+  try {
+    if (sweet) {
+      const data = {
+        QuantityShare: sweet.shares.length,
+      }
+      return res.status(200).json(formatResponse(data, true, ``));
+    }else return res.status(400).json(formatResponse(null, false, ``));
+
+  } catch (error) {
+    console.error("Lỗi khi đếm số share", error.message);
+    return res.status(400).json(formatResponse(null, false, "Lỗi khi đếm số Share"));
+  }
+})
+
 
 
 module.exports = {
@@ -1700,4 +1761,5 @@ module.exports = {
   pin_Or_Unpin_Sweet,
   get_Sweet_To_UserID,
   check_Sweet_Or_Share,
+  countShareInSweet,
 }

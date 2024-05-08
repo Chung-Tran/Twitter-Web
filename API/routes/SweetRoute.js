@@ -28,7 +28,8 @@ const { create_Sweet,
     pin_Or_Unpin_Sweet,
     check_Pin_Or_Unpin_Sweet,
     get_Sweet_To_UserID,
-    check_Sweet_Or_Share,} = require('../controllers/SweetController');
+    check_Sweet_Or_Share,
+    countShareInSweet,} = require('../controllers/SweetController');
 
 
 router.post('/createSweet/',UploadImageMiddleware.array('image'), create_Sweet);
@@ -70,5 +71,6 @@ router.put('/pinSweet/:SweetID', pin_Or_Unpin_Sweet);
 router.get('/getSweetByUserID/:UserID', get_Sweet_To_UserID);
 
 router.get('/checkSweetOrShare', check_Sweet_Or_Share);
+router.get('/countShare', countShareInSweet);
 
 module.exports = router;

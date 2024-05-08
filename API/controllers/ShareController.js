@@ -55,6 +55,7 @@ const create_Share = asyncHandle(async (req, res) => {
         CreateAT_Origin: moment(sweet.created_at).format(),
         Content_Origin: sweet.content,
         Image_Origin: sweet.image,
+        QuantityShare_Origin: sweet.shares.length,
         QuantityLike: createNew.likes.length,
         QuantityComment: createNew.comments.length,
       };
@@ -107,36 +108,85 @@ const update_Share = asyncHandle(async (req, res) => {
     const content = req.body.content;
     const image = await uploadImage(req.files);
 
-   
-    const updateData = await Share.findByIdAndUpdate(share_id, { $set: { content: content, image: image, updated_at: new Date()}});
-    
-    const shareAfterUpdate = await get_Share_By_Id(share_id);
+    const share = await Share.findById(share_id);
 
-    if (shareAfterUpdate) {
-        console.log('Đối tượng share mới:', shareAfterUpdate);
-        shareAfterUpdate
-      } else {
-        console.log('Không tìm thấy đối tượng share.');
-        res.status(404).json(formatResponse(null, false, "Không tìm thấy bài Share!!"));
+    try {
+      if (!share) {
+        console.log("Không thấy bài Share!");
+        return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài Share!"));
+  
+      }
+      try {
+        if (share.updated_at == null) {
+  
+          const content_History = share.content;
+          // const image_History = share.image;
+          const updated_History = share.created_at;
+  
+          const historyUpdate = {
+            content: content_History,
+            // images: image_History,
+            updated_at: updated_History,
+          };
+  
+          const addDataToHistory = await Share.findByIdAndUpdate(share_id, { $push: { edit_history: historyUpdate } }); // , { new: true }
+  
+          const updateDataToSweet = await Share.findByIdAndUpdate(share_id, { $set: { content: content, updated_at: new Date() } });
+  
+        } else {
+
+          const content_History = share.content;
+          // const image_History = share.image;
+          const updated_History = share.updated_at;
+  
+          const historyUpdate = {
+            content: content_History,
+            // images: image_History,
+            updated_at: updated_History,
+          };
+  
+          const addDataToHistory = await Share.findByIdAndUpdate(share_id, { $push: { edit_history: historyUpdate } }); // , { new: true }
+  
+          const updateData = await Share.findByIdAndUpdate(share_id, { $set: { content: content, updated_at: new Date() } });
+  
+  
+        }
+      } catch (error) {
+        return res.status(400).json(formatResponse(null, false, "Lỗi khi cập nhật bài Share!"));
       }
 
-    const sweet = await Sweet.findById(shareAfterUpdate.sweet_id).populate("user_id", "displayName");
+      const shareAfterUpdate = await Share.findById(share_id);
+      const id = shareAfterUpdate.sweet_id;
+      console.log(id);
+    if (shareAfterUpdate) {
+      console.log('Đối tượng Share mới:', shareAfterUpdate);
+      shareAfterUpdate
+    } else {
+      console.log('Không tìm thấy đối tượng Share.');
+    }
+
+    const sweet = await Sweet.findById(id).populate("user_id", "displayName");
 
     const data = {
-        UserName: await getDisplayName_By_ID(shareAfterUpdate.user_id),
-        CreateAt: moment(shareAfterUpdate.created_at).format(),
-        Content: shareAfterUpdate.content,
-        Image: shareAfterUpdate.image,
-        Sweet_Origin: Share.sweet_id,
-        UserName_Origin: sweet.user_id,
-        CreateAT_Origin: moment(sweet.created_at).format(),
-        Content_Origin: sweet.content,
-        QuantityLike: shareAfterUpdate.likes.length,
-        QuantityComment: shareAfterUpdate.comments.length,
-        UpdateAt: shareAfterUpdate.updated_at,
+      _id: share_id,
+      UserName: await getDisplayName_By_ID(shareAfterUpdate.user_id),
+      CreateAt: moment(shareAfterUpdate.created_at).format(),
+      Content: shareAfterUpdate.content,
+      Image: shareAfterUpdate.image,
+      Sweet_Origin: Share.sweet_id,
+      UserName_Origin: shareAfterUpdate.user_id,
+      CreateAT_Origin: moment(sweet.created_at).format(),
+      Content_Origin: sweet.content,
+      QuantityLike: shareAfterUpdate.likes.length,
+      QuantityComment: shareAfterUpdate.comments.length,
+      UpdateAt: shareAfterUpdate.updated_at,
     };
 
-    return res.status(200).json(formatResponse(data, true, "Cập nhật bài Share thành công!!"));
+    return res.status(200).json(formatResponse(data, true, "Sửa đổi thành công"));
+  } catch (error) {
+    console.log("Error", error.message)
+    return res.status(400).json(formatResponse(null, false, "Sửa đổi thất bại!"));
+  }
 });
 
 const delete_Share = asyncHandle(async(req, res) => {
@@ -172,8 +222,9 @@ const delete_Share = asyncHandle(async(req, res) => {
             console.error("Lỗi khi xóa bài Share", error);
             return res.status(400).json(formatResponse(null, false, "Lỗi khi thực hiện xóa bài Share!"));
         }
-
+        const sweetAfterUpdate = await Sweet.findById(share.sweet_id);
         data ={
+            QuantityShare: sweetAfterUpdate.shares.length,
             Note: "Bài Share đã xóa!",
             //count: sweet.shares.length,
         }
