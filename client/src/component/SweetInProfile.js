@@ -179,10 +179,10 @@ function SweetInProfile({user_id}) {
 
                 ) : (null)} */}
 
-                <div className='image-content' >
+                <div className='image-content'  >
                     {
                         item.Image && item.Image.map((item1, index) => (
-                            <img src={item1} />
+                            <img src={item1} style={{maxWidth:'600px'}}/>
                         ))
                     }
                 </div>
