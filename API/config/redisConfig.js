@@ -10,7 +10,7 @@ const connectRedis = () => {
         });
 
         redisClient.on('error', function (err) {
-            console.log('Error ' + err);
+            console.log('Error connect ' + JSON.stringify(err));
         });
 
         redisClient.on('connect', function() {

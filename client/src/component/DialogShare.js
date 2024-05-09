@@ -15,7 +15,7 @@ import { toast } from 'react-toastify';
 import Post from './post/post';
 
 
-function DialogShare({sweet, onCloseDialog}) {
+function DialogShare({sweet, onCloseDialog, quantityShare}) {
     const navigate = useNavigate();
     const handleReturnPort = () => {
         navigate("/")
@@ -24,6 +24,8 @@ function DialogShare({sweet, onCloseDialog}) {
     const [showDialog, setShowDialog] = useState(true);
     const [postSweetContent, setPostSweetContent] = useState();
     const [isCreateShare, setIsCreateShare] = useState(false);
+    const [countShare, setCountShare] = useState(false);
+
     const [isShare, setIsShare] = useState();
     const textareaRef = useRef(null);
 
@@ -36,6 +38,7 @@ function DialogShare({sweet, onCloseDialog}) {
     const handleCloseDialog = () => {
         setShowDialog(false); 
         onCloseDialog(false);
+        quantityShare(2);
     };
 
     const checkIsShare = async () => {
@@ -72,8 +75,9 @@ function DialogShare({sweet, onCloseDialog}) {
                 if (response.data.isSuccess) {
                     // setSweetList(response.data.data.InFo_Sweet);
                     setPostSweetContent('');
-                    toast.success("Tạo bài viết thành công!");
+                    toast.success("Tạo bài Share thành công!");
                     setIsCreateShare(true);
+                    setCountShare(response.data.data.QuantityShare_Origin);
                 }else toast.error(response.errorMessage); 
             }else{
                 const response = await axiosClient.post(`/share/createShare/${sweet.SweetID}`, formData, {
@@ -84,8 +88,9 @@ function DialogShare({sweet, onCloseDialog}) {
                 if (response.data.isSuccess) {
                     // setSweetList(response.data.data.InFo_Sweet);
                     setPostSweetContent('');
-                    toast.success("Tạo bài viết thành công!");
+                    toast.success("Tạo bài Share thành công!");
                     setIsCreateShare(true);
+                    setCountShare(response.data.data.QuantityShare_Origin);
                 }else toast.error(response.errorMessage);
             }
         } catch (error) {

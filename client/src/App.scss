@@ -569,6 +569,7 @@
           width: 100%;
           height: 50px;
           display: flex;
+          flex-direction: 'row';
           background-color: transparent;
 
           img {
@@ -578,31 +579,75 @@
             border-radius: 50%;
           }
 
-          .user-info-name {
-            margin-left: 10px;
-            font-size: 16px;
-            color: white;
-            margin: auto 10px;
-
-            span {
-              font-family: 'font-medium';
-
-              &:last-child {
-                margin-left: 10px;
-                font-size: 14px;
-                color: rgb(248, 159, 159);
+          .info-content{            
+            .user-info-name {
+              margin-left: 10px;
+              font-size: 16px;
+              color: white;
+              margin: auto 10px;
+  
+              span {
+                font-family: 'font-medium';
+  
+                &:last-child {
+                  margin-left: 10px;
+                  font-size: 14px;
+                  color: rgb(248, 159, 159);
+                }
               }
+              
+
+  
             }
+  
+            
+            .option-sigle-post{
+              display: flex;
+              flex-direction: 'row';
+              
+              .post-createdAt {
+                margin: auto;
+                margin-left: 10px;
+                color: #6d6d6d;
+                font-size: 14px;
+                
+              }
 
-
+              .option-sweet {
+                position: absolute;
+                // padding-right: 100px;
+                border: 1px solid #100cef;
+  
+                button {
+                  height: 25px;
+                  width: 165px;
+                  font-size: 14px;
+                  font-weight: bold;
+                  background: #5a4848;
+                  cursor: pointer;
+                  padding: 3px 6px;
+                  border: none;
+                  outline: none;
+                  display: flex;
+                  flex-direction: column;
+    
+                  &:hover {
+                    background-color: #5dafe6;
+                  }
+                }
+              }
+  
+            }
           }
 
-          .post-createdAt {
-            margin: auto;
-            margin-left: 10px;
-            color: #6d6d6d;
-            font-size: 14px;
-          }
+          
+
+          
+            
+          
+
+          
+
 
         }
 
@@ -616,9 +661,95 @@
             min-height: 30px;
             background-color: transparent;
 
+            textarea {
+              background-color: transparent;
+              border: 1px solid rgb(71, 51, 51);
+              margin-top: 10px;
+              color: white;
+              font-size: 18px;
+              padding: 5px;
+              resize: auto;
+              width: 100%;
+            }
+
             span {
               font-size: 20px;
               color: white;
+            }
+
+            .option-update-sweet {
+              display: flex;
+              flex-direction: row;
+              position: relative;
+
+              .box-icon {
+                height: 30%;
+                display: flex;
+                justify-content: flex-start;
+                padding: 7px 0;
+                width: 100%;
+                align-items: center;
+
+                .icon-list {
+                  width: 100%;
+
+                  nav {
+                    width: 70%;
+                    display: flex;
+                    flex-direction: row;
+                    margin: 0 10px;
+                    color: white;
+
+                    ul {
+                      display: flex;
+                      flex: 1 1;
+                      margin: auto 0;
+                      cursor: pointer;
+
+                      li {
+                        margin-bottom: 0;
+                        font-size: 20px;
+                        margin: 0 5px;
+                        color: rgb(89, 89, 224);
+                        font-weight: bold;
+
+                      }
+                    }
+                  }
+                }
+              }
+
+
+              #btn-capnhat {
+                background-color: #4579b0;
+                color: white;
+                border: none;
+                font-size: 15px;
+                width: 100px;
+                padding: 5px 5px;
+                cursor: pointer;
+                border-radius: 5px;
+                margin-right: 10px;
+              }
+
+              #btn-capnhat:hover {
+                background-color: #044284;
+              }
+
+              #huy {
+                background-color: #bf6972;
+                color: white;
+                border: none;
+                font-size: 15px;
+                padding: 5px 5px;
+                cursor: pointer;
+                border-radius: 5px;
+              }
+
+              #huy:hover {
+                background-color: #c82333;
+              }
+
             }
 
           }
