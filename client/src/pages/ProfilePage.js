@@ -57,7 +57,9 @@ function ProfilePage() {
     }, [selectedTab]); 
 
     return userInfo && (
-        <div className='profile-container' >
+        <div className='hompage-container' >
+
+            <div className='profile-container' >
        
                 <div className='profile-page-header'>
                     <span><IoArrowBackSharp /></span>
@@ -164,6 +166,7 @@ function ProfilePage() {
                 
                 
             </div>
+        </div>
     )
 }
 
