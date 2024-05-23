@@ -563,7 +563,7 @@ const add_OR_Delete_User_To_List_Like_Sweet = asyncHandle(async (req, res) => {
         sweet.likes.push(user_id);
         sweet.save();
         const data = {
-          State: false,
+          State: true,
           QuantityLike: sweet.likes.length
         }
         const dataAddNotify = {
@@ -578,7 +578,7 @@ const add_OR_Delete_User_To_List_Like_Sweet = asyncHandle(async (req, res) => {
         sweet.likes.splice(user_id_In_List_Like_Sweet, 1);
         sweet.save();
         const data = {
-          State: true,
+          State: false,
           QuantityLike: sweet.likes.length,
           
         }
@@ -590,7 +590,7 @@ const add_OR_Delete_User_To_List_Like_Sweet = asyncHandle(async (req, res) => {
         share.likes.push(user_id);
         share.save();
         const data = {
-          State: false,
+          State: true,
           QuantityLike: share.likes.length
         }
         const dataAddNotify = {
@@ -603,7 +603,7 @@ const add_OR_Delete_User_To_List_Like_Sweet = asyncHandle(async (req, res) => {
         share.likes.splice(user_id_In_List_Like_Share, 1);
         share.save();
         const data = {
-          State: true,
+          State: false,
           QuantityLike: share.likes.length
         }
         return res.status(200).json(formatResponse(data, true, "Bỏ thích bài Share thành công!"));
@@ -1067,6 +1067,7 @@ async function formatTimeDifference(fromDate, toDate) {
 
 const get_A_Sweet = asyncHandle(async (req, res) => {
   const sweetID = req.query.SweetID;
+  const user_id = req.user.userId;
 
   const sweet = await Sweet.findById(sweetID)
     .populate('user_id', 'displayName username')
@@ -1107,9 +1108,15 @@ const get_A_Sweet = asyncHandle(async (req, res) => {
     const now = moment();
 
     let data = "";
+    let stateLike;
     if (sweet) {
       const createdAt_Sweet = moment(sweet.created_at);
       const durationByText_Sweet = await formatTimeDifference(createdAt_Sweet, now);
+
+      const check_UserLike = sweet.likes.some(like => like.equals(user_id));
+      if(check_UserLike){
+        stateLike = true;
+      }else stateLike = false;
 
       data = {
         _id: sweet._id,
@@ -1124,6 +1131,8 @@ const get_A_Sweet = asyncHandle(async (req, res) => {
         ListUserToShare: sweet.shares,
         CreateAt: moment(sweet.created_at).format(),
         Duration: durationByText_Sweet,
+        StateLike: stateLike,
+        State: false
       }
     } else if (share) {
       const createdAt_Share = moment(share.created_at);
@@ -1134,6 +1143,11 @@ const get_A_Sweet = asyncHandle(async (req, res) => {
         .populate('likes', 'displayName username')
         .populate('shares', 'displayName username');
       const durationByText_Sweet = await formatTimeDifference(sweet.created_at, now);
+
+      const check_UserLike = share.likes.some(like => like.equals(user_id));
+      if(check_UserLike){
+        stateLike = true;
+      }else stateLike = false;
 
       data = {
         _id: share._id,
@@ -1155,6 +1169,8 @@ const get_A_Sweet = asyncHandle(async (req, res) => {
         ListUserToShare: share.shares,
         CreateAt: moment(share.created_at).format(),
         Duration: durationByText_Share,
+        StateLike: stateLike,
+        State: true
       }
     }
 
@@ -1340,6 +1356,8 @@ const get_Many_sweet = asyncHandle(async (req, res) => {
 const get_Many_Sweet_And_Share_For_You = asyncHandle((async (req, res) => {
   let skipNumble = parseInt(req.query.skip) || 0;
   let limitNumble = parseInt(req.query.limit) || 10;
+  const user_id = req.user.userId
+  // const user_id = req.body.userId
 
   try {
     const getSweet = await Sweet.find({ isDelete: false }).populate('user_id', 'displayName username');
@@ -1371,6 +1389,12 @@ const get_Many_Sweet_And_Share_For_You = asyncHandle((async (req, res) => {
         durationByText_Origin = await formatTimeDifference(createdAt_Origin, now);
       }
 
+      let stateLike;
+      const check_UserLike = item.likes.includes(user_id);
+      if(check_UserLike){
+        stateLike = true;
+      }else stateLike = false;
+
       if (item instanceof Sweet) {
         return {
           _id: item._id,
@@ -1381,11 +1405,12 @@ const get_Many_Sweet_And_Share_For_You = asyncHandle((async (req, res) => {
           QuantityComment: item.comments.length,
           QuantityShare: item.shares.length,
           CreateAt: moment(item.created_at).format(),
-          Duration: durationByText
+          Duration: durationByText,
+          StateLike: stateLike,
+          State: false
         };
       } else {
         return {
-          
           _id: item._id,
           UserName: item.user_id,
           Content: item.content,
@@ -1405,6 +1430,8 @@ const get_Many_Sweet_And_Share_For_You = asyncHandle((async (req, res) => {
 
           CreateAt: moment(item.created_at).format(),
           Duration: durationByText,
+          StateLike: stateLike,
+          State: true,
         };
       }
     }));
@@ -1463,6 +1490,13 @@ const get_Many_Sweet_And_Share_Following = asyncHandle((async (req, res) => {
         durationByText_Origin = await formatTimeDifference(createdAt_Origin, now);
       }
 
+      let stateLike;
+      const check_UserLike = item.likes.includes(user_id);
+      if(check_UserLike){
+        stateLike = true;
+      }else stateLike = false;
+
+
       if (item instanceof Sweet) {
         return {
           _id: item._id,
@@ -1473,7 +1507,9 @@ const get_Many_Sweet_And_Share_Following = asyncHandle((async (req, res) => {
           QuantityComment: item.comments.length,
           QuantityShare: item.shares.length,
           CreateAt: moment(item.created_at).format(),
-          Duration: durationByText
+          Duration: durationByText,
+          StateLike: stateLike,
+          State: false
         };
       } else {
         return {
@@ -1496,6 +1532,8 @@ const get_Many_Sweet_And_Share_Following = asyncHandle((async (req, res) => {
 
           CreateAt: moment(item.created_at).format(),
           Duration: durationByText,
+          StateLike: stateLike,
+          State: true
         };
       }
     }));
@@ -1563,11 +1601,11 @@ const pin_Or_Unpin_Sweet = asyncHandle(async (req, res) => {
       if (sweet.isPin === true) {
         sweet.isPin = false;
         await sweet.save();
-        return res.status(200).json(formatResponse(null, true, `Bỏ ghim bài viết theo có id ${sweet_id} thành công!`));
+        return res.status(200).json(formatResponse(false, true, `Bỏ ghim bài viết theo có id ${sweet_id} thành công!`));
       } else {
         sweet.isPin = true;
         await sweet.save();
-        return res.status(200).json(formatResponse(null, true, `Ghim bài viết theo có id ${sweet_id} thành công!`));
+        return res.status(200).json(formatResponse(true, true, `Ghim bài viết theo có id ${sweet_id} thành công!`));
       }
     }
     else if (share) {
@@ -1581,11 +1619,11 @@ const pin_Or_Unpin_Sweet = asyncHandle(async (req, res) => {
       if (share.isPin === true) {
         share.isPin = false;
         await share.save();
-        return res.status(200).json(formatResponse(null, true, `Bỏ ghim bài share theo có id ${sweet_id} thành công!`));
+        return res.status(200).json(formatResponse(false, true, `Bỏ ghim bài share theo có id ${sweet_id} thành công!`));
       } else {
         share.isPin = true;
         await share.save();
-        return res.status(200).json(formatResponse(null, true, `Ghim bài share theo có id ${sweet_id} thành công!`));
+        return res.status(200).json(formatResponse(true, true, `Ghim bài share theo có id ${sweet_id} thành công!`));
       }
     } else return res.status(400).json(formatResponse(null, false, "ID không hợp lệ!"));
 
@@ -1598,7 +1636,7 @@ const pin_Or_Unpin_Sweet = asyncHandle(async (req, res) => {
 const get_Sweet_To_UserID = asyncHandle(async (req, res) => {
 
   let skipNumble = parseInt(req.query.skip) || 0;
-  let limitNumble = parseInt(req.query.limit) || 10;
+  let limitNumble = parseInt(req.query.limit)|| 50;
 
   // const user_id = req.user.userId;
   // const user_id = req.query.UserID;
@@ -1640,6 +1678,12 @@ const get_Sweet_To_UserID = asyncHandle(async (req, res) => {
         durationByText_Origin = await formatTimeDifference(createdAt_Origin, now);
       }
 
+      let stateLike;
+      const check_UserLike = item.likes.includes(user_id);
+      if(check_UserLike){
+        stateLike = true;
+      }else stateLike = false;
+
       if (item instanceof Sweet) {
         return {
           _id: item._id,
@@ -1650,7 +1694,10 @@ const get_Sweet_To_UserID = asyncHandle(async (req, res) => {
           QuantityComment: item.comments.length,
           QuantityShare: item.shares.length,
           CreateAt: moment(item.created_at).format(),
-          Duration: durationByText
+          Duration: durationByText,
+          StateLike: stateLike,
+          State: false,
+          Ispin: item.isPin
         };
       } else {
         return {
@@ -1673,6 +1720,9 @@ const get_Sweet_To_UserID = asyncHandle(async (req, res) => {
 
           CreateAt: moment(item.created_at).format(),
           Duration: durationByText,
+          StateLike: stateLike,
+          State: true,
+          Ispin: item.isPin
         };
       }
     }));

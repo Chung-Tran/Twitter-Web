@@ -14,6 +14,9 @@ function ProfilePage() {
     const userId = JSON.parse(localStorage.getItem("twitter-user"))?._id; //ID người đang sử dụng
     const navigate=useNavigate()
 
+    const [getListSweet, setGetListSweet] = useState([]);
+    const [selectedTab, setSelectedTab] = useState('Posts');
+
     useEffect(() => {
         fetchData(id)
     }, [id]);
@@ -33,9 +36,29 @@ function ProfilePage() {
     const ChatNow = () => {
         navigate(`/messages/${id}`)
     }
-        return userInfo && (
-            <div className='profile-container' >
-                    
+
+    const handleGetSweet = async () => {
+        try {  
+          const response = await axiosClient.get(`/sweet/getSweetByUserID/${id}`);
+          if(response.data.isSuccess){
+            setGetListSweet(response.data.data.Info);
+                console.log("lo",response.data.data.Info);
+            }
+
+        } catch (error) {
+          toast.error(error.response?.data.errorMessage ?? "Unexpected error");
+        }
+    };
+
+    useEffect(() => {
+        if(selectedTab==='Posts'){
+            handleGetSweet();
+        }
+    }, [selectedTab]); 
+
+    return userInfo && (
+        <div className='profile-container' >
+       
                 <div className='profile-page-header'>
                     <span><IoArrowBackSharp /></span>
                     <div className='header-title'>
@@ -71,34 +94,77 @@ function ProfilePage() {
                 </div>
                 <div className='style-show-profile'>
                     <ul>
-                        <li id='select-type-post'>Posts</li>
-                        <li>Replies</li>
-                        <li>Hightlights</li>
-                        <li>Articles</li>
-                        <li>Media</li>
-                        <li>Likes</li>
+                        <li
+                            onClick={() => setSelectedTab('Posts')}
+                            style={{ cursor: 'pointer' }}
+                            className={selectedTab === 'Posts' ? 'active' : ''}
+                        >
+                            Posts
+                        </li>
+                        <li
+                            onClick={() => setSelectedTab('Replies')}
+                            style={{ cursor: 'pointer' }}
+                            className={selectedTab === 'Replies' ? 'active' : ''}
+                        >
+                            Replies
+                        </li>
+                        <li
+                            onClick={() => setSelectedTab('Hightlights')}
+                            style={{ cursor: 'pointer' }}
+                            className={selectedTab === 'Hightlights' ? 'active' : ''}
+                        >
+                            Hightlights
+                        </li>
+                        <li
+                            onClick={() => setSelectedTab('Articles')}
+                            style={{ cursor: 'pointer' }}
+                            className={selectedTab === 'Articles' ? 'active' : ''}
+                        >
+                            Articles
+                        </li>
+                        <li
+                            onClick={() => setSelectedTab('Media')}
+                            style={{ cursor: 'pointer' }}
+                            className={selectedTab === 'Media' ? 'active' : ''}
+                        >
+                            Media
+                        </li>
+                        <li
+                            onClick={() => setSelectedTab('Likes')}
+                            style={{ cursor: 'pointer' }}
+                            className={selectedTab === 'Likes' ? 'active' : ''}
+                        >
+                            Likes
+                        </li>
                     </ul>
-                    <div className='profile-show-tweet'>
-                        {/* {userInfo?.statusList && userInfo.statusList.map((item, index) => (
-                            <SinglePost sweetData={item} selectedTab="For you"/>
-                        ))} */}
-                        
+                    
+                    <div className='sweet-in-profile'>
+                        {selectedTab === 'Posts' ? (
+                            <div style={{marginTop: 20, marginLeft: 20}}>
+                                {getListSweet && getListSweet.map((item, index) => (
+                                    <div key={index}>< SweetInProfile sweetData = {item} resetData={handleGetSweet}/> </div>
+                                ))}
+
+                                {/* {getListSweet && getListSweet.map((item, index) => (
+                                    <div key={index} className='post-content-by-user'>
+                                        <SinglePost sweetData={item} selectedTab={selectedTab} resetData={fetchData} />
+                                    </div>
+                                ))} */}
+                            </div>
+                            
+                        ) : (null)}
                     </div>
 
-                    <div style={{marginTop: 20, marginLeft: 20}}>
-                   
-                   {< SweetInProfile user_id = {id}/>}
-
-               </div>
+                    
+                    
                    
                 </div>
 
-                
 
                 
                 
             </div>
-        )
-    }
+    )
+}
 
-    export default ProfilePage;
+export default ProfilePage;

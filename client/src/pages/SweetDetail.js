@@ -20,7 +20,7 @@ function SweetDetail() {
     }
 
     const [sweetDetail, setSweetDetail] = useState();
-    const [postCommentContent, setPostCommentContent] = useState();
+    const [postCommentContent, setPostCommentContent] = useState('');
     const [selectedFile, setSelectedFile] = useState([]);
     
     const [isPostView, setIsPostView] = useState(false);
@@ -39,34 +39,64 @@ function SweetDetail() {
         } else {
             toast.error(response.errorMessage);
         }
+        // console.log(sweetDetail);
+
     };
     useEffect(() => {
         fetchData();
         window.scrollTo(0, 0);
+        console.log(sweetDetail);
     }, []);
 
     
 
     const potstCommentHandle = async () => {
         try {
-            const formData = new FormData();
-            formData.append('content', postCommentContent);
-            selectedFile && formData.append('image', selectedFile);
-            const response = await axiosClient.post(`comment/createComment/${id}`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
+            if(selectedFile.length === 0){
+                if(postCommentContent !== ''){
+                    const formData = new FormData();
+                    formData.append('content', postCommentContent);
+                    selectedFile && formData.append('image', selectedFile);
+                    const response = await axiosClient.post(`comment/createComment/${id}`, formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    });
+                    if (response.data.isSuccess) {
+                        setPostCommentContent('');
+                        setSelectedFile([]);
+                        toast.success("Bình luận bài viết thành công.");
+                        fetchData();
+                    } else {
+                        toast.error(response.errorMessage);
+                    }
                 }
-            });
-            if (response.data.isSuccess) {
-                setPostCommentContent('');
-                toast.success("Bình luận bài viết thành công.");
-                fetchData();
-            } else {
-                toast.error(response.errorMessage);
+                else{
+                    toast.error("Lỗi khi bình luận bài viết");
+                }
+            }else{
+                const formData = new FormData();
+                formData.append('content', postCommentContent || '');
+                selectedFile && formData.append('image', selectedFile);
+                const response = await axiosClient.post(`comment/createComment/${id}`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                if (response.data.isSuccess) {
+                    setPostCommentContent('');
+                    setSelectedFile([]);
+                    toast.success("Bình luận bài viết thành công.");
+                    fetchData();
+                } else {
+                    toast.error(response.errorMessage);
+                }
             }
+            
         } catch (error) {
             console.error("Error posting content:", error);
             toast.error("Lỗi khi bình luận bài viết");
+            setSelectedFile([]);
         }
     };
     const handleFileChange = (e) => {
@@ -86,7 +116,7 @@ function SweetDetail() {
             <div className='homepage-post'>       
                 <div class="sticky-popup">
                     <button class="close-button" onClick={()=> handleReturnPort()}><AiOutlineArrowLeft/></button>
-                    <p>POST</p>
+                    <p className='p-post'>POST</p>
                 </div>
                 <div className='post-content'>
                     {sweetDetail && <SinglePost sweetData={sweetDetail} />}
@@ -102,7 +132,7 @@ function SweetDetail() {
                                     placeholder='Post your reply'
                                     name="postSweetContent"
                                     value={postCommentContent}
-                                    onChange={(e) => setPostCommentContent(e.target.value)}
+                                    onChange={(e) => setPostCommentContent(e.target.value || '')}
                                 />
                             </div>
                             <div className='text-comment-icon'>
