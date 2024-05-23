@@ -4,29 +4,46 @@ const Sweet = require('../model/Sweet');
 const formatResponse = require('../common/ResponseFormat');
 const { getUsersOnline } = require('../config/redisConfig');
 const { createNotification } = require('./NotifyController');
-const {ObjectId} = require('mongodb')
+const { ObjectId } = require('mongodb')
+const { uploadImage } = require('../config/cloudinaryConfig');
 const editUser = asyncHandle(async (req, res) => {
     const userId = req.user.userId;
-    const email = req.user.email;
-    const username = req.body.username;
-    const bio = req.body.bio;
-    const dob = req.body.dob;
+    const { displayName, bio, dob, userName, email } = req.body;
+    const image = req.files && await uploadImage(req.files);
     try {
-        const updatedUser = await User.findByIdAndUpdate(userId, { username, email, bio, dob }, { new: true });
-
-        if (!updatedUser) {
-            return res.status(400).json(formatResponse(null, false, "Update user false"));
+        const existingUsername = await User.findOne({ username: userName });
+        if (existingUsername && existingUsername._id != userId) {
+            return res.status(400).json(formatResponse(null, false, "Username đã tồn tại"));
         }
+        const existingEmail = await User.findOne({ email: email });
+        if (existingEmail && existingEmail._id != userId) {
+            return res.status(400).json(formatResponse(null, false, "Email đã tồn tại"));
+        }
+        const updatedUser = await User.findByIdAndUpdate(userId, { userName, email, bio, displayName }, { new: true });
+        if (!!image)
+        {
+            console.log('upload', image[0]);
+            await User.findByIdAndUpdate(userId, { avatar:image[0] }, { new: true });
+        } else if (!!dob)
+        {
+            await User.findByIdAndUpdate(userId, { dob }, { new: true });
+            }
+        if (!updatedUser) {
+            return res.status(400).json(formatResponse(null, false, "Update user failed"));
+        }
+
         const data = {
-            username: updatedUser.username,
+            username: updatedUser.userName,
+            displayName: updatedUser.username,
             email: updatedUser.email,
             bio: updatedUser.bio,
             dob: updatedUser.dob
         };
+
         res.status(200).json(formatResponse(data, true, ""));
     } catch (error) {
         console.error('Error editing user information:', error);
-        res.status(500).json(formatResponse(null, false, "Update user false. Error:" + error.message));
+        res.status(500).json(formatResponse(null, false, "Update user failed. Error:" + error.message));
     }
 });
 
@@ -109,6 +126,8 @@ const getUser = asyncHandle(async (req, res) => {
             displayName: user.displayName,
             bio: user.bio ?? "",
             dob: user.dob ?? "",
+            email: user?.email, 
+            avatar:user?.avatar,
             createdAt:user.created_at.toLocaleDateString(),
             statusList:sweetList
 

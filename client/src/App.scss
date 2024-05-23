@@ -2681,3 +2681,30 @@
     }
   }
 }
+// .ant-modal{
+//   background-color: #000000 !important;
+//   color: white !;
+// }
+.ant-modal-title{
+  margin: 0;
+  color: white !important;
+  font-weight: 600;
+  font-size: 20px !important;
+  line-height: 1;
+  word-wrap: break-word;
+  border-bottom: 1px solid #8d7373;
+  padding-bottom: 12px;
+  margin-bottom: 25px;
+  padding-left: 2px;
+  font-weight: bolder !important;
+  background-color: black ;
+
+}
+.profile-edit-modal{
+  .cover-image{
+    width: 100%;
+    img{
+      width: 100%;
+    }
+  }
+}

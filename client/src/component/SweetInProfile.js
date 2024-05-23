@@ -31,7 +31,6 @@ function SweetInProfile({user_id}) {
           const response = await axiosClient.get(`/sweet/getSweetByUserID/${user_id}`);
           if(response.data.isSuccess){
             setGetListSweet(response.data.data.Info);
-                console.log(response.data.data.Info);
             }
 
         } catch (error) {
@@ -59,7 +58,6 @@ function SweetInProfile({user_id}) {
 
     useEffect(() => {
         handleGetSweet();
-        console.log("alo");
         // checkIsShare();
         // fetchLikeStatus();
     }, [user_id]); 

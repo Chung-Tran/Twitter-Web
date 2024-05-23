@@ -8,6 +8,8 @@ import axiosClient from '../authenticate/authenticationConfig';
 import SinglePost from '../component/SinglePost';
 import SweetInProfile from '../component/SweetInProfile';
 import { BiMessageDots } from "react-icons/bi";
+import { Button, Modal } from 'antd';
+import EditProfileModal from '../component/EditProfileModal';
 function ProfilePage() {
     const { id } = useParams();
     const [userInfo, setUserInfo] = useState();
@@ -50,8 +52,8 @@ function ProfilePage() {
                             <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbrcbieHSe__U37eq3JOSPIGi4WVjdzn0GDw_jVv7Rnqq_UTvaAw3GkeXd_O575NU_nGw&usqp=CAU' />
                         </div>
                         <div className='avatar-image'>
-                            <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' alt="Avatar" />
-                            {id==userId ?  <button >Edit profile</button> : <button style={{border:'none'}} onClick={()=>ChatNow()}><BiMessageDots style={{color:'#555', fontSize:'28px'  }}/></button>}
+                            <img src={!!userInfo?.avatar ? userInfo.avatar : 'https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg'} alt="Avatar" />
+                            {id==userId ?  <EditProfileModal handleReload={fetchData}/> : <button style={{border:'none'}} onClick={()=>ChatNow()}><BiMessageDots style={{color:'#555', fontSize:'28px'  }}/></button>}
                         </div>
                     </div>
                     <div className='profile-user-info'>
