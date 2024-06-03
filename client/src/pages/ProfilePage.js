@@ -10,6 +10,7 @@ import SweetInProfile from '../component/SweetInProfile';
 import { BiMessageDots } from "react-icons/bi";
 import { Button, Modal } from 'antd';
 import EditProfileModal from '../component/EditProfileModal';
+import FollowViewModal from '../component/followViewModal';
 function ProfilePage() {
     const { id } = useParams();
     const [userInfo, setUserInfo] = useState();
@@ -20,12 +21,12 @@ function ProfilePage() {
     const [selectedTab, setSelectedTab] = useState('Posts');
 
     useEffect(() => {
-        fetchData(id)
+        id && fetchData()
     }, [id]);
-    const fetchData = async (id) => {
+    const fetchData = async () => {
         try {
             let response;
-            response = await axiosClient.get(`/users/${id}`);
+            response = await axiosClient.get(`/users/${id}`)
             if (response.data.isSuccess) {
                 setUserInfo(response.data.data)
             } else {
@@ -44,7 +45,6 @@ function ProfilePage() {
           const response = await axiosClient.get(`/sweet/getSweetByUserID/${id}`);
           if(response.data.isSuccess){
             setGetListSweet(response.data.data.Info);
-                console.log("lo",response.data.data.Info);
             }
 
         } catch (error) {
@@ -90,8 +90,8 @@ function ProfilePage() {
                             {userInfo?.dob && <li id='profile-desc'>{userInfo?.dob}</li>}
                             <li id='profile-join-time'><FaCalendarAlt style={{ color: 'rgb(115 95 95)' }} /> &nbsp;{userInfo?.createdAt}</li>
                             <ul >
-                                <li>{userInfo?.following ?? 0} &nbsp;&nbsp;<p>Following</p></li>
-                                <li>{userInfo?.followUser ?? 0} &nbsp;&nbsp;<p>Followers</p></li>
+                                <li>{userInfo?.following.length ?? 0} &nbsp;&nbsp;{<FollowViewModal type="following" userList={ userInfo && userInfo.following} resetData={fetchData} />}</li>
+                                <li>{userInfo?.followUser.length ?? 0} &nbsp;&nbsp;{<FollowViewModal type="followers" userList={ userInfo && userInfo.followUser} resetData={fetchData} />}</li>
                             </ul>
                         </ul>
                     </div>
@@ -146,14 +146,10 @@ function ProfilePage() {
                         {selectedTab === 'Posts' ? (
                             <div style={{marginTop: 20, marginLeft: 20}}>
                                 {getListSweet && getListSweet.map((item, index) => (
-                                    <div key={index}>< SweetInProfile sweetData = {item} resetData={handleGetSweet}/> </div>
-                                ))}
-
-                                {/* {getListSweet && getListSweet.map((item, index) => (
                                     <div key={index} className='post-content-by-user'>
                                         <SinglePost sweetData={item} selectedTab={selectedTab} resetData={fetchData} />
                                     </div>
-                                ))} */}
+                                ))}
                             </div>
                             
                         ) : (null)}

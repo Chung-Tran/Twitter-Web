@@ -4,7 +4,7 @@ import { Button, Form, Input, Radio, Image, Modal, Upload, Row, Col } from 'antd
 import { useNavigate, useParams } from 'react-router-dom';
 import axiosClient from '../authenticate/authenticationConfig';
 import { toast } from 'react-toastify';
-
+import FollowViewModal from './followViewModal';
 const getBase64 = (file) =>
     new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -15,6 +15,7 @@ const getBase64 = (file) =>
 
 const EditProfileModal = ({handleReload}) => {
     const [open, setOpen] = useState(false);
+    const [showFollowViewModal, setShowFollowViewModal] = useState(false);
     const [confirmLoading, setConfirmLoading] = useState(false);
     const [previewOpen, setPreviewOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState('');
@@ -140,7 +141,6 @@ const EditProfileModal = ({handleReload}) => {
             </div>
         </button>
     );
-    console.log(form.getFieldValue("displayName"))
     return (
         <div className='profile-edit-modal'>
             <Button type="primary" onClick={showModal}>

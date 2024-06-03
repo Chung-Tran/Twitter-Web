@@ -348,7 +348,7 @@
 
 .hompage-container {
   background-color: black;
-  width: 90%;
+  width: 92%;
   height: auto;
   position: relative;
 
@@ -358,7 +358,7 @@
     height: auto;
     display: flex;
     min-height: 100vh;
-    margin-left: 56px;
+    margin-left: 36px;
     flex-direction: column;
     min-width: 620px;
     margin-right: 50px;
@@ -605,42 +605,18 @@
                 
               }
 
-              .option-sweet {
-                position: absolute;
-                // padding-right: 100px;
-                border: 1px solid #100cef;
-  
-                button {
-                  height: 25px;
-                  width: 165px;
-                  font-size: 14px;
-                  font-weight: bold;
-                  background: #5a4848;
-                  cursor: pointer;
-                  padding: 3px 6px;
-                  border: none;
-                  outline: none;
-                  display: flex;
-                  flex-direction: column;
-    
-                  &:hover {
-                    background-color: #5dafe6;
-                  }
-                }
-              }
+             
   
             }
-          }
-
-          
-
-          
             
-          
-
-          
-
-
+          }
+          .option-sweet {
+            position: absolute;
+            /* border: 1px solid #100cef; */
+            z-index: 1000;
+            right: 0;
+            margin-right: 20px;
+          }
         }
 
         .single-post-content {
@@ -1109,12 +1085,13 @@
     border: 1px solid #393737;
     border-top: none;
     border-bottom: none;
-    min-width: 560px;
+    min-width: 620px;
     min-height: 100vh;
-    margin-left: 56px;
+    margin-left: 36px;
     margin-right: 50px;
     // max-width: 700px;
     position: relative;
+    max-width: 650px;
   
     .profile-page-header {
       display: flex;
@@ -3181,246 +3158,52 @@
   }
 }
 
+.ant-modal-title{
+  margin: 0;
+  color: white !important;
+  font-weight: 600;
+  font-size: 20px !important;
+  line-height: 1;
+  word-wrap: break-word;
+  border-bottom: 1px solid #8d7373;
+  padding-bottom: 12px;
+  margin-bottom: 25px;
+  padding-left: 2px;
+  font-weight: bolder !important;
+  background-color: black ;
 
+}
+.profile-edit-modal{
+  .cover-image{
+    width: 100%;
+    img{
+      width: 100%;
+    }
+  }
+}
+.ant-list-item-meta-title{
+a{
+  color: #edd5d5  !important;
+  font-size: 18px;
 
-// .sweet-in-profile{
-//   .single-post {
-//     height: auto;
-//     width: 100%;
-//     padding: 10px 10px;
+}
+}
+.ant-list-item-meta-description{
+  color: #edd5d5  !important;
+  margin-left: 3px;
+  font-size: 17px;
+}
 
-//     &:hover {
-//       background-color: #080808;
-//     }
-
-//     cursor: pointer;
-
-//     .user-info {
-//       width: 100%;
-//       height: 50px;
-//       display: flex;
-//       flex-direction: 'row';
-//       background-color: transparent;
-
-//       img {
-//         height: 45px;
-//         width: 45px;
-//         object-fit: cover;
-//         border-radius: 50%;
-//       }
-
-//       .info-content{            
-//         .user-info-name {
-//           margin-left: 10px;
-//           font-size: 16px;
-//           color: white;
-//           margin: auto 10px;
-
-//           span {
-//             font-family: 'font-medium';
-
-//             &:last-child {
-//               margin-left: 10px;
-//               font-size: 14px;
-//               color: rgb(248, 159, 159);
-//             }
-//           }
-          
-
-
-//         }
-
-        
-//         .option-sigle-post{
-//           display: flex;
-//           flex-direction: 'row';
-          
-//           .post-createdAt {
-//             margin: auto;
-//             margin-left: 10px;
-//             color: #6d6d6d;
-//             font-size: 14px;
-            
-//           }
-
-//           .option-sweet {
-//             position: absolute;
-//             // padding-right: 100px;
-//             border: 1px solid #100cef;
-
-//             button {
-//               height: 25px;
-//               width: 165px;
-//               font-size: 14px;
-//               font-weight: bold;
-//               background: #5a4848;
-//               cursor: pointer;
-//               padding: 3px 6px;
-//               border: none;
-//               outline: none;
-//               display: flex;
-//               flex-direction: column;
-
-//               &:hover {
-//                 background-color: #5dafe6;
-//               }
-//             }
-//           }
-
-//         }
-//       }
-
-//     }
-
-//     .single-post-content {
-//       width: 90%;
-//       margin-left: 50px;
-//       min-height: 70px;
-//       background-color: transparent;
-
-//       .text-content {
-//         min-height: 30px;
-//         background-color: transparent;
-
-//         textarea {
-//           background-color: transparent;
-//           border: 1px solid rgb(71, 51, 51);
-//           margin-top: 10px;
-//           color: white;
-//           font-size: 18px;
-//           padding: 5px;
-//           resize: auto;
-//           width: 100%;
-//         }
-
-//         span {
-//           font-size: 20px;
-//           color: white;
-//         }
-
-//         .option-update-sweet {
-//           display: flex;
-//           flex-direction: row;
-//           position: relative;
-
-//           .box-icon {
-//             height: 30%;
-//             display: flex;
-//             justify-content: flex-start;
-//             padding: 7px 0;
-//             width: 100%;
-//             align-items: center;
-
-//             .icon-list {
-//               width: 100%;
-
-//               nav {
-//                 width: 70%;
-//                 display: flex;
-//                 flex-direction: row;
-//                 margin: 0 10px;
-//                 color: white;
-
-//                 ul {
-//                   display: flex;
-//                   flex: 1 1;
-//                   margin: auto 0;
-//                   cursor: pointer;
-
-//                   li {
-//                     margin-bottom: 0;
-//                     font-size: 20px;
-//                     margin: 0 5px;
-//                     color: rgb(89, 89, 224);
-//                     font-weight: bold;
-
-//                   }
-//                 }
-//               }
-//             }
-//           }
-
-
-//           #btn-capnhat {
-//             background-color: #4579b0;
-//             color: white;
-//             border: none;
-//             font-size: 15px;
-//             width: 100px;
-//             padding: 5px 5px;
-//             cursor: pointer;
-//             border-radius: 5px;
-//             margin-right: 10px;
-//           }
-
-//           #btn-capnhat:hover {
-//             background-color: #044284;
-//           }
-
-//           #huy {
-//             background-color: #bf6972;
-//             color: white;
-//             border: none;
-//             font-size: 15px;
-//             padding: 5px 5px;
-//             cursor: pointer;
-//             border-radius: 5px;
-//           }
-
-//           #huy:hover {
-//             background-color: #c82333;
-//           }
-
-//         }
-
-//       }
-
-//       .post-share {
-//         border: 1px solid #555;
-//         padding-top: 10px;
-//         padding-left: 10px;
-//       }
-
-//       .image-content {
-//         margin-top: 10px;
-//         height: auto;
-//         width: 100%;
-
-//         img {
-//           width: 100%;
-//           object-fit: cover;
-//           height: auto;
-//         }
-//       }
-
-//       .react-content {
-//         width: 100%;
-//         max-height: 50px;
-//         height: auto;
-//         display: flex;
-
-//         color: #bdbaba;
-
-//         ul {
-//           list-style: none;
-//           display: flex;
-//           align-items: center;
-//           justify-content: space-between;
-//           width: 100%;
-//           padding: 8px 10px 0 10px;
-
-//           li {
-//             display: flex;
-//             justify-content: center;
-
-//             &:hover {
-//               color: #6d80fe;
-//             }
-//           }
-//         }
-//       }
-
-
-//     }
-//   }
-// }
+.custom-dropdown {
+  background-color:#160e0e !important;
+  color: white !important;
+  span{
+    color: white !important;
+    color: white !important;
+    font-size: 15px;
+    font-weight: 400;
+  }
+  .ant-dropdown-menu-item:hover {
+    background-color: #333 !important; /* Nền xám khi hover */
+  }
+}

@@ -118,10 +118,13 @@ const getUser = asyncHandle(async (req, res) => {
         if (!user) {
             return res.status(404).json(formatResponse(null, false, "User not found"));
         }
+        const followingUsers = await User.find({ _id: { $in: user.following } }).select('username displayName avatar');
+        const followerUsers = await User.find({ _id: { $in: user.followers } }).select('username displayName avatar');
+
         const data = {
             userId: user._id,
-            following: user.following.length,
-            followUser: user.followers.length,
+            following:followingUsers,
+            followUser: followerUsers,
             userName: user.username,
             displayName: user.displayName,
             bio: user.bio ?? "",
@@ -204,6 +207,7 @@ const getListUserOnline = asyncHandle(async (req, res) => {
         return res.status(400).json(formatResponse("", false, "Lỗi khi lấy danh sách người dùng đang online!!"));
     }
 });
+
 
 
 module.exports = { editUser, addFollowUser, getUser, searchUser, getListUserUnFollow, getListUserOnline }
