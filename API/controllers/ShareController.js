@@ -18,8 +18,8 @@ const create_Share = asyncHandle(async (req, res) => {
     const sweet_id = req.params.SweetID;
     const user_id = req.user.userId
     // const user_id = req.body.user_id;
-    const content = req.body.content;
-    const image = await uploadImage(req.files);
+    const content = req.body.content || '';
+    const image = req.files ? await uploadImage(req.files) : null;
 
     const sweet = await Sweet.findById(sweet_id).populate('user_id', 'displayName username');
     if(sweet){
@@ -44,6 +44,8 @@ const create_Share = asyncHandle(async (req, res) => {
         await createNotification(dataAddNotify);
       }
 
+      const sweetAfterUpdate = await Sweet.findById(sweet_id).populate('user_id', 'displayName username');
+
 
       const data = {
         UserName: await getDisplayName_By_ID(user_id),
@@ -55,7 +57,7 @@ const create_Share = asyncHandle(async (req, res) => {
         CreateAT_Origin: moment(sweet.created_at).format(),
         Content_Origin: sweet.content,
         Image_Origin: sweet.image,
-        QuantityShare_Origin: sweet.shares.length,
+        QuantityShare_Origin: sweetAfterUpdate.shares.length,
         QuantityLike: createNew.likes.length,
         QuantityComment: createNew.comments.length,
       };

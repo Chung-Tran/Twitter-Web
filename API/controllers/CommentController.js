@@ -20,10 +20,24 @@ const create_Comment = asyncHandle(async (req, res) => {
   const sweet_id = req.params.SweetID;
 
   const user_id = req.user.userId;
-  //const user_id = req.user.userId
   //const user_id = req.body.user_id;
-  const content = req.body.content;
+  const content = req.body.content || '';
   const image = req.files ? await uploadImage(req.files) : null;
+  
+  // let content = null;
+  // let image = null;
+  // try {
+  //   if (!req.files && (!req.body.content || req.body.content.trim() === '')) {
+  //     return res.status(400).json(formatResponse(null, false, 'Content is required when no image is provided'));
+  //   } else {
+  //     content = req.body.content.trim();
+  //     image = req.files ? await uploadImage(req.files) : null;
+  //   }
+  // } catch (error) {
+  //   console.error("Lỗi khi truyền vào tham số: ", error.message)
+  //   return res.status(400).json(formatResponse(null, false, 'Content is required when no image is provided'));
+  // }
+  
 
 
   let comment = null;

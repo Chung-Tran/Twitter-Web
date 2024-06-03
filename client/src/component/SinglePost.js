@@ -27,19 +27,14 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
         navigate(`/status/${_id}`, { state: { source: 'sweetDetail' } })
     }
 
-    const handleGetListLike = (_id) => {
-        navigate(`/listLike/${_id}`, { state: { source: 'getListLike' } })
-    }
-    const userId = JSON.parse(localStorage.getItem("twitter-user"))?._id;
+    // const userId = JSON.parse(localStorage.getItem("twitter-user"))?._id;
 
-    const [checkIsLiked, setCheckIsLiked] = useState(false);
-    const [isLiked, setIsLiked] = useState(false);
+    const [isLiked, setIsLiked] = useState(sweetData.StateLike);
     const [quantityLike, setQuantityLike] = useState(sweetData.QuantityLike); 
     const [quantityShare, setQuantityShare] = useState(sweetData.QuantityShare); 
     const [showDialog, setShowDialog] = useState(false);
     const [showDialogCreateShare, setShowDialogCreateShare] = useState(false);
     const [getList, setGetList] = useState();
-    const [isShare, setIsShare] = useState(false)
     const [isOption, setIsOption] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [selectedFile, setSelectedFile] = useState([]);
@@ -48,50 +43,6 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
     const [contentAferUpdateSweet, setContentAferUpdateSweet] = useState(sweetData.Content);
 
     const [showDialogHistory, setshowDialogHistory] = useState(false);
-
-
-
-
-
-    const checkIsShare = async () => {
-        try {
-            if (sweetData && sweetData._id) {
-          const response = await axiosClient.get(`/sweet/checkSweetOrShare?SweetID=${sweetData._id}`);
-          if(response.data.isSuccess){
-            if(response.data.data.State){
-                setIsShare(false);
-            }else {
-                setIsShare(true);
-            }
-        }}
-
-        } catch (error) {
-          toast.error(error.response?.data.errorMessage ?? "Unexpected error");
-        }
-    };
-
-    useEffect(() => {
-        checkIsShare();
-        fetchLikeStatus();
-    }, [selectedTab]); 
-  
-    const fetchLikeStatus = async () => {
-        try {
-            if (sweetData && sweetData._id) {
-                const response = await axiosClient.get(`/sweet/checkUserLike?SweetID=${sweetData._id}`);
-                if (response.data.isSuccess) {
-                    if (response.data.data.State) {
-                        setIsLiked(true);
-                    } else {
-                        setIsLiked(false);
-                    }
-                }
-            }
-
-        } catch (error) {
-            toast.error(error.response?.data.errorMessage ?? "Unexpected error");
-        }
-    }
 
     const handleCreateShareClick = () => {
         setShowDialogCreateShare(true);
@@ -104,24 +55,8 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
     const handleShowDialogGetQuantityShare = (value) => {
         setQuantityShare(value);
     };
-
-    const countShare = async () => {
-        try {
-            if (!isShare) {
-          const response = await axiosClient.get(`/sweet/countShare?SweetID=${sweetData._id}`);
-          if(response.data.isSuccess){
-            setQuantityShare(response.data.data.QuantityShare);
-            
-        }}
-
-        } catch (error) {
-          toast.error(error.response?.data.errorMessage ?? "Unexpected error");
-        }
-    };
-    // useEffect(() => {
-    //     countShare();
-    // }, []);
     
+    /////////
     const handleGetListShareClick = () => {
         setShowDialog(true);
         setGetList(true);
@@ -136,22 +71,18 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
         setShowDialog(value);
     };
 
+    ////////////////
     const likeSweetHandle = async () => {
         try {
-            const response = await axiosClient.put(`/sweet/addOrDeleleLike/${sweetData._id}`);
-            
+            const response = await axiosClient.put(`/sweet/addOrDeleleLike/${sweetData._id}`);           
             if (response.data.isSuccess) {
                 if (response.data.data.State) {
-                    setIsLiked(false);
-                } else {
                     setIsLiked(true);
+                } else {
+                    setIsLiked(false);
                 }
-                setCheckIsLiked(response.data.isSuccess);
-
                 setQuantityLike(response.data.data.QuantityLike);
-
             }
-
         } catch (error) {
             toast.error(error.response?.data.errorMessage ?? "Unexpected error");
         }
@@ -166,7 +97,7 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
 
     const handleDeleteClick = async () => {
         try {
-            if(!isShare){
+            if(!sweetData.State){
                 const response = await axiosClient.delete(`sweet/deleteSweet/${sweetData._id}`);
                 if (response.data.isSuccess) {
                     toast.success("Xóa bài viết thành công.");
@@ -216,7 +147,7 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
 
     const handleUpdateClick = async () => {
         try {
-            if(!isShare){
+            if(!sweetData.State){
                 const formData = new FormData();
                 formData.append('content', updatedSweet);
                 selectedFile && formData.append('image', selectedFile);     
@@ -262,15 +193,16 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
     const handleCancelEditClick = () => {
         setIsEditing(false);
     };
-      const handleDialogHistoryClick = async () => {
-        setshowDialogHistory(true);
-      };
-      const handleShowDialogHistoryUpdate = (value) => {
-        setshowDialogHistory(value);
-        if(!value){
-          setIsOption(false);
-        }
-      };
+
+    const handleDialogHistoryClick = async () => {
+    setshowDialogHistory(true);
+    };
+    const handleShowDialogHistoryUpdate = (value) => {
+    setshowDialogHistory(value);
+    if(!value){
+        setIsOption(false);
+    }
+    };
     return (
         <div className='single-post' >
             <div className='user-info' >
@@ -289,14 +221,14 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
                             <div className='option-sweet'>
                             <button onClick={handleEditClick}>Chỉnh sửa</button>
                             <button onClick={() => handleDeleteClick()}>Xóa vĩnh viễn</button>
-                            {!isShare ? (<button onClick={() => handleDeleteTemporaryClick()}>Xóa bỏ vào thùng rác</button>) : (null)}               
+                            {!sweetData.State ? (<button onClick={() => handleDeleteTemporaryClick()}>Xóa bỏ vào thùng rác</button>) : (null)}               
                             <button onClick={handleDialogHistoryClick}>Xem lịch sử chỉnh sửa</button>
                             <button onClick={handleCancelOptionClick}>Hủy</button>
                             </div>
                             ) : (
                             <span onClick={handleOptionClick}><FaEllipsisV/></span>
                             )}
-                        </div>
+                            </div>
                     </div>
                     
                 </div>
@@ -355,8 +287,8 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
                 )}
                     
                 </div>
-                
-                {isShare === true ? (
+                <div>
+                {sweetData.State ? (
                     <div className='post-share' onClick={() => handleGetSweetDetail(sweetData.SweetID)}> 
                         <div className='user-info'>
                             <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
@@ -385,6 +317,8 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
                 
 
                 ) : (null)}
+                </div>
+                
 
                 <div className='image-content' onClick={() => handleGetSweetDetail(sweetData._id)}>
                     {
@@ -400,9 +334,9 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
                         <li><GiRapidshareArrow 
                                 onClick={() => handleCreateShareClick(sweetData._id)}
                             /> 
-                            {!isShare ? (
-                            <span onClick={handleGetListShareClick}>&nbsp; {sweetData.QuantityShare}</span> ) 
-                            : (null)}
+                            {!sweetData.State ? (
+                            <span onClick={handleGetListShareClick}>&nbsp; {quantityShare}</span> )
+                             : (null)} 
                         </li>
                         
                         <li ><AiOutlineHeart

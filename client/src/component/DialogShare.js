@@ -22,11 +22,8 @@ function DialogShare({sweet, onCloseDialog, quantityShare}) {
     }
 
     const [showDialog, setShowDialog] = useState(true);
-    const [postSweetContent, setPostSweetContent] = useState();
-    const [isCreateShare, setIsCreateShare] = useState(false);
-    const [countShare, setCountShare] = useState(false);
+    const [shareContent, setShareContent] = useState('');
 
-    const [isShare, setIsShare] = useState();
     const textareaRef = useRef(null);
 
     useEffect(() => {
@@ -38,46 +35,23 @@ function DialogShare({sweet, onCloseDialog, quantityShare}) {
     const handleCloseDialog = () => {
         setShowDialog(false); 
         onCloseDialog(false);
-        quantityShare(2);
     };
-
-    const checkIsShare = async () => {
-        try {
-            if (sweet && sweet._id) {
-                const response = await axiosClient.get(`/sweet/checkSweetOrShare?SweetID=${sweet._id}`);
-                if(response.data.isSuccess){
-                    if(response.data.data.State){
-                        setIsShare(false);
-                    }else {
-                        setIsShare(true);
-                    }
-                }
-            }
-        } catch (error) {
-          toast.error(error.response?.data.errorMessage ?? "Unexpected error");
-        }
-    };
-
-    useEffect(() => {
-        checkIsShare();
-    }, [sweet._id]); 
 
     const handleCreateShare = async () => {
         try {
             const formData = new FormData();
-            formData.append('content', postSweetContent);
-            if(!isShare){
+            formData.append('content', shareContent);
+            if(!sweet.State){
                 const response = await axiosClient.post(`/share/createShare/${sweet._id}`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
                 });
                 if (response.data.isSuccess) {
-                    // setSweetList(response.data.data.InFo_Sweet);
-                    setPostSweetContent('');
+                    console.log("shareCretae: ", response.data.data.QuantityShare_Origin);
                     toast.success("Tạo bài Share thành công!");
-                    setIsCreateShare(true);
-                    setCountShare(response.data.data.QuantityShare_Origin);
+                    setShareContent('');
+                    quantityShare(response.data.data.QuantityShare_Origin);
                 }else toast.error(response.errorMessage); 
             }else{
                 const response = await axiosClient.post(`/share/createShare/${sweet.SweetID}`, formData, {
@@ -87,10 +61,9 @@ function DialogShare({sweet, onCloseDialog, quantityShare}) {
                 });
                 if (response.data.isSuccess) {
                     // setSweetList(response.data.data.InFo_Sweet);
-                    setPostSweetContent('');
+                    setShareContent('');
                     toast.success("Tạo bài Share thành công!");
-                    setIsCreateShare(true);
-                    setCountShare(response.data.data.QuantityShare_Origin);
+                    quantityShare(response.data.data.QuantityShare_Origin);
                 }else toast.error(response.errorMessage);
             }
         } catch (error) {
@@ -107,7 +80,7 @@ function DialogShare({sweet, onCloseDialog, quantityShare}) {
             <div className="overlay">
                 <div className="dialog">
                     <div className="dialog-header">
-                        {isShare ? (
+                        {sweet.State ? (
                             <h2>{sweet.UserName_Origin.username === '' ? `Share bài viết của ${sweet.UserName_Origin.displayName}` : `Share bài viết của ${sweet.UserName_Origin.username}`}</h2>
                         ) : (
                             <h2>{sweet.UserName.username === '' ? `Share bài viết của ${sweet.UserName.displayName}` : `Share bài viết của ${sweet.UserName.username}`}</h2>
@@ -123,9 +96,13 @@ function DialogShare({sweet, onCloseDialog, quantityShare}) {
                             <div className='input-box-text-share'>
                                 <textarea
                                     ref={textareaRef}
-                                    name="postSweetContent"
-                                    value={postSweetContent}
-                                    onChange={(e) => setPostSweetContent(e.target.value)}
+                                    name="shareContent"
+                                    value={shareContent}
+                                    onChange={(e) => {
+                                        const value = e.target.value; 
+                                        setShareContent(value !== '' ? value : '');
+                                        }
+                                    }
                                     placeholder='What do you think about this status?!'
                                     rows={2}
                                     cols={40}
@@ -152,7 +129,7 @@ function DialogShare({sweet, onCloseDialog, quantityShare}) {
                     </div>
 
                     <div>
-                        {isShare ? (
+                        {sweet.State ? (
                             <div className='post-share'> 
                                 <div className='user-info'>
                                     <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
@@ -212,7 +189,6 @@ function DialogShare({sweet, onCloseDialog, quantityShare}) {
                 </div>
             </div>
         ): (null)}
-     <div>{isCreateShare && <Post isCreateShare = {isCreateShare}/>}</div>
     </div>
     )
 }

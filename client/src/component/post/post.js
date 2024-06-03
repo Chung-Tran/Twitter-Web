@@ -11,9 +11,8 @@ import axiosClient from '../../authenticate/authenticationConfig';
 import SinglePost from '../SinglePost';
 import { toast } from 'react-toastify';
 
-function Post({isCreateShare}) {
+function Post() {
   const [selectedTab, setSelectedTab] = useState('For You');
-  const [isCreateShareSuccess, setIsCreateShareSuccess] = useState(false);
   const [sweetList, setSweetList] = useState([]);
   const [postSweetContent, setPostSweetContent] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
@@ -82,26 +81,11 @@ function Post({isCreateShare}) {
   }; 
 
   useEffect(() => {
-    setIsCreateShareSuccess(isCreateShare);
-  }, [isCreateShare]);
-  
-  useEffect(() => {
-    if (isCreateShareSuccess) {
-      fetchData();
-    }
-  }, [isCreateShare]);
-  
-  useEffect(() => {
     if (isNearBottom==true) {
       console.log('set skip')
       setSkip(prevSkip => prevSkip + limit);
     }
   }, [isNearBottom]);
-
-
-  // useEffect(() => {
-  //   fetchData();
-  // }, [selectedTab, limit, skip, isCreateShareSuccess]);
 
 
   const handleTabClick = (tab) => {
@@ -149,7 +133,7 @@ console.log('limit',limit,'skip',skip)
         <span className={selectedTab === 'Following' ? 'selected-tab' : ''} onClick={() => handleTabClick('Following')}>Following</span>
         
         <AiOutlineSetting width={20} color='white' fontSize={23} style={{ marginRight: '1px', marginTop: '10px', right: '0' }} />
-      </div>
+        </div>
       <div className='post-create-box'>
         <div className='input-box-avatar'>
           <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
@@ -179,8 +163,9 @@ console.log('limit',limit,'skip',skip)
                         accept="image/*" 
                         onChange={handleFileChange}
                         multiple 
-                      />
- <span style={{ position: 'absolute', marginTop: '50px', fontSize: '16px', color: '#c9a4a4', fontWeight: 'normal', marginLeft: '-5px' }}>{selectedFile?.length>0 ? selectedFile.length + " file" : ""}</span>                      </label>
+                        />
+                        <span style={{ position: 'absolute', marginTop: '50px', fontSize: '16px', color: '#c9a4a4', fontWeight: 'normal', marginLeft: '-5px' }}>{selectedFile?.length>0 ? selectedFile.length + " file" : ""}</span>     
+                      </label>
                     </li>
                     <li><AiOutlineFileGif /></li>
                     <li><AiOutlineUnorderedList /></li>
