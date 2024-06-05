@@ -47,7 +47,6 @@ function ShowListInfoModal({ sweet, number, title, type }) {
             fetchData();
         }
     }, [visible, sweet._id, type]);
-    console.log(users)
 
     return (
         <span>

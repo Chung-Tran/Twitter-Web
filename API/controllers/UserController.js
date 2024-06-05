@@ -143,32 +143,38 @@ const getUser = asyncHandle(async (req, res) => {
     }
 });
 
-const searchUser = asyncHandle(async (req, res) => {
-
-    const email = req.query.email;
-    const username = req.query.username;
-
-    const searchKeyWord = await User.find({
-        $or: [
-            email && { email: { $regex: email, $options: "i" } },
-            username && { username: { $regex: username, $options: "i" } }
-        ].filter(Boolean)
-    });
-
+const searchUsers = asyncHandle(async (req, res) => {
     try {
-        if (searchKeyWord.length > 0) {
-            const data = {
-                QuantityResult: searchKeyWord.length,
-                InFo_User: searchKeyWord
-            }
-            return res.status(200).json(formatResponse(data, true, "Tìm kiếm thành công!!"))
-        } else return res.status(400).json(formatResponse("", false, "Không tìm thấy User!!"))
+        const { query, skip = 0, limit = 10 } = req.query;
+        const searchRegex = new RegExp(query, 'i');
 
+        const users = await User.find({
+            $or: [
+                { username: { $regex: searchRegex } },
+                { displayName: { $regex: searchRegex } }
+            ]
+        })
+        .select('username displayName avatar')
+        .skip(parseInt(skip))
+        .limit(parseInt(limit));
+
+        const totalUsers = await User.countDocuments({
+            $or: [
+                { username: { $regex: searchRegex } },
+                { displayName: { $regex: searchRegex } }
+            ]
+        });
+
+        return res.status(200).json(formatResponse({
+            users,
+            totalUsers
+        }, true, ""));
     } catch (error) {
-        console.error("Lỗi khi tìm kiếm: ", error.message);
-        return res.status(400).json(formatResponse("", false, "Lỗi khi tìm kiếm User!!"));
+        console.error(error);
+        res.status(500).json(formatResponse(null, false, "Internal Server Error"));
     }
-})
+});
+
 
 const getListUserUnFollow = asyncHandle(async (req, res) => {
     const user_id = req.user.userId;
@@ -210,4 +216,4 @@ const getListUserOnline = asyncHandle(async (req, res) => {
 
 
 
-module.exports = { editUser, addFollowUser, getUser, searchUser, getListUserUnFollow, getListUserOnline }
+module.exports = { editUser, addFollowUser, getUser, searchUsers, getListUserUnFollow, getListUserOnline }

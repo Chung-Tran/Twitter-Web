@@ -15,7 +15,7 @@ function ProfilePage() {
     const { id } = useParams();
     const [userInfo, setUserInfo] = useState();
     const userId = JSON.parse(localStorage.getItem("twitter-user"))?._id; //ID người đang sử dụng
-    const navigate=useNavigate()
+    const navigate = useNavigate()
 
     const [getListSweet, setGetListSweet] = useState([]);
     const [selectedTab, setSelectedTab] = useState('Posts');
@@ -41,28 +41,28 @@ function ProfilePage() {
     }
 
     const handleGetSweet = async () => {
-        try {  
-          const response = await axiosClient.get(`/sweet/getSweetByUserID/${id}`);
-          if(response.data.isSuccess){
-            setGetListSweet(response.data.data.Info);
+        try {
+            const response = await axiosClient.get(`/sweet/getSweetByUserID/${id}`);
+            if (response.data.isSuccess) {
+                setGetListSweet(response.data.data.Info);
             }
 
         } catch (error) {
-          toast.error(error.response?.data.errorMessage ?? "Unexpected error");
+            toast.error(error.response?.data.errorMessage ?? "Unexpected error");
         }
     };
 
     useEffect(() => {
-        if(selectedTab==='Posts'){
+        if (selectedTab === 'Posts') {
             handleGetSweet();
         }
-    }, [selectedTab]); 
+    }, [selectedTab]);
 
     return userInfo && (
         <div className='hompage-container' >
 
             <div className='profile-container' >
-       
+
                 <div className='profile-page-header'>
                     <span><IoArrowBackSharp /></span>
                     <div className='header-title'>
@@ -78,7 +78,11 @@ function ProfilePage() {
                         </div>
                         <div className='avatar-image'>
                             <img src={!!userInfo?.avatar ? userInfo.avatar : 'https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg'} alt="Avatar" />
-                            {id==userId ?  <EditProfileModal handleReload={fetchData}/> : <button style={{border:'none'}} onClick={()=>ChatNow()}><BiMessageDots style={{color:'#555', fontSize:'28px'  }}/></button>}
+                            <div style={{ alignItems: 'center', display: 'flex', marginTop: '45px' }}>
+                                {id != userId && <button>{userInfo.following.some(user => user._id === userId) ? "Theo dõi" : "Bỏ theo dõi"}</button>}
+                                {id == userId ? <EditProfileModal handleReload={fetchData} /> : <button style={{ border: 'none' }} onClick={() => ChatNow()}><BiMessageDots style={{ color: '#555', fontSize: '28px' }} /></button>}
+
+                            </div>
                         </div>
                     </div>
                     <div className='profile-user-info'>
@@ -90,8 +94,8 @@ function ProfilePage() {
                             {userInfo?.dob && <li id='profile-desc'>{userInfo?.dob}</li>}
                             <li id='profile-join-time'><FaCalendarAlt style={{ color: 'rgb(115 95 95)' }} /> &nbsp;{userInfo?.createdAt}</li>
                             <ul >
-                                <li>{userInfo?.following.length ?? 0} &nbsp;&nbsp;{<FollowViewModal type="following" userList={ userInfo && userInfo.following} resetData={fetchData} />}</li>
-                                <li>{userInfo?.followUser.length ?? 0} &nbsp;&nbsp;{<FollowViewModal type="followers" userList={ userInfo && userInfo.followUser} resetData={fetchData} />}</li>
+                                <li>{userInfo?.following.length ?? 0} &nbsp;&nbsp;{<FollowViewModal type="following" userList={userInfo && userInfo.following} resetData={fetchData} />}</li>
+                                <li>{userInfo?.followUser.length ?? 0} &nbsp;&nbsp;{<FollowViewModal type="followers" userList={userInfo && userInfo.followUser} resetData={fetchData} />}</li>
                             </ul>
                         </ul>
                     </div>
@@ -141,28 +145,28 @@ function ProfilePage() {
                             Likes
                         </li>
                     </ul>
-                    
+
                     <div className='sweet-in-profile'>
                         {selectedTab === 'Posts' ? (
-                            <div style={{marginTop: 20, marginLeft: 20}}>
+                            <div style={{ marginTop: 20, marginLeft: 20 }}>
                                 {getListSweet && getListSweet.map((item, index) => (
                                     <div key={index} className='post-content-by-user'>
                                         <SinglePost sweetData={item} selectedTab={selectedTab} resetData={fetchData} />
                                     </div>
                                 ))}
                             </div>
-                            
+
                         ) : (null)}
                     </div>
 
-                    
-                    
-                   
+
+
+
                 </div>
 
 
-                
-                
+
+
             </div>
         </div>
     )

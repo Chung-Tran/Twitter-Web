@@ -1910,21 +1910,20 @@
     border: 2px solid transparent;
     border-radius: 30px;
     background-color: #2b2b2e;
-
-    ul {
-      list-style: none;
-      margin-top: 10px;
-      margin-left: 10px;
-      color: #62626b;
-
-      li {
-        display: flex;
-        align-items: center;
-
-        span {
-          margin-right: 10px;
-        }
-      }
+    padding: 5px;
+    padding-left: 10px;
+    color: #816969;
+    align-items: center;
+    display: flex;
+    input{
+      background: transparent;
+      flex: 1 1;
+      border: none;
+      outline: none;
+      font-size: 19px;
+      color: rgb(220 183 183);
+      padding: 5px;
+      padding-left: 10px;
     }
   }
 
@@ -3205,5 +3204,43 @@ a{
   }
   .ant-dropdown-menu-item:hover {
     background-color: #333 !important; /* Nền xám khi hover */
+  }
+}
+.search-suggestion-info{
+  display: flex;
+  flex-direction: column;
+  color: white;
+  font-weight: 500;
+  padding: 5px 0;
+  span:last-child{
+    font-size: 16px;
+    font-weight: 400;
+    color: #878787;
+  }
+}
+.autosuggest__suggestions-container--open {
+  position: absolute !important;
+  top: 69px;
+  background-color: black;
+  width: 340px;
+  padding: 20px 0;
+  right: 46px;
+  border-radius: 15px;
+  box-shadow: rgba(255, 255, 255, 0.2) 0px 0px 15px, rgba(255, 255, 255, 0.15) 0px 0px 3px 1px;
+  height: auto;
+  max-height: 540px;
+  z-index: 1000;
+  overflow: scroll;
+  overflow-x: auto;
+  .autosuggest__suggestions-list{
+    .autosuggest__suggestion{
+      width: 100%;
+      padding: 6px 20px;
+      overflow: hidden;
+      cursor: pointer;
+      &:hover{
+        background-color: #161010;
+      }
+    }
   }
 }
