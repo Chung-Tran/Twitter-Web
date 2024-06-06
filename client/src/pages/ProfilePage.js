@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { IoArrowBackSharp } from "react-icons/io5";
-import Post from '../component/post/post';
 import { FaCalendarAlt } from "react-icons/fa";
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axiosClient from '../authenticate/authenticationConfig';
 import SinglePost from '../component/SinglePost';
-import SweetInProfile from '../component/SweetInProfile';
 import { BiMessageDots } from "react-icons/bi";
-import { Button, Modal } from 'antd';
 import EditProfileModal from '../component/EditProfileModal';
 import FollowViewModal from '../component/followViewModal';
 function ProfilePage() {
