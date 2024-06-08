@@ -129,14 +129,16 @@ function SweetInProfile({sweetData, resetData}) {
         try {
             
             const response = await axiosClient.put(`sweet/pinSweet/${sweetData._id}`);
-            if (response.data.data) {
+            // const response = await axiosClient.get(`sweet/checkSweetOrShare?SweetID=${sweetData._id}`);
+
+            if (response.data.data.State) {
                 toast.success("Ghim bài viết thành công.");
 
-                resetData();
-            } else{
-                toast.success("Bỏ ghim bài viết thành công.");
-                resetData();
-            }
+                resetData();}
+            // } else{
+            //     toast.success("Bỏ ghim bài viết thành công.");
+            //     resetData();
+            // }
             
         } catch (error) {
             toast.error("Lỗi khi ghim bài viết");
