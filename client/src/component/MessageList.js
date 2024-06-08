@@ -3,6 +3,10 @@ import { TbMessagePlus } from "react-icons/tb";
 import { AiOutlineSetting } from "react-icons/ai";
 import { CiSearch } from "react-icons/ci";
 import axiosClient from '../authenticate/authenticationConfig';
+import { Dropdown, Menu, Modal, Space } from 'antd';
+import { FaEllipsisV } from "react-icons/fa";
+import {jwtDecode} from 'jwt-decode';
+
 function MessageList({ messages, userId, changeReceiverId }) {
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,7 +53,26 @@ function MessageList({ messages, userId, changeReceiverId }) {
     setSearchQuery(value);
     debouncedSearch(value);
   };
+  const handleDeleteChat = () => {
 
+  }
+  const Dropdownitems = [
+    {
+      key: 'Delete',
+      label: 'Xóa tin nhắn',
+      onClick: handleDeleteChat,
+    },
+
+  ].filter(Boolean);
+
+  const menu = (
+    <Menu
+      items={Dropdownitems}
+      className="custom-dropdown"
+    />
+  );
+  console.log(user)
+  console.log(messages)
   return (
     <div className='message-list'>
       <div className='message-list-header'>
@@ -81,14 +104,28 @@ function MessageList({ messages, userId, changeReceiverId }) {
       </div>
       {messages && messages.map((item, index) => (
         <div className='message-user-list' key={index} onClick={() => changeUserChat(user[index]._id)}>
-          <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
+          <img src={item?.userInfo[index]?.avatar ? item?.userInfo[index].avatar : 'https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg'} />
           <div className='message-user-single-content'>
             <div className='message-user-single-info'>
               {/* Sử dụng user[index] thay vì item.userInfo[0] */}
               <span>{user[index]?.displayName}</span>
-              <span>{user[index]?.username}</span>
+              <span id='message-user-single-info-username'>{user[index]?.username}</span>
+              <div className='dropdown-message'>
+                <Dropdown overlay={menu} trigger={['click']} className='custome-dropdown' >
+                  <span onClick={(e) => e.preventDefault()}>
+                    <Space>
+                      <FaEllipsisV style={{ color: '#fff', fontSize: '13px' }} />
+                    </Space>
+                  </span>
+                </Dropdown>
+              </div>
             </div>
-            <span>{item.lastMessage.content}</span>
+            <div className='message-user-content'>
+              {item.lastMessage.senderID == userId && (<p>Bạn:</p>)}
+              <span>{item.lastMessage.content}</span>
+
+            </div>
+             
           </div>
         </div>
       ))}

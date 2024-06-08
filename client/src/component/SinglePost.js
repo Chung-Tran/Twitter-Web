@@ -1,13 +1,10 @@
-//import React, { useEffect, useState }from 'react'
 import React, { useState, useEffect } from 'react';
-
 import { CiImageOn } from "react-icons/ci";
 import { AiOutlineFileGif } from "react-icons/ai";
 import { AiOutlineUnorderedList } from "react-icons/ai";
 import { BsEmojiSmile } from "react-icons/bs";
 import { SlCalender } from "react-icons/sl";
 import { CiLocationOn } from "react-icons/ci";
-
 import { FaRegComment } from "react-icons/fa";
 import { GiRapidshareArrow } from "react-icons/gi";
 import { AiOutlineHeart } from "react-icons/ai";
@@ -15,10 +12,13 @@ import { BsReverseListColumnsReverse } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import axiosClient from '../authenticate/authenticationConfig';
 import { toast } from 'react-toastify';
-import  Dialog  from '../component/Dialog'
+import Dialog from '../component/Dialog'
 import DialogShare from './DialogShare';
 import { FaEllipsisV } from "react-icons/fa";
 import DialogHistorySweet from './DialogHistorySweet';
+import ShowListInfoModal from './ShowListInfoModal';
+import { DownOutlined, SmileOutlined } from '@ant-design/icons';
+import { Dropdown, Menu, Modal, Space } from 'antd';
 
 
 function SinglePost({ sweetData, selectedTab, resetData }) {
@@ -27,15 +27,12 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
         navigate(`/status/${_id}`, { state: { source: 'sweetDetail' } })
     }
 
-    // const userId = JSON.parse(localStorage.getItem("twitter-user"))?._id;
+    const userId = JSON.parse(localStorage.getItem("twitter-user"))?._id;
 
     const [isLiked, setIsLiked] = useState(sweetData.StateLike);
-    const [quantityLike, setQuantityLike] = useState(sweetData.QuantityLike); 
-    const [quantityShare, setQuantityShare] = useState(sweetData.QuantityShare); 
-    const [showDialog, setShowDialog] = useState(false);
+    const [quantityLike, setQuantityLike] = useState(sweetData.QuantityLike);
+    const [quantityShare, setQuantityShare] = useState(sweetData.QuantityShare);
     const [showDialogCreateShare, setShowDialogCreateShare] = useState(false);
-    const [getList, setGetList] = useState();
-    const [isOption, setIsOption] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [selectedFile, setSelectedFile] = useState([]);
     const [updatedSweet, setUpdatedSweet] = useState(sweetData.Content);
@@ -55,26 +52,10 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
     const handleShowDialogGetQuantityShare = (value) => {
         setQuantityShare(value);
     };
-    
-    /////////
-    const handleGetListShareClick = () => {
-        setShowDialog(true);
-        setGetList(true);
-    };
 
-    const handleGetListLikeClick = () => {
-        setShowDialog(true);
-        setGetList(false);
-    };
-
-    const handleShowDialog = (value) => {
-        setShowDialog(value);
-    };
-
-    ////////////////
     const likeSweetHandle = async () => {
         try {
-            const response = await axiosClient.put(`/sweet/addOrDeleleLike/${sweetData._id}`);           
+            const response = await axiosClient.put(`/sweet/addOrDeleleLike/${sweetData._id}`);
             if (response.data.isSuccess) {
                 if (response.data.data.State) {
                     setIsLiked(true);
@@ -88,16 +69,9 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
         }
     }
 
-    const handleOptionClick = () => {
-        setIsOption(true);
-    };
-    const handleCancelOptionClick = () => {
-        setIsOption(false);
-    };
-
     const handleDeleteClick = async () => {
         try {
-            if(!sweetData.State){
+            if (!sweetData.State) {
                 const response = await axiosClient.delete(`sweet/deleteSweet/${sweetData._id}`);
                 if (response.data.isSuccess) {
                     toast.success("Xóa bài viết thành công.");
@@ -105,7 +79,7 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
                 } else {
                     toast.error(response.errorMessage);
                 }
-            }else{
+            } else {
                 const response = await axiosClient.delete(`share/deleteShare/${sweetData._id}`);
                 if (response.data.isSuccess) {
                     toast.success("Xóa bài Share thành công.");
@@ -118,10 +92,10 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
         } catch (error) {
             toast.error("Lỗi khi xóa bài viết");
         }
-        setIsOption(false);
     };
-      
+
     const handleDeleteTemporaryClick = async () => {
+        
         try {
             const response = await axiosClient.delete(`sweet/deleteSweetTemporary/${sweetData._id}`);
             if (response.data.isSuccess) {
@@ -133,12 +107,11 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
         } catch (error) {
             toast.error("Lỗi khi bỏ bài viết vào thùng rác");
         }
-        setIsOption(false);
     };
+    
 
     const handleEditClick = () => {
-    setIsEditing(true);
-    setIsOption(false);
+        setIsEditing(true);
     };
 
     const handleFileChange = (e) => {
@@ -147,10 +120,10 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
 
     const handleUpdateClick = async () => {
         try {
-            if(!sweetData.State){
+            if (!sweetData.State) {
                 const formData = new FormData();
                 formData.append('content', updatedSweet);
-                selectedFile && formData.append('image', selectedFile);     
+                selectedFile && formData.append('image', selectedFile);
                 const response = await axiosClient.put(`sweet/updateSweet/${sweetData._id}`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
@@ -165,10 +138,10 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
                 } else {
                     toast.error(response.errorMessage);
                 }
-            }else {
+            } else {
                 const formData = new FormData();
                 formData.append('content', updatedSweet);
-                selectedFile && formData.append('image', selectedFile);     
+                selectedFile && formData.append('image', selectedFile);
                 const response = await axiosClient.put(`share/updateShare/${sweetData._id}`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
@@ -182,9 +155,9 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
                     // resetData();
                 } else {
                     toast.error(response.errorMessage);
-                }                
+                }
             }
-            
+
         } catch (error) {
             toast.error("Lỗi khi chỉnh sửa bài viết");
         }
@@ -195,19 +168,46 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
     };
 
     const handleDialogHistoryClick = async () => {
-    setshowDialogHistory(true);
+        setshowDialogHistory(true);
     };
     const handleShowDialogHistoryUpdate = (value) => {
-    setshowDialogHistory(value);
-    if(!value){
-        setIsOption(false);
-    }
+        setshowDialogHistory(value);
     };
+    const Dropdownitems = [
+        userId === sweetData.UserName._id && {
+            key: 'edit',
+            label: 'Chỉnh sửa',
+            onClick: handleEditClick,
+        },
+        userId === sweetData.UserName._id && {
+            key: 'delete',
+            label: 'Xóa vĩnh viễn',
+            onClick: handleDeleteClick,
+        },
+        userId === sweetData.UserName._id && !sweetData.State && {
+            key: 'deleteTemporary',
+            label: 'Xóa bỏ vào thùng rác',
+            onClick: handleDeleteTemporaryClick,
+        },
+        {
+            key: 'viewHistory',
+            label: 'Xem lịch sử chỉnh sửa',
+            onClick: handleDialogHistoryClick,
+        },
+
+    ].filter(Boolean);
+
+    const menu = (
+        <Menu
+            items={Dropdownitems}
+            className="custom-dropdown"
+        />
+    );
     return (
         <div className='single-post' >
             <div className='user-info' >
-                <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' 
-                onClick={() => {navigate(`/profile/${sweetData.UserName._id}`)}}
+                <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg'
+                    onClick={() => { navigate(`/profile/${sweetData.UserName._id}`) }}
                 />
                 <div className='info-content' >
                     <div className='user-info-name'>
@@ -215,110 +215,108 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
                         <span>{sweetData.UserName.username}</span>
                     </div>
                     <div className='option-sigle-post'>
-                            <span className='post-createdAt'>{sweetData.Duration}</span>
-                            <div className='post-createdAt'> {/*option-sigle-post*/}
-                            {isOption ? (
-                            <div className='option-sweet'>
-                            <button onClick={handleEditClick}>Chỉnh sửa</button>
-                            <button onClick={() => handleDeleteClick()}>Xóa vĩnh viễn</button>
-                            {!sweetData.State ? (<button onClick={() => handleDeleteTemporaryClick()}>Xóa bỏ vào thùng rác</button>) : (null)}               
-                            <button onClick={handleDialogHistoryClick}>Xem lịch sử chỉnh sửa</button>
-                            <button onClick={handleCancelOptionClick}>Hủy</button>
-                            </div>
-                            ) : (
-                            <span onClick={handleOptionClick}><FaEllipsisV/></span>
-                            )}
-                            </div>
-                    </div>
-                    
-                </div>
+                        <span className='post-createdAt'>{sweetData.Duration}</span>
+                        <div className='post-createdAt'> {/*option-sigle-post*/}
 
-                
+
+                        </div>
+                    </div>
+
+                </div>
+                <div className='option-sweet'>
+                    <Dropdown overlay={menu} trigger={['click']} className='custome-dropdown' >
+                        <span onClick={(e) => e.preventDefault()}>
+                            <Space>
+                                <FaEllipsisV style={{ color: '#fff' }} />
+                            </Space>
+                        </span>
+                    </Dropdown>
+                </div>
 
             </div>
-            
+
             <div className='single-post-content'>
                 <div className='text-content' >
-                {isEditing ? (
-                    <div>
-                    <textarea 
-                    value={updatedSweet}
-                    onChange={(e) => setUpdatedSweet(e.target.value)}
-                    placeholder='Enter update Sweet...'
-                    rows={3}
-                    />
+                    {isEditing ? (
+                        <div>
+                            <textarea
+                                value={updatedSweet}
+                                onChange={(e) => setUpdatedSweet(e.target.value)}
+                                placeholder='Enter update Sweet...'
+                                rows={3}
+                            />
 
-                    <div className='option-update-sweet'>
-                        <div className='box-icon'>
-                            <div className='icon-list'>
-                                <nav>
-                                    <ul>
-                                        <li>
-                                        {/* Hiển thị icon CiImageOn */}
-                                        <label htmlFor="fileInput" style={{display:'flex', alignItems:'center',justifyContent:'center' ,cursor:'pointer',fontSize:'23px'}}>
-                                            <CiImageOn />
-                                            {/* Ẩn input file */}
-                                            <input
-                                            type="file"
-                                            id="fileInput"
-                                            style={{ display: "none" }}
-                                            accept="image/*" 
-                                            onChange={handleFileChange}
-                                            />
-                                        </label>
-                                        </li>
-                                        <li></li>
-                                        <li><AiOutlineFileGif /></li>
-                                        <li><AiOutlineUnorderedList /></li>
-                                        <li><BsEmojiSmile /></li>
-                                        <li><SlCalender /></li>
-                                        <li><CiLocationOn /></li>
-                                    </ul>
-                                </nav>
+                            <div className='option-update-sweet'>
+                                <div className='box-icon'>
+                                    <div className='icon-list'>
+                                        <nav>
+                                            <ul>
+                                                <li>
+                                                    {/* Hiển thị icon CiImageOn */}
+                                                    <label htmlFor="fileInput" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '23px' }}>
+                                                        <CiImageOn />
+                                                        {/* Ẩn input file */}
+                                                        <input
+                                                            type="file"
+                                                            id="fileInput"
+                                                            style={{ display: "none" }}
+                                                            accept="image/*"
+                                                            onChange={handleFileChange}
+                                                        />
+                                                    </label>
+                                                </li>
+                                                <li></li>
+                                                <li><AiOutlineFileGif /></li>
+                                                <li><AiOutlineUnorderedList /></li>
+                                                <li><BsEmojiSmile /></li>
+                                                <li><SlCalender /></li>
+                                                <li><CiLocationOn /></li>
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                </div>
+
+                                <button id='btn-capnhat' onClick={() => handleUpdateClick()}>Update</button>
+                                <button id='huy' onClick={handleCancelEditClick}>Cancel</button>
                             </div>
                         </div>
+                    ) : (
+                        <span onClick={() => handleGetSweetDetail(idAfterUpdatedSweet)}>{contentAferUpdateSweet}</span>
+                    )}
 
-                        <button id='btn-capnhat' onClick={() => handleUpdateClick()}>Update</button>
-                        <button id='huy' onClick={handleCancelEditClick}>Cancel</button>
-                    </div>
-                    </div>
-                ) : (
-                    <span onClick={() => handleGetSweetDetail(idAfterUpdatedSweet)}>{contentAferUpdateSweet }</span>
-                )}
-                    
                 </div>
                 <div>
-                {sweetData.State ? (
-                    <div className='post-share' onClick={() => handleGetSweetDetail(sweetData.SweetID)}> 
-                        <div className='user-info'>
-                            <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
-                            <div className='info-content'>
-                            <div className='user-info-name'>
-                                <span>{sweetData.UserName_Origin?.displayName}</span>
-                                <span>{sweetData.UserName_Origin?.username}</span>
+                    {sweetData.State ? (
+                        <div className='post-share' onClick={() => handleGetSweetDetail(sweetData.SweetID)}>
+                            <div className='user-info'>
+                                <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
+                                <div className='info-content'>
+                                    <div className='user-info-name'>
+                                        <span>{sweetData.UserName_Origin?.displayName}</span>
+                                        <span>{sweetData.UserName_Origin?.username}</span>
+                                    </div>
+                                    <span className='post-createdAt'>{sweetData.Duration_Origin}</span>
+                                </div>
                             </div>
-                            <span className='post-createdAt'>{sweetData.Duration_Origin}</span>
+
+                            <div className='single-post-content'>
+                                <div className='text-content' onClick={() => handleGetSweetDetail(sweetData._id)}>
+                                    <span >{sweetData.Content_Origin}</span>
+                                </div>
+
+                                <div className='image-content' onClick={() => handleGetSweetDetail(sweetData._id)}>
+                                    {sweetData.Image_Origin && sweetData.Image_Origin.map((item, index) => (
+                                        <img src={item} />
+                                    ))
+                                    }
+                                </div>
                             </div>
                         </div>
 
-                        <div className='single-post-content'> 
-                            <div className='text-content' onClick={() => handleGetSweetDetail(sweetData._id)}>
-                                <span >{sweetData.Content_Origin}</span>
-                            </div>
 
-                            <div className='image-content' onClick={() => handleGetSweetDetail(sweetData._id)}>
-                            { sweetData.Image_Origin && sweetData.Image_Origin.map((item, index) => (
-                                <img src={item} />
-                                ))
-                            }
-                            </div>
-                        </div>
-                    </div>  
-                
-
-                ) : (null)}
+                    ) : (null)}
                 </div>
-                
+
 
                 <div className='image-content' onClick={() => handleGetSweetDetail(sweetData._id)}>
                     {
@@ -330,31 +328,29 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
 
                 <div className='react-content'>
                     <ul>
-                        <li onClick={() => handleGetSweetDetail(sweetData._id)}><FaRegComment /> &nbsp; { sweetData.QuantityComment}</li>
-                        <li><GiRapidshareArrow 
-                                onClick={() => handleCreateShareClick(sweetData._id)}
-                            /> 
+                        <li onClick={() => handleGetSweetDetail(sweetData._id)}><FaRegComment /> &nbsp; {sweetData.QuantityComment}</li>
+                        <li><GiRapidshareArrow
+                            onClick={() => handleCreateShareClick(sweetData._id)}
+                        />
                             {!sweetData.State ? (
-                            <span onClick={handleGetListShareClick}>&nbsp; {quantityShare}</span> )
-                             : (null)} 
+                                <ShowListInfoModal title={"Danh sách người chia sẻ"} number={quantityShare} sweet={sweetData} type={"Share"} />
+                            )
+                                : (null)}
                         </li>
-                        
+
                         <li ><AiOutlineHeart
-                                onClick={()=>likeSweetHandle()}
-                                style={{ color: isLiked ? 'red' : 'white', cursor: 'pointer' }}
-                            />      
-                            <span onClick={handleGetListLikeClick}>&nbsp; {quantityLike}</span>
+                            onClick={() => likeSweetHandle()}
+                            style={{ color: isLiked ? 'red' : 'white', cursor: 'pointer' }}
+                        />
+                            <ShowListInfoModal title={"Danh sách người thích bài viết"} number={quantityLike} sweet={sweetData} type={"Like"} />
                         </li>
-                        
-                        <li onClick={() => handleGetSweetDetail(sweetData._id)}><BsReverseListColumnsReverse/> &nbsp; {835}</li>
+
+                        <li onClick={() => handleGetSweetDetail(sweetData._id)}><BsReverseListColumnsReverse /> &nbsp; {835}</li>
                     </ul>
                 </div>
+                {showDialogCreateShare && <DialogShare sweet={sweetData} onCloseDialog={handleShowDialogCreateShare} quantityShare={handleShowDialogGetQuantityShare} />}
 
-                {showDialog && <Dialog sweet = {sweetData} getList={getList} onCloseDialog={handleShowDialog}/>}
-
-                {showDialogCreateShare && <DialogShare sweet = {sweetData} onCloseDialog={handleShowDialogCreateShare} quantityShare={handleShowDialogGetQuantityShare}/>}
-
-                {showDialogHistory && <DialogHistorySweet sweet={sweetData} onCloseDialog = {handleShowDialogHistoryUpdate}/>}
+                {showDialogHistory && <DialogHistorySweet sweet={sweetData} onCloseDialog={handleShowDialogHistoryUpdate} />}
             </div>
 
         </div>

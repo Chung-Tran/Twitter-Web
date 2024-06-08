@@ -30,7 +30,7 @@ const Navbar = () => {
           let data = response.data.data;
           // Lấy ID của người nhận đầu tiên
           if (data.length > 0) {
-            navigate(`messages/${data[0]._id}`);
+            navigate(`/messages/${data[0]._id}`);
           }
         })
     }

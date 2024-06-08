@@ -1,11 +1,9 @@
 import axios from 'axios';
 
 const axiosClient = axios.create({
+    // baseURL: 'http://localhost:5008/api',
+    // baseURL: 'http://192.168.233.223:5008/api',
     baseURL: 'http://localhost:5008/api',
-    
-    // baseURL: 'http://192.168.1.88:5008/api',
-
-    // baseURL: ' https://46ce-2001-ee0-50ce-a50-4d32-3491-40af-da30.ngrok-free.app/api',
     timeout: 20000, 
     headers: {
         'Content-Type': 'application/json'
@@ -30,7 +28,6 @@ axiosClient.interceptors.request.use(
 axiosClient.interceptors.response.use(
     (response) => {
         if (response.status === 401 || response.status === 403) {
-            console.log('response status', response);
             localStorage.removeItem('token')
         }
         const { data } = response;

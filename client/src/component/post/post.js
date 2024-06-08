@@ -123,7 +123,6 @@ function Post() {
   };
 
 
-console.log('limit',limit,'skip',skip)
   return (
     <div className='homepage-post'>
       {sweetList ? (

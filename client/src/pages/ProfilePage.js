@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { IoArrowBackSharp } from "react-icons/io5";
-import Post from '../component/post/post';
 import { FaCalendarAlt } from "react-icons/fa";
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axiosClient from '../authenticate/authenticationConfig';
 import SinglePost from '../component/SinglePost';
-import SweetInProfile from '../component/SweetInProfile';
 import { BiMessageDots } from "react-icons/bi";
+import EditProfileModal from '../component/EditProfileModal';
+import FollowViewModal from '../component/followViewModal';
 import { ImEqualizer } from "react-icons/im";
 import { ImCog } from "react-icons/im";
 import { ImBin } from "react-icons/im";
@@ -18,7 +18,7 @@ function ProfilePage() {
     const { id } = useParams();
     const [userInfo, setUserInfo] = useState();
     const userId = JSON.parse(localStorage.getItem("twitter-user"))?._id; //ID người đang sử dụng
-    const navigate=useNavigate()
+    const navigate = useNavigate()
 
     const [getListSweet, setGetListSweet] = useState([]);
     const [selectedTab, setSelectedTab] = useState('Posts');
@@ -27,12 +27,12 @@ function ProfilePage() {
 
 
     useEffect(() => {
-        fetchData(id)
+        id && fetchData()
     }, [id]);
-    const fetchData = async (id) => {
+    const fetchData = async () => {
         try {
             let response;
-            response = await axiosClient.get(`/users/${id}`);
+            response = await axiosClient.get(`/users/${id}`)
             if (response.data.isSuccess) {
                 setUserInfo(response.data.data)
             } else {
@@ -47,20 +47,19 @@ function ProfilePage() {
     }
 
     const handleGetSweet = async () => {
-        try {  
-          const response = await axiosClient.get(`/sweet/getSweetByUserID/${id}`);
-          if(response.data.isSuccess){
-            setGetListSweet(response.data.data.Info);
-                console.log("lo",response.data.data.Info);
+        try {
+            const response = await axiosClient.get(`/sweet/getSweetByUserID/${id}`);
+            if (response.data.isSuccess) {
+                setGetListSweet(response.data.data.Info);
             }
 
         } catch (error) {
-          toast.error(error.response?.data.errorMessage ?? "Unexpected error");
+            toast.error(error.response?.data.errorMessage ?? "Unexpected error");
         }
     };
 
     useEffect(() => {
-        if(selectedTab==='Posts'){
+        if (selectedTab === 'Posts') {
             handleGetSweet();
         }
     }, [selectedTab]); 
@@ -76,7 +75,7 @@ function ProfilePage() {
         <div className='hompage-container' >
 
             <div className='profile-container' >
-       
+
                 <div className='profile-page-header'>
                     <span><IoArrowBackSharp /></span>
                     <div className='header-title'>
@@ -91,8 +90,12 @@ function ProfilePage() {
                             <img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbrcbieHSe__U37eq3JOSPIGi4WVjdzn0GDw_jVv7Rnqq_UTvaAw3GkeXd_O575NU_nGw&usqp=CAU' />
                         </div>
                         <div className='avatar-image'>
-                            <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' alt="Avatar" />
-                            {id==userId ?  <button >Edit profile</button> : <button style={{border:'none'}} onClick={()=>ChatNow()}><BiMessageDots style={{color:'#555', fontSize:'28px'  }}/></button>}
+                            <img src={!!userInfo?.avatar ? userInfo.avatar : 'https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg'} alt="Avatar" />
+                            <div style={{ alignItems: 'center', display: 'flex', marginTop: '45px' }}>
+                                {id != userId && <button>{userInfo.following.some(user => user._id === userId) ? "Theo dõi" : "Bỏ theo dõi"}</button>}
+                                {id == userId ? <EditProfileModal handleReload={fetchData} /> : <button style={{ border: 'none' }} onClick={() => ChatNow()}><BiMessageDots style={{ color: '#555', fontSize: '28px' }} /></button>}
+
+                            </div>
                         </div>
                     </div>
                     <div className='profile-user-info'>
@@ -104,8 +107,8 @@ function ProfilePage() {
                             {userInfo?.dob && <li id='profile-desc'>{userInfo?.dob}</li>}
                             <li id='profile-join-time'><FaCalendarAlt style={{ color: 'rgb(115 95 95)' }} /> &nbsp;{userInfo?.createdAt}</li>
                             <ul >
-                                <li>{userInfo?.following ?? 0} &nbsp;&nbsp;<p>Following</p></li>
-                                <li>{userInfo?.followUser ?? 0} &nbsp;&nbsp;<p>Followers</p></li>
+                                <li>{userInfo?.following.length ?? 0} &nbsp;&nbsp;{<FollowViewModal type="following" userList={userInfo && userInfo.following} resetData={fetchData} />}</li>
+                                <li>{userInfo?.followUser.length ?? 0} &nbsp;&nbsp;{<FollowViewModal type="followers" userList={userInfo && userInfo.followUser} resetData={fetchData} />}</li>
                             </ul>
                         </ul>
                     </div>
@@ -155,7 +158,7 @@ function ProfilePage() {
                             Likes
                         </li>
                     </ul>
-                    
+
                     <div className='sweet-in-profile'>
                         {selectedTab === 'Posts' ? (
                             
@@ -179,18 +182,18 @@ function ProfilePage() {
                                 </div>
                                 
                             </div>
-                            
+
                         ) : (null)}
                     </div>
 
-                    
-                    
-                   
+
+
+
                 </div>
 
 
-                
-                
+
+
             </div>
         </div>
     )

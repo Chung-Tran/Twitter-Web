@@ -22,15 +22,14 @@ cloudinary.config({
 //Connect db
 dbConnect();
 //Connect redis server in docker
-// const redisClient = connectRedis();
-// redisClient.connect();
+const redisClient = connectRedis();
+redisClient.connect();
 //config websocket
 wss.on('connection', function connection(ws) {
     userConnection.add(ws);
     // Xử lý các tin nhắn nhận được từ client
     ws.on('message', function incoming(message) {
         try {
-            console.log('receive')
             const parsedMessage = JSON.parse(message);
             if (parsedMessage.type === 'chat') {
                 // Tin nhắn là loại chat, gọi hàm sendMessage để xử lý
