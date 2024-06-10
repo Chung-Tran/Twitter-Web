@@ -48,13 +48,31 @@ const getNotificationById = async (notificationId) => {
 const getNotificationsByUser = asyncHandle(async (req, res) => {
     try {
         const userId = req.user.userId;
-        const notifications = await Notification.find({ userId: userId }).populate('userId','_id, displayName').populate('tweetId' ,'images,_id');
-        
-        res.status(200).json(formatResponse(notifications, true, ""));
+        const page = parseInt(req.query.page) || 1; 
+        const limit = parseInt(req.query.limit) || 10; 
+        const skip = (page - 1) * limit;
+
+        const notifications = await Notification.find({ userId: userId })
+            .populate('userId', '_id, displayName')
+            .populate('tweetId', 'images,_id')
+            .skip(skip)
+            .limit(limit)
+            .sort({created_at:1});
+
+        const totalNotifications = await Notification.countDocuments({ userId: userId });
+
+        res.status(200).json({
+            data: notifications,
+            isSuccess: true,
+            total: totalNotifications,
+            page,
+            limit
+        });
     } catch (error) {
         throw error;
     }
-})
+});
+
 
 //update đã đọc
 const markNotificationAsRead = async (notificationId) => {

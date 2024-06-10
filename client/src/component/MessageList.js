@@ -71,8 +71,6 @@ function MessageList({ messages, userId, changeReceiverId }) {
       className="custom-dropdown"
     />
   );
-  console.log(user)
-  console.log(messages)
   return (
     <div className='message-list'>
       <div className='message-list-header'>
