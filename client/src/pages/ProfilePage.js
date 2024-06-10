@@ -32,6 +32,7 @@ function ProfilePage() {
 
     useEffect(() => {
         id && fetchData() && handleGetSweet()
+        window.scrollTo(0, 0);
     }, [id]);
     const fetchData = async () => {
         try {
@@ -177,7 +178,7 @@ function ProfilePage() {
                             <div style={{marginTop: 20, marginLeft: 20}}>
                                 <div className='nvarbar-sweet-in-profile'>
                                     <div> All Posts By {userInfo.displayName} </div>
-                                    <div> <ImEqualizer /> Filter</div>
+                                    {/* <div> <ImEqualizer /> Filter</div> */}
                                     <div onClick={userId === id ? () => getAllSweetDeleteTemporary() : null}> <ImCog/> Option</div>
                                 </div>
 

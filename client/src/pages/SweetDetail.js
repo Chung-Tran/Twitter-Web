@@ -9,6 +9,7 @@ import { CiImageOn } from "react-icons/ci";
 import { BsEmojiSmile } from "react-icons/bs";
 import { SlCalender } from "react-icons/sl";
 import { AiOutlineArrowLeft } from 'react-icons/ai';
+import { GrCaretDown } from "react-icons/gr";
 import Post from '../component/post/post'
 import { useNavigate } from "react-router-dom";
 
@@ -24,6 +25,11 @@ function SweetDetail() {
     const [selectedFile, setSelectedFile] = useState([]);
     
     const [isPostView, setIsPostView] = useState(false);
+    const [isSortComment, setIsSortComment] = useState(false);
+    const [listComment, setListComment] = useState([]);
+    const [typeSortComment, setTypeSortComment] = useState('OutStanding');
+
+    const [typeSortCommentText, setTypeSortCommentText] = useState('Sort');
 
     const handleBackButtonClick = () => {
         setIsPostView(true); 
@@ -44,6 +50,7 @@ function SweetDetail() {
     };
     useEffect(() => {
         fetchData();
+        handleSortOutStanding();
         window.scrollTo(0, 0);
         console.log(sweetDetail);
     }, []);
@@ -111,6 +118,49 @@ function SweetDetail() {
         // };
         // reader.readAsDataURL(file);
     };    
+
+    const handleClickSortComment = () => {
+        setIsSortComment(true);
+    }
+    const handleClickCancelSortComment = () => {
+        setIsSortComment(false);
+    }
+
+    const handleSortOutStanding = async () => {
+        const response = await axiosClient.get(`/sweet/getListCommentOutStanding?SweetID=${id}`);
+        if (response.data.isSuccess) {
+            setListComment(response.data.data.List_UserName_ToComment)
+            setTypeSortComment('OutStanding');
+            setTypeSortCommentText('Nổi bật');
+        } else {
+            toast.error(response.errorMessage);
+        }
+        handleClickCancelSortComment();
+    };
+
+    const handleSortRecently = async () => {
+        const response = await axiosClient.get(`/sweet/getListCommentRecently?SweetID=${id}`);
+        if (response.data.isSuccess) {
+            setListComment(response.data.data.List_UserName_ToComment)
+            setTypeSortComment('Recently');
+            setTypeSortCommentText('Gần đây');
+        } else {
+            toast.error(response.errorMessage);
+        }
+        handleClickCancelSortComment();
+    };
+
+    const handleSortFurthest = async () => {
+        const response = await axiosClient.get(`/sweet/getListCommentFurthest?SweetID=${id}`);
+        if (response.data.isSuccess) {
+            setListComment(response.data.data.List_UserName_ToComment)
+            setTypeSortComment('Furthest');
+            setTypeSortCommentText('Cũ nhất');
+        } else {
+            toast.error(response.errorMessage);
+        }
+        handleClickCancelSortComment();
+    };
     return (    
         <div className='hompage-container'>         
             <div className='homepage-post'>       
@@ -119,7 +169,7 @@ function SweetDetail() {
                     <p className='p-post'>POST</p>
                 </div>
                 <div className='post-content'>
-                    {sweetDetail && <SinglePost sweetData={sweetDetail} />}
+                    {sweetDetail && <SinglePost sweetData={sweetDetail} resetData={fetchData}/>}
                 </div>
                 <div className='sweet-detail-comment'>
                     <div className='comment-frame'>
@@ -161,18 +211,49 @@ function SweetDetail() {
                             </div>
                         </div>
                     </div>
-                    {
-                        // sweetDetail && sweetDetail.ListUserToComment.map((item, index) => (
-                        //     <SweetComment commentData={item} resetData={fetchData} />
-                        // ))
-                            // <SweetComment sweet={sweetDetail} resetData={fetchData} />
-                            
-                    }
+
+                    <div className='nvarbar-comment'>
+                        <div>Comment</div>
+                        <div>
+                            <div className='sort' onClick={() => handleClickSortComment()}> {typeSortCommentText} &nbsp; &nbsp;<GrCaretDown/></div>
+                            {isSortComment ? (
+                            <div className='option-sort-comment'> {/*option-sigle-post*/}
+                                <div className='option'>     
+                                    <button onClick={() => handleSortOutStanding()}>Nổi bật</button>
+                                    <button onClick={() => handleSortRecently()}>Gần đây</button>
+                                    <button onClick={() => handleSortFurthest()}>Cũ nhất</button>
+                                    <button onClick={() => handleClickCancelSortComment()}>Hủy</button>                                  
+                                </div>
+                                
+                            </div>                            
+                            ) : (null)}
+                        </div>
+                        
+                    </div>
+
                     <div className='comment'>
-                    {
-                    sweetDetail && sweetDetail.ListUserToComment.map((item, index) => (
-                            <SweetComment commentData={item} resetData={fetchData}/>
-                        ))
+                        {/* {
+                            sweetDetail && sweetDetail.ListUserToComment.map((item, index) => (
+                                <SweetComment commentData={item} resetData={fetchData}/>
+                            ))
+                        } */}
+
+                        {
+                            typeSortComment==='OutStanding' && listComment.map((item, index) => (
+                                <SweetComment commentData={item} resetData={handleSortOutStanding}/>
+                            ))
+                        }
+
+                        {
+                            typeSortComment==='Recently' && listComment.map((item, index) => (
+                                <SweetComment commentData={item} resetData={handleSortRecently}/>
+                            ))
+                        }
+
+                        {
+                            typeSortComment==='Furthest' && listComment.map((item, index) => (
+                                <SweetComment commentData={item} resetData={handleSortFurthest}/>
+                            ))
                         }
                         
                         {/* {sweetDetail && <SweetComment sweet={sweetDetail} resetData={fetchData}/>} */}

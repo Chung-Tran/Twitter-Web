@@ -71,14 +71,14 @@ function DialogSweetInBin({sweetTemporary, onCloseDialog, resetData}) {
             <div className="overlay">
                 <div className="dialog">
                     <div className="dialog-header">
-                        <h2>Các bài viết đã xóa tạm thời</h2>                        
+                        <h2 style={{color: 'red'}}>Các bài viết đã xóa tạm thời</h2>                        
                         <button className="close-button" onClick={() => handleCloseDialog()}>&times;</button>
                     </div>
 
                     
                     <div className='sweetInBin'> 
                     {sweetTemporary.map((sweet, index) => (
-                <div key={index} className='sweet'>
+                        <div key={index} className='sweet'>
                         <div className='user-info'>
                             <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
                             <div className='info-content'>

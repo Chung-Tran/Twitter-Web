@@ -190,7 +190,6 @@ function SinglePost({ sweetData, selectedTab, resetData, inProfile}) {
                 resetData();
                 // setContentAferUpdateSweet(sweetData.Content);
             }
-            
         } catch (error) {
             toast.error("Lỗi khi ghim bài viết");
             console.log("Lỗi: ", error)
@@ -311,7 +310,7 @@ function SinglePost({ sweetData, selectedTab, resetData, inProfile}) {
                             </div>
                         </div>
                     ) : (
-                        <span onClick={() => handleGetSweetDetail(idAfterUpdatedSweet)}>
+                        <span onClick={() => handleGetSweetDetail(sweetData._id)}>
                             {inProfile ? sweetData.Content : updatedSweet}
                         </span>
                     )}
@@ -372,7 +371,7 @@ function SinglePost({ sweetData, selectedTab, resetData, inProfile}) {
 
                         <li ><AiOutlineHeart
                             onClick={() => likeSweetHandle()}
-                            style={{ color: isLiked ? 'red' : 'white', cursor: 'pointer' }}
+                            style={{ color: inProfile ? (sweetData.StateLike ? 'red' : 'white') : (isLiked ? 'red' : 'white'), cursor: 'pointer' }}
                         />
                             <ShowListInfoModal title={"Danh sách người thích bài viết"} number= {inProfile ? sweetData.QuantityLike : quantityLike} sweet={sweetData} type={"Like"} />
                         </li>

@@ -361,7 +361,7 @@ const add_OR_Delete_User_To_List_Like_Comment = asyncHandle(async(req,res) =>{
       comment.likes.push(user_id);
       comment.save();
       const data = {
-        State: false,
+        State: true,
         QuantityLike: comment.likes.length
       }
       return res.status(200).json(formatResponse(data, true, "Đã like comment!"));
@@ -369,7 +369,7 @@ const add_OR_Delete_User_To_List_Like_Comment = asyncHandle(async(req,res) =>{
       comment.likes.splice(user_id_In_List_Like_Comment, 1);
       comment.save();
       const data = {
-        State: true,
+        State: false,
         QuantityLike: comment.likes.length
       }
       return res.status(200).json(formatResponse(data, true, "Bỏ thích comment thành công!"));

@@ -559,7 +559,7 @@ const get_List_User_To_Share = asyncHandle(async (req, res) => {
   }
 });
 
-async function get_Comment_Info_To_Sweet_OutStanding(list_CommentID) {
+async function get_Comment_Info_To_Sweet_OutStanding(list_CommentID, userID) {
   const comment_Info = [];
   const sortData = list_CommentID.sort((a, b) => {
     const interactionCount_a = (a.likes ? a.likes.length : 0) + (a.comment_Reply ? a.comment_Reply.length : 0);
@@ -575,6 +575,8 @@ async function get_Comment_Info_To_Sweet_OutStanding(list_CommentID) {
     const countLike = comment.likes.length;
     const duration = await formatTimeDifference(moment(comment.created_at), moment())
 
+    const stateLike = comment.likes.some(like => like._id.toString() === userID.toString());
+
     comment_Info.push({
       _id: comment._id,
       DisplayName: userName,
@@ -583,7 +585,8 @@ async function get_Comment_Info_To_Sweet_OutStanding(list_CommentID) {
       QuantityLike: countLike,
       User_Like: comment.likes,
       QuantityReplyComment: comment.comment_reply.length,
-      CreateAt: duration
+      CreateAt: duration,
+      StateLike: stateLike,
     });
   }
   return comment_Info;
@@ -591,8 +594,10 @@ async function get_Comment_Info_To_Sweet_OutStanding(list_CommentID) {
 
 const get_List_Comment_To_Sweet_OutStanding = asyncHandle(async (req, res) => {
   let skipNumble = parseInt(req.query.skip) || 0;
-  let limitNumble = parseInt(req.query.limit) || 3;
+  let limitNumble = parseInt(req.query.limit) || 15;
 
+  const user_id = req.user.userId;
+  console.log("id", user_id);
   const id_Sweet = req.query.SweetID;
 
   const sweet = await Sweet.findById(id_Sweet).populate("comments");
@@ -601,7 +606,7 @@ const get_List_Comment_To_Sweet_OutStanding = asyncHandle(async (req, res) => {
   try {
     if(sweet){
       const list_Comment = sweet.comments;
-      const getComment = await get_Comment_Info_To_Sweet_OutStanding(list_Comment);
+      const getComment = await get_Comment_Info_To_Sweet_OutStanding(list_Comment, user_id);
   
       const data = {
         QuantityComment: sweet.comments.length,
@@ -613,7 +618,7 @@ const get_List_Comment_To_Sweet_OutStanding = asyncHandle(async (req, res) => {
   
     }else if(share){
       const list_Comment = share.comments;
-      const getComment = await get_Comment_Info_To_Sweet_OutStanding(list_Comment);
+      const getComment = await get_Comment_Info_To_Sweet_OutStanding(list_Comment, user_id);
   
       const data = {
         QuantityComment: share.comments.length,
@@ -633,7 +638,7 @@ const get_List_Comment_To_Sweet_OutStanding = asyncHandle(async (req, res) => {
 
 })
 
-async function get_Comment_Info_To_Sweet_Recently(list_CommentID) {
+async function get_Comment_Info_To_Sweet_Recently(list_CommentID, userID) {
   const comment_Info = [];
   const sortData = list_CommentID.sort((a, b) => {
     return new Date(b.created_at) - new Date(a.created_at);
@@ -644,6 +649,8 @@ async function get_Comment_Info_To_Sweet_Recently(list_CommentID) {
     const countLike = comment.likes.length;
     const duration = await formatTimeDifference(moment(comment.created_at), moment())
 
+    const stateLike = comment.likes.some(like => like._id.toString() === userID.toString());
+
     comment_Info.push({
       _id: comment._id,
       DisplayName: userName,
@@ -652,7 +659,8 @@ async function get_Comment_Info_To_Sweet_Recently(list_CommentID) {
       QuantityLike: countLike,
       User_Like: comment.likes,
       QuantityReplyComment: comment.comment_reply.length,
-      CreateAt: duration
+      CreateAt: duration,
+      StateLike: stateLike,
     });
   }
   return comment_Info;
@@ -660,16 +668,18 @@ async function get_Comment_Info_To_Sweet_Recently(list_CommentID) {
 
 const get_List_Comment_To_Sweet_Recently = asyncHandle(async (req, res) => {
   let skipNumble = parseInt(req.query.skip) || 0;
-  let limitNumble = parseInt(req.query.limit) || 3;
+  let limitNumble = parseInt(req.query.limit) || 15;
 
+  const user_id = req.user.userId;
   const id_Sweet = req.query.SweetID;
+
   const sweet = await Sweet.findById(id_Sweet).populate("comments");
   const share = await Share.findById(id_Sweet).populate("comments");
 
   try {
     if(sweet){
       const list_Comment = sweet.comments;
-      const getComment = await get_Comment_Info_To_Sweet_Recently(list_Comment);
+      const getComment = await get_Comment_Info_To_Sweet_Recently(list_Comment, user_id);
   
       const data = {
         QuantityComment: sweet.comments.length,
@@ -681,7 +691,7 @@ const get_List_Comment_To_Sweet_Recently = asyncHandle(async (req, res) => {
   
     }else if(share){
       const list_Comment = share.comments;
-      const getComment = await get_Comment_Info_To_Sweet_Recently(list_Comment);
+      const getComment = await get_Comment_Info_To_Sweet_Recently(list_Comment, user_id);
   
       const data = {
         QuantityComment: share.comments.length,
@@ -699,7 +709,7 @@ const get_List_Comment_To_Sweet_Recently = asyncHandle(async (req, res) => {
 
 })
 
-async function get_Comment_Info_To_Sweet_Furthest(list_CommentID) {
+async function get_Comment_Info_To_Sweet_Furthest(list_CommentID, userID) {
   const comment_Info = [];
   const sortData = list_CommentID.sort((a, b) => {
     return new Date(a.created_at) - new Date(b.created_at);
@@ -710,6 +720,8 @@ async function get_Comment_Info_To_Sweet_Furthest(list_CommentID) {
     const countLike = comment.likes.length;
     const duration = await formatTimeDifference(moment(comment.created_at), moment())
 
+    const stateLike = comment.likes.some(like => like._id.toString() === userID.toString());
+
     comment_Info.push({
       _id: comment._id,
       DisplayName: userName,
@@ -718,7 +730,8 @@ async function get_Comment_Info_To_Sweet_Furthest(list_CommentID) {
       QuantityLike: countLike,
       User_Like: comment.likes,
       QuantityReplyComment: comment.comment_reply.length,
-      CreateAt: duration
+      CreateAt: duration,
+      StateLike: stateLike,
     });
   }
   return comment_Info;
@@ -726,7 +739,10 @@ async function get_Comment_Info_To_Sweet_Furthest(list_CommentID) {
 
 const get_List_Comment_To_Sweet_Furthest = asyncHandle(async (req, res) => {
   let skipNumble = parseInt(req.query.skip) || 0;
-  let limitNumble = parseInt(req.query.limit) || 3;
+  let limitNumble = parseInt(req.query.limit) || 15;
+
+  const user_id = req.user.userId;
+  const id_Sweet = req.query.SweetID;
 
   const sweet = await Sweet.findById(id_Sweet).populate("comments");
   const share = await Share.findById(id_Sweet).populate("comments");
@@ -734,7 +750,7 @@ const get_List_Comment_To_Sweet_Furthest = asyncHandle(async (req, res) => {
   try {
     if(sweet){
       const list_Comment = sweet.comments;
-      const getComment = await get_Comment_Info_To_Sweet_Furthest(list_Comment);
+      const getComment = await get_Comment_Info_To_Sweet_Furthest(list_Comment, user_id);
   
       const data = {
         QuantityComment: sweet.comments.length,
@@ -746,7 +762,7 @@ const get_List_Comment_To_Sweet_Furthest = asyncHandle(async (req, res) => {
   
     }else if(share){
       const list_Comment = share.comments;
-      const getComment = await get_Comment_Info_To_Sweet_Furthest(list_Comment);
+      const getComment = await get_Comment_Info_To_Sweet_Furthest(list_Comment, user_id);
   
       const data = {
         QuantityComment: share.comments.length,
@@ -823,7 +839,7 @@ const get_A_Sweet = asyncHandle(async (req, res) => {
         ]
       })
 
-    const getComment = await get_Comment_Info_To_Sweet_OutStanding(comment);
+    const getComment = await get_Comment_Info_To_Sweet_OutStanding(comment, user_id);
 
     const now = moment();
 

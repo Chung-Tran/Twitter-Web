@@ -869,6 +869,69 @@
         }
       }
 
+      .nvarbar-comment{
+        display: flex;   
+        margin-top: 10px; 
+        border-bottom: #726c6c 1px solid;
+        padding-top: 3px;
+        padding-bottom: 3px;
+      
+        div:first-child {
+          color: #e0e3e7;
+          font-size: 25px;
+          font-weight: bold;
+          margin-right: 420px;
+          width: auto;
+        }
+      
+        div:last-child {
+          flex-direction: column;
+          width: 150px;
+          .sort{
+            margin-left: 38px;
+            color: #77a7db;
+            font-size: 20px;    
+            border: #474849 1px solid;  
+            width: 115px;
+            cursor: pointer;
+          }
+
+          .option-sort-comment{
+            margin-left: 38px;   
+                   
+            .option {
+              position: absolute;
+              border: #474849 1px solid;  
+              width: 101px;
+              margin-top: 3px;
+              z-index: 1000;
+          
+              button {
+                height: 25px;
+                width: 100px;
+                font-size: 17px;
+                font-weight: bold;
+                background: #e5a2a2;
+                cursor: pointer;
+                border: none;
+                outline: none;
+                display: flex;
+                flex-direction: column;
+          
+                &:hover {
+                  background-color: #5dafe6;
+                }
+              }
+            }
+          }
+        }
+
+        
+
+        
+
+        }
+
       .sweet-comment-content {
         margin-top: 15px;
         width: 100%;
@@ -1290,7 +1353,7 @@
           div:first-child {
             font-size: 25px;
             font-weight: bold;
-            margin-right: 20px;
+            margin-right: 150px;
             width: 437px;
           }
     
