@@ -1093,7 +1093,7 @@
     margin-right: 50px;
     // max-width: 700px;
     position: relative;
-    max-width: 650px;
+    max-width: 800px;
 
     .profile-page-header {
       display: flex;
@@ -1288,9 +1288,10 @@
           margin-bottom: 20px;
 
           div:first-child {
-            font-size: 20px;          
-            font-weight: bold; 
-            margin-right: 280px;       
+            font-size: 25px;
+            font-weight: bold;
+            margin-right: 20px;
+            width: 437px;
           }
     
           div:nth-child(2) {
@@ -3315,6 +3316,180 @@
       &:hover {
         background-color: #161010;
       }
+    }
+  }
+}
+
+.dialogGetSweetInBin-container {
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+
+    .dialog {
+      background-color: #e4d5d5;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      padding-left: 5px;
+      margin-left: 35px;
+      max-width: 100%;
+      height: 500px;
+      width: 640px;
+      overflow-y: auto;
+
+      .dialog-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #0e0c0c;
+        // padding-bottom: 3px;
+        margin-bottom: 5px;
+        position: relative;
+
+        .dialog-header h2 {
+          position: absolute;
+          margin-left: 50px;
+          flex-grow: 1;
+        }
+
+        .close-button {
+          background: none;
+          border: none;
+          cursor: pointer;
+          position: relative;
+          margin-right: 10px;
+          font-size: 25px;
+          color: #060505;
+          margin-left: auto;
+        }
+
+        .close-button:hover {
+          color: #ff0000;
+        }
+      }
+
+      .sweetInBin {
+        border: 1px solid #555;
+        padding-top: 10px;
+        padding-left: 10px;
+        margin-left: 40px;
+        overflow-y: auto;
+        .sweet{
+        .user-info {
+          width: 100%;
+          height: 50px;
+          display: flex;
+          background-color: transparent;
+
+          img {
+            height: 45px;
+            width: 45px;
+            object-fit: cover;
+            border-radius: 50%;
+          }
+
+          .user-info-name {
+            margin-left: 10px;
+            font-size: 16px;
+            color: rgb(12, 10, 10);
+            margin: auto 10px;
+
+            span {
+              font-family: 'font-medium';
+
+              &:last-child {
+                margin-left: 10px;
+                font-size: 14px;
+                color: rgb(246, 83, 83);
+              }
+            }
+
+
+          }
+
+          .post-createdAt {
+            margin: auto;
+            margin-left: 10px;
+            color: #787272;
+            font-size: 14px;
+          }
+          .option-sweet-by-user{
+            margin-left: 1px;
+
+            .option-sweet {
+              position: absolute;
+              // margin-left: 200px;
+              border: 1px solid #100cef;
+              z-index: 1000;
+  
+              button {
+                height: 25px;
+                width: 165px;
+                font-size: 14px;
+                font-weight: bold;
+                background: #5a4848;
+                cursor: pointer;
+                padding: 3px 6px;
+                border: none;
+                outline: none;
+                display: flex;
+                flex-direction: column;
+  
+                &:hover {
+                  background-color: #5dafe6;
+                }
+              }
+            }
+          }
+
+        }
+
+        .content {
+          width: 90%;
+          margin-left: 50px;
+          min-height: 70px;
+          background-color: transparent;
+
+          .text-content {
+            min-height: 30px;
+            background-color: transparent;
+
+            span {
+              font-size: 20px;
+              color: rgb(10, 9, 9);
+            }
+
+          }
+
+          
+
+          .image-content {
+            margin-top: 10px;
+            height: auto;
+            width: 100%;
+
+            img {
+              width: 100%;
+              object-fit: cover;
+              height: auto;
+            }
+          }
+
+          
+
+
+        }}
+
+      }
+
+
     }
   }
 }

@@ -10,7 +10,7 @@ const shareSchema = new mongoose.Schema({
     shares: [],
     edit_history: [{
         // edit_id: { type: mongoose.Schema.Types.ObjectId, required: true },
-        content: { type: String, required: true }, // Nội dung cũ của bài viết
+        content: { type: String }, // Nội dung cũ của bài viết
         updated_at: { type: Date, default: Date.now }, // Ngày giờ chỉnh sửa
         images: [{ type: String }]
     }],

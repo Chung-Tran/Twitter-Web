@@ -21,7 +21,7 @@ import { DownOutlined, SmileOutlined } from '@ant-design/icons';
 import { Dropdown, Menu, Modal, Space } from 'antd';
 
 
-function SinglePost({ sweetData, selectedTab, resetData }) {
+function SinglePost({ sweetData, selectedTab, resetData, inProfile}) {
     const navigate = useNavigate();
     const handleGetSweetDetail = (_id) => {
         navigate(`/status/${_id}`, { state: { source: 'sweetDetail' } })
@@ -62,6 +62,7 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
                 } else {
                     setIsLiked(false);
                 }
+                resetData();
                 setQuantityLike(response.data.data.QuantityLike);
             }
         } catch (error) {
@@ -134,7 +135,7 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
                     setUpdatedSweet(response.data.data.Content);
                     setContentAferUpdateSweet(response.data.data.Content);
                     toast.success("Cập nhật bài viết thành công.");
-                    // resetData();
+                    resetData();
                 } else {
                     toast.error(response.errorMessage);
                 }
@@ -152,7 +153,7 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
                     setUpdatedSweet(response.data.data.Content);
                     setContentAferUpdateSweet(response.data.data.Content);
                     toast.success("Cập nhật bài Share thành công.");
-                    // resetData();
+                    resetData();
                 } else {
                     toast.error(response.errorMessage);
                 }
@@ -173,7 +174,36 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
     const handleShowDialogHistoryUpdate = (value) => {
         setshowDialogHistory(value);
     };
+
+    const handlePinSweetClick = async () => {
+        try {
+            
+            const response = await axiosClient.put(`sweet/pinSweet/${sweetData._id}`);
+
+            if (response.data.data) {
+                toast.success("Ghim bài viết thành công.");
+
+                resetData();
+                // setContentAferUpdateSweet(sweetData.Content);
+            } else{
+                toast.success("Bỏ ghim bài viết thành công.");
+                resetData();
+                // setContentAferUpdateSweet(sweetData.Content);
+            }
+            
+        } catch (error) {
+            toast.error("Lỗi khi ghim bài viết");
+            console.log("Lỗi: ", error)
+        }
+    };
     const Dropdownitems = [
+        
+        inProfile && userId === sweetData.UserName._id && {
+            key: 'edit',
+            label: !sweetData.Ispin ? 'Ghim bài viết' : 'Bỏ ghim bài viết',
+            onClick: handlePinSweetClick,
+        },
+
         userId === sweetData.UserName._id && {
             key: 'edit',
             label: 'Chỉnh sửa',
@@ -210,7 +240,7 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
                     onClick={() => { navigate(`/profile/${sweetData.UserName._id}`) }}
                 />
                 <div className='info-content' >
-                    <div className='user-info-name'>
+                    <div className='user-info-name' onClick={() => { navigate(`/profile/${sweetData.UserName._id}`) }}>
                         <span>{sweetData.UserName.displayName}</span>
                         <span>{sweetData.UserName.username}</span>
                     </div>
@@ -281,17 +311,19 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
                             </div>
                         </div>
                     ) : (
-                        <span onClick={() => handleGetSweetDetail(idAfterUpdatedSweet)}>{contentAferUpdateSweet}</span>
+                        <span onClick={() => handleGetSweetDetail(idAfterUpdatedSweet)}>
+                            {inProfile ? sweetData.Content : updatedSweet}
+                        </span>
                     )}
 
                 </div>
                 <div>
                     {sweetData.State ? (
-                        <div className='post-share' onClick={() => handleGetSweetDetail(sweetData.SweetID)}>
+                        <div className='post-share'>
                             <div className='user-info'>
-                                <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
+                                <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' onClick={() => { navigate(`/profile/${sweetData.UserName_Origin._id}`) }}/>
                                 <div className='info-content'>
-                                    <div className='user-info-name'>
+                                    <div className='user-info-name' onClick={() => { navigate(`/profile/${sweetData.UserName_Origin._id}`) }}>
                                         <span>{sweetData.UserName_Origin?.displayName}</span>
                                         <span>{sweetData.UserName_Origin?.username}</span>
                                     </div>
@@ -300,11 +332,11 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
                             </div>
 
                             <div className='single-post-content'>
-                                <div className='text-content' onClick={() => handleGetSweetDetail(sweetData._id)}>
+                                <div className='text-content' onClick={() => handleGetSweetDetail(sweetData.SweetID)}>
                                     <span >{sweetData.Content_Origin}</span>
                                 </div>
 
-                                <div className='image-content' onClick={() => handleGetSweetDetail(sweetData._id)}>
+                                <div className='image-content' onClick={() => handleGetSweetDetail(sweetData.SweetID)}>
                                     {sweetData.Image_Origin && sweetData.Image_Origin.map((item, index) => (
                                         <img src={item} />
                                     ))
@@ -333,7 +365,7 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
                             onClick={() => handleCreateShareClick(sweetData._id)}
                         />
                             {!sweetData.State ? (
-                                <ShowListInfoModal title={"Danh sách người chia sẻ"} number={quantityShare} sweet={sweetData} type={"Share"} />
+                                <ShowListInfoModal title={"Danh sách người chia sẻ"} number={inProfile ? sweetData.QuantityShare : quantityShare} sweet={sweetData} type={"Share"} />
                             )
                                 : (null)}
                         </li>
@@ -342,7 +374,7 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
                             onClick={() => likeSweetHandle()}
                             style={{ color: isLiked ? 'red' : 'white', cursor: 'pointer' }}
                         />
-                            <ShowListInfoModal title={"Danh sách người thích bài viết"} number={quantityLike} sweet={sweetData} type={"Like"} />
+                            <ShowListInfoModal title={"Danh sách người thích bài viết"} number= {inProfile ? sweetData.QuantityLike : quantityLike} sweet={sweetData} type={"Like"} />
                         </li>
 
                         <li onClick={() => handleGetSweetDetail(sweetData._id)}><BsReverseListColumnsReverse /> &nbsp; {835}</li>
@@ -357,4 +389,7 @@ function SinglePost({ sweetData, selectedTab, resetData }) {
     )
 }
 
+SinglePost.defaultProps = {
+    inProfile: false,
+  };
 export default SinglePost

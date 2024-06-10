@@ -22,8 +22,8 @@ cloudinary.config({
 //Connect db
 dbConnect();
 //Connect redis server in docker
-const redisClient = connectRedis();
-redisClient.connect();
+// const redisClient = connectRedis();
+// redisClient.connect();
 //config websocket
 wss.on('connection', function connection(ws) {
     userConnection.add(ws);
