@@ -21,7 +21,7 @@ import DialogReplyComment from './DialogReplyComment';
 import DialogGetLikeComment from './DialogGetLikeComment';
 import DialogGetListReplyComment from './DialogGetListReplyComment';
 
-function SweetComment({ commentData ,resetData}) {
+function SweetComment({ commentData ,resetData, useIDOwnerSweet}) {
 
   const [isOption, setIsOption] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -36,31 +36,12 @@ function SweetComment({ commentData ,resetData}) {
   const [QuantityLike, setQuantityLike] = useState(commentData.QuantityLike);
   const [selectedFile, setSelectedFile] = useState([]);
 
-
+  const userId = JSON.parse(localStorage.getItem("twitter-user"))?._id; //ID người đang sử dụng
 
   const [updatedComment, setUpdatedComment] = useState(commentData.Content);
 
   const skip = 0;
   const limit = 10;
-
-  // const handleGetListComment = async () => {
-  //   try {
-  //     const response = await axiosClient.get(`/sweet/getListCommentOutStanding?SweetID=${commentData._id}`);
-  //     if(response.data.isSuccess){
-  //         setCommentList(response.data.data.List_UserName_ToComment)
-  //         setQuantityComment(response.data.data.QuantityComment);
-  //         console.log("Data:" ,response.data.data.List_UserName_ToLike);
-  //     }else {
-  //         toast.error(response.errorMessage);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error posting content:", error);
-  //     toast.error("Lỗi khi tạo mới bài viết");
-  //   }
-  // };
-  // useEffect(() => {
-  //   handleGetListComment();
-  // },[commentData._id]);
 
   const handleOptionClick = () => {
     setIsOption(true);
@@ -240,8 +221,8 @@ function SweetComment({ commentData ,resetData}) {
               <div>
                 {isOption ? (
                   <div className='option-comment'>
-                  <button onClick={handleEditClick}>Chỉnh sửa</button>
-                  <button onClick={() => handleDeleteClick()}>Xóa</button>
+                  {(userId===commentData.DisplayName._id)?(<button onClick={handleEditClick}>Chỉnh sửa</button>):(null)}
+                  {(userId===commentData.DisplayName._id || userId ===useIDOwnerSweet)?(<button onClick={handleDeleteClick}>Xóa</button>):(null)}
                   <button onClick={handleDialogHistoryClick}>Xem lịch sử chỉnh sửa</button>
                   <button onClick={handleCancelOptionClick}>Hủy</button>
                   </div>
