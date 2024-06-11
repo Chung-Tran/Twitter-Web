@@ -81,9 +81,9 @@ function DialogShare({sweet, onCloseDialog, quantityShare}) {
                 <div className="dialog">
                     <div className="dialog-header">
                         {sweet.State ? (
-                            <h2>{sweet.UserName_Origin.username === '' ? `Share bài viết của ${sweet.UserName_Origin.displayName}` : `Share bài viết của ${sweet.UserName_Origin.username}`}</h2>
+                            <h2 style={{color: 'black', fontStyle: 'italic'}}>{sweet.UserName_Origin.username === '' ? `Share bài viết của ${sweet.UserName_Origin.displayName}` : `Share bài viết của ${sweet.UserName_Origin.username}`}</h2>
                         ) : (
-                            <h2>{sweet.UserName.username === '' ? `Share bài viết của ${sweet.UserName.displayName}` : `Share bài viết của ${sweet.UserName.username}`}</h2>
+                            <h2 style={{color: 'black', fontStyle: 'italic'}}>{sweet.UserName.username === '' ? `Share bài viết của ${sweet.UserName.displayName}` : `Share bài viết của ${sweet.UserName.username}`}</h2>
                         )}
                         <button className="close-button" onClick={() => handleCloseDialog()}>&times;</button>
                     </div>
@@ -135,7 +135,7 @@ function DialogShare({sweet, onCloseDialog, quantityShare}) {
                                     <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
                                     <div className='info-content'>
                                         <div className='user-info-name'>
-                                            <span>{sweet.UserName_Origin.displayName}</span>
+                                            <span style={{color: 'black'}}>{sweet.UserName_Origin.displayName}</span>
                                             <span>{sweet.UserName_Origin.username}</span>
                                         </div>
                                         <span className='post-createdAt'>{sweet.Duration_Origin}</span>
@@ -144,7 +144,7 @@ function DialogShare({sweet, onCloseDialog, quantityShare}) {
         
                                 <div className='single-post-content'> 
                                     <div className='text-content'>
-                                        <span >{sweet.Content_Origin}</span>
+                                        <span style={{color: 'black'}}>{sweet.Content_Origin}</span>
                                     </div>
         
                                     <div className='image-content'>
@@ -161,7 +161,7 @@ function DialogShare({sweet, onCloseDialog, quantityShare}) {
                                     <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
                                     <div className='info-content'>
                                         <div className='user-info-name'>
-                                            <span>{sweet.UserName.displayName}</span>
+                                            <span style={{color: 'black'}}>{sweet.UserName.displayName}</span>
                                             <span>{sweet.UserName.username}</span>
                                         </div>
                                         <span className='post-createdAt'>{sweet.Duration}</span>
@@ -170,7 +170,7 @@ function DialogShare({sweet, onCloseDialog, quantityShare}) {
         
                                 <div className='single-post-content'> 
                                     <div className='text-content'>
-                                        <span >{sweet.Content}</span>
+                                        <span style={{color: 'black'}}>{sweet.Content}</span>
                                     </div>
         
                                     <div className='image-content'>

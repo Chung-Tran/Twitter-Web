@@ -31,7 +31,7 @@ function SweetComment({ commentData ,resetData}) {
   const [showDialogListReplyComment, setShowDialogListReplyComment] = useState(false);
   const [showDialogListLikeComment, setshowDialogListLikeComment] = useState(false);
   const [showDialogListLikeReplyComment, setshowDialogListLikeReplyComment] = useState(false);
-  const [isLike, setIsLike] = useState();
+  const [isLike, setIsLike] = useState(commentData.StateLike);
   const [QuantityRepLyComment, setQuantityReplyComment] = useState(commentData.QuantityReplyComment);
   const [QuantityLike, setQuantityLike] = useState(commentData.QuantityLike);
   const [selectedFile, setSelectedFile] = useState([]);
@@ -186,19 +186,20 @@ function SweetComment({ commentData ,resetData}) {
     }
   };
 
-  useEffect(() => {
-    fetchLikeComment();
-  }, [commentData]); 
+  // useEffect(() => {
+  //   fetchLikeComment();
+  // }, [commentData]); 
 
   const likeCommentHandle = async () => {
     try {
         const response = await axiosClient.put(`/comment/likeComment/${commentData._id}`);
         if(response.data.isSuccess){
             if(response.data.data.State){
-                setIsLike(false);
-            }else{
                 setIsLike(true);
+            }else{
+                setIsLike(false);
             }
+            resetData();
             setQuantityLike(response.data.data.QuantityLike);
         }
 
@@ -320,9 +321,9 @@ function SweetComment({ commentData ,resetData}) {
 
                   <li > <AiOutlineHeart
                           onClick={() => likeCommentHandle()}
-                          style={{ color: isLike ? 'red' : 'white', cursor: 'pointer' }}
+                          style={{ color: commentData.StateLike ? 'red' : 'white', cursor: 'pointer' }}
                         />
-                        <span onClick={()=> handleDialogLikeCommentClick()} style={{cursor: 'pointer'}}> &nbsp; {QuantityLike} </span>
+                        <span onClick={()=> handleDialogLikeCommentClick()} style={{cursor: 'pointer'}}> &nbsp; {commentData.QuantityLike} </span>
                   </li> 
 
               </ul>   

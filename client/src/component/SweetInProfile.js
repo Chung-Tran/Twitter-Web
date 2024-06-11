@@ -129,6 +129,8 @@ function SweetInProfile({sweetData, resetData}) {
         try {
             
             const response = await axiosClient.put(`sweet/pinSweet/${sweetData._id}`);
+            // const response = await axiosClient.get(`sweet/checkSweetOrShare?SweetID=${sweetData._id}`);
+
             if (response.data.data) {
                 toast.success("Ghim bài viết thành công.");
 

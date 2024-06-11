@@ -72,12 +72,10 @@ const addFollowUser = asyncHandle(async (req, res) => {
             //Tạo notify
             const dataAddNotify = {
                 userId: followUser._id,
-                content: `${req.user.displayName} đã theo dõi bạn.`,
+                content: '${req.user.displayName} đã theo dõi bạn.',
                 relateTo: userId,
             }
-
-            await createNotification(dataAddNotify);
-            //Trả về dữ liệu
+            await createNotification(dataAddNotify)
             const data = {
                 userId: user._id,
                 following: user.following.length,

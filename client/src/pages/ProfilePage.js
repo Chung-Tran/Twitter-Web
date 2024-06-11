@@ -5,9 +5,17 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axiosClient from '../authenticate/authenticationConfig';
 import SinglePost from '../component/SinglePost';
+import SweetInProfile from '../component/SweetInProfile';
+import DialogSweetInBin from '../component/DialogSweetInBin';
 import { BiMessageDots } from "react-icons/bi";
 import EditProfileModal from '../component/EditProfileModal';
 import FollowViewModal from '../component/followViewModal';
+import { ImEqualizer } from "react-icons/im";
+import { ImCog } from "react-icons/im";
+import { ImBin } from "react-icons/im";
+import { ImBin2 } from "react-icons/im";
+
+
 function ProfilePage() {
     const { id } = useParams();
     const [userInfo, setUserInfo] = useState();
@@ -17,8 +25,14 @@ function ProfilePage() {
     const [getListSweet, setGetListSweet] = useState([]);
     const [selectedTab, setSelectedTab] = useState('Posts');
 
+    const [isOption, setIsOption] = useState(false);
+    const [sweetTemporary, setSweetTemporary] = useState([]);
+
+
+
     useEffect(() => {
-        id && fetchData()
+        id && fetchData() && handleGetSweet()
+        window.scrollTo(0, 0);
     }, [id]);
     const fetchData = async () => {
         try {
@@ -53,7 +67,22 @@ function ProfilePage() {
         if (selectedTab === 'Posts') {
             handleGetSweet();
         }
-    }, [selectedTab]);
+    }, [id, selectedTab]); 
+
+    const handleShowDialogListSweetInBin = (value) => {
+        setIsOption(value);
+    };
+
+    const getAllSweetDeleteTemporary = async () => {
+        const response = await axiosClient.get(`/sweet/getListSweetDeleteTemporary`)
+        if(response.data.isSuccess){
+            setSweetTemporary(response.data.data.InFo_Sweet);
+            console.log(response.data.data);
+        }else{
+            toast.error(response.data.errorMessage);
+        }
+        setIsOption(true);
+    }
 
     return userInfo && (
         <div className='hompage-container' >
@@ -61,7 +90,7 @@ function ProfilePage() {
             <div className='profile-container' >
 
                 <div className='profile-page-header'>
-                    <span><IoArrowBackSharp /></span>
+                    <span onClick={()=> {navigate("/")}}><IoArrowBackSharp /></span>
                     <div className='header-title'>
                         <span>{userInfo.displayName}</span>
                         <span>{userInfo.statusList?.length} posts</span>
@@ -145,12 +174,31 @@ function ProfilePage() {
 
                     <div className='sweet-in-profile'>
                         {selectedTab === 'Posts' ? (
-                            <div style={{ marginTop: 20, marginLeft: 20 }}>
-                                {getListSweet && getListSweet.map((item, index) => (
-                                    <div key={index} className='post-content-by-user'>
-                                        <SinglePost sweetData={item} selectedTab={selectedTab} resetData={fetchData} />
-                                    </div>
-                                ))}
+                            
+                            <div style={{marginTop: 20, marginLeft: 20}}>
+                                <div className='nvarbar-sweet-in-profile'>
+                                    <div> All Posts By {userInfo.displayName} </div>
+                                    {/* <div> <ImEqualizer /> Filter</div> */}
+                                    <div onClick={userId === id ? () => getAllSweetDeleteTemporary() : null}> <ImCog/> Option</div>
+                                </div>
+
+                                <div className='all-sweet-in-profile'>
+                                    {/* {getListSweet && getListSweet.map((item, index) => (
+                                        <div key={index}>< SweetInProfile sweetData = {item} resetData={handleGetSweet}/> </div>
+                                    ))} */}
+
+                                    {getListSweet && getListSweet.map((item, index) => (
+                                        <div key={index} className='post-content-by-user'>
+                                            <SinglePost sweetData={item} resetData={handleGetSweet} inProfile={true}/>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* {isOption&&sweetTemporary.map((item, index) => ( */}
+                                   {isOption&& <DialogSweetInBin sweetTemporary={sweetTemporary} onCloseDialog={handleShowDialogListSweetInBin} resetData={handleGetSweet}/>}
+
+                                {/* ))} */}
+                                
                             </div>
 
                         ) : (null)}

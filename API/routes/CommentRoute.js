@@ -29,12 +29,11 @@ router.get('/checkLikeComment', check_User_Like_Comment);
 router.put('/likeComment/:CommentID', add_OR_Delete_User_To_List_Like_Comment);
 router.get('/getListlikeComment', get_List_User_To_Like_Comment);
 
+
 router.post('/createReplyComment/:CommentID', UploadImageMiddleware.array('image'),create_ReplyComment);
 router.put('/updateReplyComment/:CommentID/:ReplyCommentID', UploadImageMiddleware.array('image'), update_ReplyComment);
 router.get('/getListHistoryUpdateReply', get_History_Update_ReplyComment);
 router.delete('/deleteReplyComment/:CommentID/:ReplyCommentID', delete_ReplyComment);
-
-
 
 router.put('/likeReplyComment/:CommentID/:ReplyCommentID', add_OR_Delete_User_To_List_Like_ReplyComment);
 router.get('/getListlikeReplyComment', get_List_User_To_Like_ReplyComment);
