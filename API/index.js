@@ -21,9 +21,9 @@ cloudinary.config({
 // firebase.auth().languageCode = 'it';
 //Connect db
 dbConnect();
-//Connect redis server in docker
-// const redisClient = connectRedis();
-// redisClient.connect();
+// Connect redis server in docker
+const redisClient = connectRedis();
+redisClient.connect();
 //config websocket
 wss.on('connection', function connection(ws) {
     userConnection.add(ws);

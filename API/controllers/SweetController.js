@@ -111,7 +111,6 @@ const update_Sweet = asyncHandle(async (req, res) => {
     if (!sweet) {
       console.log("Không thấy bài viết!");
       return res.status(400).json(formatResponse(null, false, "Không tìm thấy bài viết!"));
-
     }
 
     try {
@@ -127,10 +126,6 @@ const update_Sweet = asyncHandle(async (req, res) => {
           updated_at: updated_History,
         };
 
-        const addDataToHistory = await Sweet.findByIdAndUpdate(sweet_id, { $push: { edit_history: historyUpdate } }); // , { new: true }
-
-        const updateDataToSweet = await Sweet.findByIdAndUpdate(sweet_id, { $set: { content: content, image: image, updated_at: new Date() } });
-
       } else {
 
         const content_History = sweet.content;
@@ -145,8 +140,13 @@ const update_Sweet = asyncHandle(async (req, res) => {
 
         const addDataToHistory = await Sweet.findByIdAndUpdate(sweet_id, { $push: { edit_history: historyUpdate } }); // , { new: true }
 
-        const updateData = await Sweet.findByIdAndUpdate(sweet_id, { $set: { content: content, image: image, updated_at: new Date() } });
+        if (!!req.files && req.files?.length>0)
+        {
+          await Sweet.findByIdAndUpdate(sweet_id, { $set: { content: content, image: image, updated_at: new Date() } });
+        } else {
+           await Sweet.findByIdAndUpdate(sweet_id, { $set: { content: content, updated_at: new Date() } });
 
+        }
 
       }
     } catch (error) {

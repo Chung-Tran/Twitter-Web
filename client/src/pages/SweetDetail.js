@@ -45,14 +45,12 @@ function SweetDetail() {
         } else {
             toast.error(response.errorMessage);
         }
-        // console.log(sweetDetail);
 
     };
     useEffect(() => {
         fetchData();
         handleSortOutStanding();
         window.scrollTo(0, 0);
-        console.log(sweetDetail);
     }, []);
 
     
@@ -192,7 +190,6 @@ function SweetDetail() {
                                             {/* Hiển thị icon CiImageOn */}
                                             <label htmlFor="fileInput" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '22px' }}>
                                                 <CiImageOn />
-                                                {/* Ẩn input file */}
                                                 <input
                                                     type="file"
                                                     id="fileInput"

@@ -21,7 +21,7 @@ import { DownOutlined, SmileOutlined } from '@ant-design/icons';
 import { Dropdown, Menu, Modal, Space } from 'antd';
 
 
-function SinglePost({ sweetData, selectedTab, resetData, inProfile}) {
+function SinglePost({ sweetData, selectedTab, resetData, inProfile }) {
     const navigate = useNavigate();
     const handleGetSweetDetail = (_id) => {
         navigate(`/status/${_id}`, { state: { source: 'sweetDetail' } })
@@ -96,7 +96,7 @@ function SinglePost({ sweetData, selectedTab, resetData, inProfile}) {
     };
 
     const handleDeleteTemporaryClick = async () => {
-        
+
         try {
             const response = await axiosClient.delete(`sweet/deleteSweetTemporary/${sweetData._id}`);
             if (response.data.isSuccess) {
@@ -109,7 +109,7 @@ function SinglePost({ sweetData, selectedTab, resetData, inProfile}) {
             toast.error("Lỗi khi bỏ bài viết vào thùng rác");
         }
     };
-    
+
 
     const handleEditClick = () => {
         setIsEditing(true);
@@ -121,10 +121,12 @@ function SinglePost({ sweetData, selectedTab, resetData, inProfile}) {
 
     const handleUpdateClick = async () => {
         try {
+            debugger
             if (!sweetData.State) {
                 const formData = new FormData();
                 formData.append('content', updatedSweet);
-                selectedFile && formData.append('image', selectedFile);
+                // selectedFile && formData.append('image', selectedFile);
+                selectedFile.length > 0 && formData.append('image', selectedFile);
                 const response = await axiosClient.put(`sweet/updateSweet/${sweetData._id}`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
@@ -177,7 +179,7 @@ function SinglePost({ sweetData, selectedTab, resetData, inProfile}) {
 
     const handlePinSweetClick = async () => {
         try {
-            
+
             const response = await axiosClient.put(`sweet/pinSweet/${sweetData._id}`);
 
             if (response.data.data) {
@@ -185,7 +187,7 @@ function SinglePost({ sweetData, selectedTab, resetData, inProfile}) {
 
                 resetData();
                 // setContentAferUpdateSweet(sweetData.Content);
-            } else{
+            } else {
                 toast.success("Bỏ ghim bài viết thành công.");
                 resetData();
                 // setContentAferUpdateSweet(sweetData.Content);
@@ -196,7 +198,7 @@ function SinglePost({ sweetData, selectedTab, resetData, inProfile}) {
         }
     };
     const Dropdownitems = [
-        
+
         inProfile && userId === sweetData.UserName._id && {
             key: 'edit',
             label: !sweetData.Ispin ? 'Ghim bài viết' : 'Bỏ ghim bài viết',
@@ -232,6 +234,7 @@ function SinglePost({ sweetData, selectedTab, resetData, inProfile}) {
             className="custom-dropdown"
         />
     );
+    console.log(selectedFile)
     return (
         <div className='single-post' >
             <div className='user-info' >
@@ -290,7 +293,8 @@ function SinglePost({ sweetData, selectedTab, resetData, inProfile}) {
                                                             id="fileInput"
                                                             style={{ display: "none" }}
                                                             accept="image/*"
-                                                            onChange={handleFileChange}
+                                                            onChange={(e) => handleFileChange(e)}
+                                                            multiple
                                                         />
                                                     </label>
                                                 </li>
@@ -320,7 +324,7 @@ function SinglePost({ sweetData, selectedTab, resetData, inProfile}) {
                     {sweetData.State ? (
                         <div className='post-share'>
                             <div className='user-info'>
-                                <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' onClick={() => { navigate(`/profile/${sweetData.UserName_Origin._id}`) }}/>
+                                <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' onClick={() => { navigate(`/profile/${sweetData.UserName_Origin._id}`) }} />
                                 <div className='info-content'>
                                     <div className='user-info-name' onClick={() => { navigate(`/profile/${sweetData.UserName_Origin._id}`) }}>
                                         <span>{sweetData.UserName_Origin?.displayName}</span>
@@ -373,7 +377,7 @@ function SinglePost({ sweetData, selectedTab, resetData, inProfile}) {
                             onClick={() => likeSweetHandle()}
                             style={{ color: inProfile ? (sweetData.StateLike ? 'red' : 'white') : (isLiked ? 'red' : 'white'), cursor: 'pointer' }}
                         />
-                            <ShowListInfoModal title={"Danh sách người thích bài viết"} number= {inProfile ? sweetData.QuantityLike : quantityLike} sweet={sweetData} type={"Like"} />
+                            <ShowListInfoModal title={"Danh sách người thích bài viết"} number={inProfile ? sweetData.QuantityLike : quantityLike} sweet={sweetData} type={"Like"} />
                         </li>
 
                         <li onClick={() => handleGetSweetDetail(sweetData._id)}><BsReverseListColumnsReverse /> &nbsp; {835}</li>
@@ -390,5 +394,5 @@ function SinglePost({ sweetData, selectedTab, resetData, inProfile}) {
 
 SinglePost.defaultProps = {
     inProfile: false,
-  };
+};
 export default SinglePost
