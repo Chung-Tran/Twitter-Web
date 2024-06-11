@@ -45,7 +45,8 @@ const loginUser = asyncHandle(async (req, res) => {
             displayName: findUser?.displayName ?? "",
             email: findUser?.email ?? "",
             mobile: findUser?.mobile ?? "",
-            token: accessToken
+            token: accessToken,
+            avatar:findUser?.avatar ?? ""
         }
         res.status(200).json(formatResponse(responseData, true, "Đăng nhập thành công"));
     } else {
@@ -53,10 +54,22 @@ const loginUser = asyncHandle(async (req, res) => {
     }
 });
 const loginByEmail = asyncHandle(async (req, res) => {
-    const { email } = req.body;
+    const { email, userData } = req.body;
     const findUser = await User.findOne({ email: email });
-    console.log(email, findUser)
-    if (findUser.length == 0) {
+    if (!findUser) {
+        const newUserInfo = {
+            username: userData?.email.replace('@gmail.com', ''),
+            avatar: userData.picture,
+            displayName: userData?.name,
+            password: ' ',
+            email: userData?.email,
+        }
+        await User.create(newUserInfo).then((result, err) => {
+            if (!err) {
+                res.status(200).json(formatResponse(result, true, "Đăng nhập thành công"));
+
+            }
+        })
         res.status(403).json(formatResponse(null, false, "Tài khoản không tồn tại. Vui lòng thử lại."));
     }
     else {
@@ -75,14 +88,14 @@ const loginByEmail = asyncHandle(async (req, res) => {
             displayName: findUser?.displayName ?? "",
             email: findUser?.email ?? "",
             mobile: findUser?.mobile ?? "",
-            token: accessToken
+            token: accessToken,
+            avatar:findUser?.avatar ?? ""
         }
         res.status(200).json(formatResponse(responseData, true, "Đăng nhập thành công"));
     }
 });
 const sendPasswordByEmail = asyncHandle(async (req, res) => {
     const { email } = req.body;
-    console.log(email)
     const findUser = await User.findOne({ email });
     if (!findUser) {
         res.status(403).json(formatResponse(null, false, "Không tìm thấy người dùng."));

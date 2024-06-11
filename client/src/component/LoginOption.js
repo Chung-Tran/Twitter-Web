@@ -18,7 +18,7 @@ function LoginOption() {
     if (decodedData.email_verified == true) {
       try {
         const email = decodedData.email;
-        const response = await axiosClient.post(`/authentication/login-by-email`, { email: email });
+        const response = await axiosClient.post(`/authentication/login-by-email`, { email: email,userData:decodedData });
         if (response.data.isSuccess) {
           toast.success("Đăng nhập thành công");
           localStorage.setItem('twitter-user', JSON.stringify(response.data.data));

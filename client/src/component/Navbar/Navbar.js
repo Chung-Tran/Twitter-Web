@@ -70,7 +70,7 @@ const Navbar = () => {
                     POST
                 </div>
                 <div className='navbar-userInfo'>
-                    <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
+                    <img src={!!user?.avatar ? user.avatar : 'https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' } alt='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
                     <div className='navbar-userinfo-name'>
                         <span>{user?.displayName}</span>
                         <span>@{user?.username}</span>
