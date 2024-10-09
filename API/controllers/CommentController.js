@@ -23,7 +23,7 @@ const create_Comment = asyncHandle(async (req, res) => {
   //const user_id = req.body.user_id;
   const content = req.body.content || '';
   const image = req.files ? await uploadImage(req.files) : null;
-  
+
   // let content = null;
   // let image = null;
   // try {
@@ -37,7 +37,7 @@ const create_Comment = asyncHandle(async (req, res) => {
   //   console.error("Lỗi khi truyền vào tham số: ", error.message)
   //   return res.status(400).json(formatResponse(null, false, 'Content is required when no image is provided'));
   // }
-  
+
 
 
   let comment = null;
@@ -152,8 +152,13 @@ const update_Comment = asyncHandle(async (req, res) => {
 
         const addDataToHistory = await Comment.findByIdAndUpdate(commentID, { $push: { edit_history: historyUpdate } }); // , { new: true }
 
-        const updateDataToSweet = await Comment.findByIdAndUpdate(commentID, { $set: { content: content, image: image, updated_at: new Date() } });
+        if (!!req.files && req.files.length > 0) {
+          await Comment.findByIdAndUpdate(commentID, { $set: { content: content, image: image, updated_at: new Date() } });
 
+        } else {
+          await Comment.findByIdAndUpdate(commentID, { $set: { content: content, updated_at: new Date() } });
+
+        }
       } else {
 
         const content_History = comment.content;
@@ -177,10 +182,9 @@ const update_Comment = asyncHandle(async (req, res) => {
     const commentAfterUpdate = await Comment.findById(commentID);
 
     if (commentAfterUpdate) {
-      console.log('Đối tượng Comment mới:', commentAfterUpdate);
       commentAfterUpdate
     } else {
-      console.log('Không tìm thấy đối tượng Sweet.');
+      //nothing
     }
 
     const data = {
@@ -213,17 +217,17 @@ const get_History_Update_Comment = asyncHandle(async (req, res) => {
 
   let list_History_Update = [];
   const now = moment();
-  
+
   for (let i = edit_historys.length - 1; i >= 0; i--) {
     const content = edit_historys[i].content;
     const images = edit_historys[i].images;
     const updated_at = moment(edit_historys[i].updated_at);
     const durationByText = await formatTimeDifference(updated_at, now);
 
-    list_History_Update.push({Content: content,Image: images, Duration: durationByText, UpdateAt: moment(updated_at).format("HH:mm - DD/MM/YYYY")});
+    list_History_Update.push({ Content: content, Image: images, Duration: durationByText, UpdateAt: moment(updated_at).format("HH:mm - DD/MM/YYYY") });
   }
 
-  
+
 
   const data = {
     UpdateNumber: edit_historys.length,
@@ -320,7 +324,7 @@ const check_User_Like_Comment = asyncHandle(async (req, res) => {
 
   try {
     const comment = await Comment.findById(comment_id);
-    
+
     if (comment) {
       const user_id_In_List_Like_Comment = comment && comment.likes && comment.likes.findIndex(userId => userId && userId.toString() === user_id);
 
@@ -338,7 +342,7 @@ const check_User_Like_Comment = asyncHandle(async (req, res) => {
         }
         return res.status(200).json(formatResponse(data, true, "Người dùng chưa like Comment!"));
       }
-    }else return res.status(400).json(formatResponse(null, false, "Không tìm thấy Comment!"));
+    } else return res.status(400).json(formatResponse(null, false, "Không tìm thấy Comment!"));
 
   } catch (error) {
     console.error("Lỗi: ", error.message)
@@ -347,7 +351,7 @@ const check_User_Like_Comment = asyncHandle(async (req, res) => {
 
 });
 
-const add_OR_Delete_User_To_List_Like_Comment = asyncHandle(async(req,res) =>{
+const add_OR_Delete_User_To_List_Like_Comment = asyncHandle(async (req, res) => {
   const comment_id = req.params.CommentID;
   const user_id = req.user.userId
   //const user_id = req.body.user_id;
@@ -365,7 +369,7 @@ const add_OR_Delete_User_To_List_Like_Comment = asyncHandle(async(req,res) =>{
         QuantityLike: comment.likes.length
       }
       return res.status(200).json(formatResponse(data, true, "Đã like comment!"));
-    }else {
+    } else {
       comment.likes.splice(user_id_In_List_Like_Comment, 1);
       comment.save();
       const data = {
@@ -404,8 +408,8 @@ const get_List_User_To_Like_Comment = asyncHandle(async (req, res) => {
       const userID = List_Userid_ToLike[i];
       const displayName = await getDisplayName_By_ID(userID);
       if (displayName) {
-          console.log("Tìm thấy UserID và có thể biết được DisplayName");
-          displayNameS.push(displayName);
+        console.log("Tìm thấy UserID và có thể biết được DisplayName");
+        displayNameS.push(displayName);
       }
     }
 
@@ -519,36 +523,36 @@ const get_List_User_To_Like_ReplyComment = asyncHandle(async (req, res) => {
     })
 
   const replyComment = comment.comment_reply;
-  
-      try {
-        if(!comment || !replyComment){
-          console.log("Không thấy comment!");
-          return res.status(400).json(formatResponse(null, false, "Không tìm thấy Comment!"));
+
+  try {
+    if (!comment || !replyComment) {
+      console.log("Không thấy comment!");
+      return res.status(400).json(formatResponse(null, false, "Không tìm thấy Comment!"));
+    }
+    else {
+      replyComment.forEach(async rc => {
+        if (rc._id.toString() === replyComment_id) {
+          const List_Userid_ToLike = rc.likes;
+          const List_Userid_ToLikeSort = [];
+          for (let i = List_Userid_ToLike.length - 1; i >= 0; i--) {
+            const userID = List_Userid_ToLike[i];
+            const displayNameS = await getDisplayName_By_ID(userID);
+            List_Userid_ToLikeSort.push(displayNameS);
+          }
+          const data = {
+            QuantityLike: List_Userid_ToLike.length,
+            List_UserName_ToLike: List_Userid_ToLikeSort
+          }
+          return res.status(200).json(formatResponse(data, true, "Lấy danh sách User đã like Reply Comment thành công"));
         }
-        else{
-          replyComment.forEach( async rc => {
-            if(rc._id.toString() === replyComment_id){
-              const List_Userid_ToLike = rc.likes;
-              const List_Userid_ToLikeSort = [];
-              for (let i = List_Userid_ToLike.length - 1; i >= 0; i--) {
-                const userID = List_Userid_ToLike[i];
-                const displayNameS = await getDisplayName_By_ID(userID);
-                List_Userid_ToLikeSort.push(displayNameS);
-              }            
-              const data = {
-                QuantityLike: List_Userid_ToLike.length,
-                List_UserName_ToLike: List_Userid_ToLikeSort
-              }
-              return res.status(200).json(formatResponse(data, true, "Lấy danh sách User đã like Reply Comment thành công"));     
-            }
-          });
-        }
-      } catch (error) {   
-        console.error("Lỗi khi lấy danh sách like", error.message);
-        return res.status(400).json(formatResponse(null, false, "Lỗi khi tìm Comment!"));
-      }
-  
-  
+      });
+    }
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách like", error.message);
+    return res.status(400).json(formatResponse(null, false, "Lỗi khi tìm Comment!"));
+  }
+
+
 });
 
 const update_ReplyComment = asyncHandle(async (req, res) => {
@@ -727,23 +731,23 @@ async function formatTimeDifference(fromDate, toDate) {
 
   const duration = moment.duration(toDate.diff(fromDate));
 
-    if (duration.asMinutes() < 1) {
-        return 'Vừa xong';
-    } else if (duration.asHours() < 1) {
-        const minutes = Math.floor(duration.asMinutes());
-        return `${minutes} phút trước`;
-    } else if (duration.asDays() < 1) {
-        const hours = Math.floor(duration.asHours());
-        return `${hours} giờ trước`;
-    } else if (duration.asDays() < 7) {
-        const days = Math.floor(duration.asDays());
-        return `${days} ngày trước`;
-    } else {
-        // Nếu lớn hơn 7 ngày, hiển thị số tuần
-        // const weeks = Math.floor(duration.asDays() / 7);
-        // return `${weeks} tuần trước`;
-        return moment(fromDate).format("DD/MM/YYYY - HH:mm");
-    }
+  if (duration.asMinutes() < 1) {
+    return 'Vừa xong';
+  } else if (duration.asHours() < 1) {
+    const minutes = Math.floor(duration.asMinutes());
+    return `${minutes} phút trước`;
+  } else if (duration.asDays() < 1) {
+    const hours = Math.floor(duration.asHours());
+    return `${hours} giờ trước`;
+  } else if (duration.asDays() < 7) {
+    const days = Math.floor(duration.asDays());
+    return `${days} ngày trước`;
+  } else {
+    // Nếu lớn hơn 7 ngày, hiển thị số tuần
+    // const weeks = Math.floor(duration.asDays() / 7);
+    // return `${weeks} tuần trước`;
+    return moment(fromDate).format("DD/MM/YYYY - HH:mm");
+  }
 }
 
 
@@ -780,8 +784,8 @@ const get_List_ReplyComment = asyncHandle(async (req, res) => {
 
 
       replyCommentS.push({
-        UserName: await getDisplayName_By_ID(rc.user_id), 
-        Content: rc.content, 
+        UserName: await getDisplayName_By_ID(rc.user_id),
+        Content: rc.content,
         Image: rc.image,
         CreateAt: duration,
         QuantityLike: quantityLike,
@@ -804,13 +808,14 @@ const get_List_ReplyComment = asyncHandle(async (req, res) => {
 
 
 
-module.exports = {create_Comment, 
-                  update_Comment, 
-                  get_History_Update_Comment,
-                  delete_Comment, 
-                  check_User_Like_Comment,
-                  add_OR_Delete_User_To_List_Like_Comment, 
-                  get_List_User_To_Like_Comment,
+module.exports = {
+  create_Comment,
+  update_Comment,
+  get_History_Update_Comment,
+  delete_Comment,
+  check_User_Like_Comment,
+  add_OR_Delete_User_To_List_Like_Comment,
+  get_List_User_To_Like_Comment,
 
   create_ReplyComment,
   update_ReplyComment,

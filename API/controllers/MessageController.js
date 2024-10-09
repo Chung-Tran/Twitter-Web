@@ -76,8 +76,6 @@ const getAllMessagesBetweenUsers = asyncHandle(async (req, res) => {
                 { senderID: user_id, receiverID: otherUserId },
                 { senderID: otherUserId, receiverID: user_id }
             ]
-
-
         }).sort({ createdAt: 1 });
 
         res.status(200).json(formatResponse(messages, true, null));

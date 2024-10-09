@@ -922,14 +922,10 @@ const get_Many_Sweet_And_Share_For_You = asyncHandle((async (req, res) => {
   let skipNumble = parseInt(req.query.skip) || 0;
   let limitNumble = parseInt(req.query.limit) || 10;
   const user_id = req.user.userId
-  // const user_id = req.body.userId
-
   try {
     const getSweet = await Sweet.find({ isDelete: false }).populate('user_id', 'displayName username');
     const getShare = await Share.find({ isDelete: false }).populate('user_id', 'displayName username');
-
     const combineSweetShare = getSweet.concat(getShare);
-
     const sortData = combineSweetShare.sort((a, b) => {
       const interactionCount_a = (a.likes ? a.likes.length : 0) + (a.comments ? a.comments.length : 0) + (a.shares.length);
       const interactionCount_b = (b.likes ? b.likes.length : 0) + (b.comments ? b.comments.length : 0) + (b.shares.length);
@@ -937,11 +933,8 @@ const get_Many_Sweet_And_Share_For_You = asyncHandle((async (req, res) => {
       if (interactionCount_b === interactionCount_a) {
         return new Date(b.created_at) - new Date(a.created_at);
       } else return interactionCount_b - interactionCount_a;
-
     });
-
     const now = moment();
-
     const processedData = await Promise.all(sortData.map(async (item) => {
       const createdAt = moment(item.created_at);
       const durationByText = await formatTimeDifference(createdAt, now);
@@ -953,7 +946,6 @@ const get_Many_Sweet_And_Share_For_You = asyncHandle((async (req, res) => {
         const createdAt_Origin = moment(createSweet);
         durationByText_Origin = await formatTimeDifference(createdAt_Origin, now);
       }
-
       let stateLike;
       const check_UserLike = item.likes.includes(user_id);
       if(check_UserLike){
@@ -980,19 +972,14 @@ const get_Many_Sweet_And_Share_For_You = asyncHandle((async (req, res) => {
           UserName: item.user_id,
           Content: item.content,
           Image: item.image,
-
           SweetID: item.sweet_id,
           UserName_Origin: sweetOrigin?.user_id,
           Duration_Origin: durationByText_Origin,
           Content_Origin: sweetOrigin?.content,
           Image_Origin: sweetOrigin?.image,
-
           QuantityLike: item.likes.length,
-
           QuantityComment: item.comments.length,
-
           QuantityShare: item.shares.length,
-
           CreateAt: moment(item.created_at).format(),
           Duration: durationByText,
           StateLike: stateLike,
