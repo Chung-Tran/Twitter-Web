@@ -10,11 +10,9 @@ import { CiLocationOn } from "react-icons/ci";
 import axiosClient from '../../authenticate/authenticationConfig';
 import SinglePost from '../SinglePost';
 import { toast } from 'react-toastify';
-import DialogShare from '../DialogShare';
 
-function Post({isCreateShare}) {
+function Post() {
   const [selectedTab, setSelectedTab] = useState('For You');
-  const [isCreateShareSuccess, setIsCreateShareSuccess] = useState(false);
   const [sweetList, setSweetList] = useState([]);
   const [postSweetContent, setPostSweetContent] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
@@ -28,7 +26,7 @@ function Post({isCreateShare}) {
     //Check phân trang
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-      const isNearBottom = scrollHeight - scrollTop <= clientHeight + 1000;
+      const isNearBottom = scrollHeight - scrollTop <= clientHeight + 800;
       setIsNearBottom(isNearBottom);
     };
 
@@ -40,53 +38,55 @@ function Post({isCreateShare}) {
   }, []);
 
   useEffect(() => {
+    console.log('call fetchdata 1')
     fetchData();
+   
   }, [limit, skip]);
   //Nếu như đổi tab data sẽ set lại từ đầu
   useEffect(() => {
     setSweetList([]);
     setSkip(0);
     setLimit(5);
+    console.log('call fetchdata setSweetList')
     fetchData();
     
   },[selectedTab])
 
   const fetchData = async () => {
     try {
-      let response;
-      if (selectedTab === 'For You') {
-        response = await axiosClient.get(`/sweet/getManySweetAndShareForYou?limit=${limit}&skip=${skip}`);
-      } else if (selectedTab === 'Following') {
-        response = await axiosClient.get(`/sweet/getManySweetAndShareFollowing?limit=${limit}&skip=${skip}`);
-      }
+        let response;
+        if (selectedTab === 'For You') {
+            response = await axiosClient.get(`/sweet/getManySweetAndShareForYou?limit=${limit}&skip=${skip}`);
+        } else if (selectedTab === 'Following') {
+            response = await axiosClient.get(`/sweet/getManySweetAndShareFollowing?limit=${limit}&skip=${skip}`);
+        }
+            const newSweetList = response.data.data.InFo_Sweet;
 
-      if (response.data.isSuccess) {
-        setSweetList(prevSweetList => [...prevSweetList, ...response.data.data.InFo_Sweet]);
-      } else {
-        toast.error(response.errorMessage);
-      }
+
+        if (response.data.isSuccess) {
+            // Hàm để loại bỏ các mục đã tồn tại trong danh sách
+            const getUniqueNewSweetList = (newList, existingList) => {
+                const existingIds = new Set(existingList.map(item => item._id));
+                return newList.filter(item => !existingIds.has(item._id));
+            };
+
+            // Loại bỏ các mục đã tồn tại trong danh sách và cập nhật sweetList
+            setSweetList(prevSweetList => [...prevSweetList, ...getUniqueNewSweetList(newSweetList, prevSweetList)]);
+        } else {
+            toast.error(response.errorMessage);
+        }
     } catch (error) {
-      console.error("Error occurred while fetching sweet data:", error);
+        console.error("Error occurred while fetching sweet data:", error);
     }
-  };
+  }; 
 
   useEffect(() => {
-    setSelectedTab('For You');
-  }, []);
-
-  useEffect(() => {
-    setIsCreateShareSuccess(isCreateShare);
-  }, [isCreateShare]);
-
-  useEffect(() => {
-    fetchData();
-  }, [selectedTab, limit, skip, isCreateShareSuccess]);
-
-  useEffect(() => {
-    if(isCreateShareSuccess){
-      fetchData();
+    if (isNearBottom==true) {
+      console.log('set skip')
+      setSkip(prevSkip => prevSkip + limit);
     }
-  }, [isCreateShare]);
+  }, [isNearBottom]);
+
 
   const handleTabClick = (tab) => {
     setSelectedTab(tab);
@@ -122,11 +122,6 @@ function Post({isCreateShare}) {
     setSelectedFile(e.target.files[0]);
   };
 
-  useEffect(() => {
-    if (isNearBottom) {
-      setSkip(prevSkip => prevSkip + limit);
-    }
-  }, [isNearBottom]);
 
   return (
     <div className='homepage-post'>
@@ -137,7 +132,7 @@ function Post({isCreateShare}) {
         <span className={selectedTab === 'Following' ? 'selected-tab' : ''} onClick={() => handleTabClick('Following')}>Following</span>
         
         <AiOutlineSetting width={20} color='white' fontSize={23} style={{ marginRight: '1px', marginTop: '10px', right: '0' }} />
-      </div>
+        </div>
       <div className='post-create-box'>
         <div className='input-box-avatar'>
           <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
@@ -167,8 +162,9 @@ function Post({isCreateShare}) {
                         accept="image/*" 
                         onChange={handleFileChange}
                         multiple 
-                      />
- <span style={{ position: 'absolute', marginTop: '50px', fontSize: '16px', color: '#c9a4a4', fontWeight: 'normal', marginLeft: '-5px' }}>{selectedFile?.length>0 ? selectedFile.length + " file" : ""}</span>                      </label>
+                        />
+                        <span style={{ position: 'absolute', marginTop: '50px', fontSize: '16px', color: '#c9a4a4', fontWeight: 'normal', marginLeft: '-5px' }}>{selectedFile?.length>0 ? selectedFile.length + " file" : ""}</span>     
+                      </label>
                     </li>
                     <li><AiOutlineFileGif /></li>
                     <li><AiOutlineUnorderedList /></li>

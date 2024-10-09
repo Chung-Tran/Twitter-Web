@@ -15,13 +15,9 @@ const {wss,userConnection} = require('./config/webSocketConfig');
 cloudinary.config({
     secure: true
 });
-// const wss = new WebSocket.Server({ port: 8080 });//Config khởi tạo server websocket cho chức năng chat
-
-//Config firebase
-// firebase.auth().languageCode = 'it';
 //Connect db
 dbConnect();
-//Connect redis server in docker
+// Connect redis server in docker
 const redisClient = connectRedis();
 redisClient.connect();
 //config websocket
@@ -30,7 +26,6 @@ wss.on('connection', function connection(ws) {
     // Xử lý các tin nhắn nhận được từ client
     ws.on('message', function incoming(message) {
         try {
-            console.log('receive')
             const parsedMessage = JSON.parse(message);
             if (parsedMessage.type === 'chat') {
                 // Tin nhắn là loại chat, gọi hàm sendMessage để xử lý
@@ -42,18 +37,6 @@ wss.on('connection', function connection(ws) {
         }
     });
 
-    // Xử lý sự kiện đóng kết nối từ client
-    // ws.on('close', function close() {
-    //     console.log('Client disconnected');
-        // Xóa thông tin của client khỏi Redis
-    //     redisClient.srem("online-users", ws, (err, reply) => {
-    //         if (err) {
-    //             console.error('Error removing user from online list:', err);
-    //         } else {
-    //             console.log('User removed from online list:', ws);
-    //         }
-    //     });
-    //  });
 });
 
 //Define routes

@@ -7,6 +7,8 @@ const { connectRedis } = require('../config/redisConfig');
 const { sendEmail } = require('../config/sendMailConfig');
 const jwt = require('jsonwebtoken');
 const { uploadImage } = require('../config/cloudinaryConfig');
+const bcrypt = require('bcrypt')
+const crypto = require('crypto');
 const redisClient = connectRedis();
 const secretKey = process.env.JWT_CODE;
 
@@ -30,8 +32,8 @@ const loginUser = asyncHandle(async (req, res) => {
     if (findUser && (await findUser.isPasswordMatched(password))) {
         const encodeData = {
             userId: findUser._id,
-            email: findUser.email ,
-            displayName:findUser.displayName
+            email: findUser.email,
+            displayName: findUser.displayName
         }
         const refeshToken = generateRefreshToken(encodeData);
         const accessToken = generateAccessToken(encodeData);
@@ -43,26 +45,38 @@ const loginUser = asyncHandle(async (req, res) => {
             displayName: findUser?.displayName ?? "",
             email: findUser?.email ?? "",
             mobile: findUser?.mobile ?? "",
-            token: accessToken
+            token: accessToken,
+            avatar:findUser?.avatar ?? ""
         }
-        console.log(responseData)
         res.status(200).json(formatResponse(responseData, true, "Đăng nhập thành công"));
     } else {
         res.status(403).json(formatResponse(null, false, "Mật khẩu không hợp lệ. Vui lòng thử lại."));
     }
 });
 const loginByEmail = asyncHandle(async (req, res) => {
-    const { email } = req.body;
+    const { email, userData } = req.body;
     const findUser = await User.findOne({ email: email });
-    console.log(email,findUser)
-    if (findUser.length == 0) {
+    if (!findUser) {
+        const newUserInfo = {
+            username: userData?.email.replace('@gmail.com', ''),
+            avatar: userData.picture,
+            displayName: userData?.name,
+            password: ' ',
+            email: userData?.email,
+        }
+        await User.create(newUserInfo).then((result, err) => {
+            if (!err) {
+                res.status(200).json(formatResponse(result, true, "Đăng nhập thành công"));
+
+            }
+        })
         res.status(403).json(formatResponse(null, false, "Tài khoản không tồn tại. Vui lòng thử lại."));
     }
     else {
         const encodeData = {
             userId: findUser._id.toString(),
             email: findUser.email,
-            displayName:findUser.displayName
+            displayName: findUser.displayName
         }
         const refeshToken = generateRefreshToken(encodeData);
         const accessToken = generateAccessToken(encodeData);
@@ -74,14 +88,14 @@ const loginByEmail = asyncHandle(async (req, res) => {
             displayName: findUser?.displayName ?? "",
             email: findUser?.email ?? "",
             mobile: findUser?.mobile ?? "",
-            token: accessToken
+            token: accessToken,
+            avatar:findUser?.avatar ?? ""
         }
         res.status(200).json(formatResponse(responseData, true, "Đăng nhập thành công"));
     }
 });
 const sendPasswordByEmail = asyncHandle(async (req, res) => {
     const { email } = req.body;
-    console.log(email)
     const findUser = await User.findOne({ email });
     if (!findUser) {
         res.status(403).json(formatResponse(null, false, "Không tìm thấy người dùng."));
@@ -156,9 +170,7 @@ const confirmResetPassword = asyncHandle(async (req, res) => {
     const { email, newPassword, token } = req.body;
 
     try {
-        console.log(email)
         const user = await User.findOne({ email: email });
-        console.log(user)
         jwt.verify(token, secretKey, async (err, decoded) => {
             if (err) {
                 return res.status(400).json(formatResponse(null, false, "Phiên thay đổi mật khẩu hết hạn. Vui lòng thử lại"));
@@ -185,16 +197,24 @@ const confirmResetPassword = asyncHandle(async (req, res) => {
                     }
                     const dataFromRedis = JSON.parse(resetCodeData);
 
-                    console.log("dataFromRedis", dataFromRedis)
-                    console.log("decoded", decoded)
                     if (decoded.resetCode != dataFromRedis.resetCode) {
                         return res.status(400).json(formatResponse(null, false, "Cập nhật mật khẩu thất bại. Vui lòng thử lại"));
                     }
                 })
 
                 // Cập nhật mật khẩu của người dùng
-                const updateResult = await user.updateUserPassword(newPassword);
-                if (updateResult.isSuccess) {
+                // const updateResult = await user.updateUserPassword(newPassword);
+                const filter = { _id: user._id };
+                const salt = await bcrypt.genSaltSync(10);
+                const update = {
+                    $set: {
+                        password: await bcrypt.hash(newPassword, salt)
+                    }
+                }
+                const result = await User.findOneAndUpdate(filter, update);
+
+                // if (updateResult.isSuccess) {
+                if (result) {
                     // Xóa reset code từ Redis sau khi sử dụng
                     await redisClient.del(`reset_password_code_${user._id}`);
 

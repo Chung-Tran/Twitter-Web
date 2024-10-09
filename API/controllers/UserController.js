@@ -4,29 +4,46 @@ const Sweet = require('../model/Sweet');
 const formatResponse = require('../common/ResponseFormat');
 const { getUsersOnline } = require('../config/redisConfig');
 const { createNotification } = require('./NotifyController');
-const {ObjectId} = require('mongodb')
+const { ObjectId } = require('mongodb')
+const { uploadImage } = require('../config/cloudinaryConfig');
 const editUser = asyncHandle(async (req, res) => {
     const userId = req.user.userId;
-    const email = req.user.email;
-    const username = req.body.username;
-    const bio = req.body.bio;
-    const dob = req.body.dob;
+    const { displayName, bio, dob, userName, email } = req.body;
+    const image = req.files && await uploadImage(req.files);
     try {
-        const updatedUser = await User.findByIdAndUpdate(userId, { username, email, bio, dob }, { new: true });
-
-        if (!updatedUser) {
-            return res.status(400).json(formatResponse(null, false, "Update user false"));
+        const existingUsername = await User.findOne({ username: userName });
+        if (existingUsername && existingUsername._id != userId) {
+            return res.status(400).json(formatResponse(null, false, "Username đã tồn tại"));
         }
+        const existingEmail = await User.findOne({ email: email });
+        if (existingEmail && existingEmail._id != userId) {
+            return res.status(400).json(formatResponse(null, false, "Email đã tồn tại"));
+        }
+        const updatedUser = await User.findByIdAndUpdate(userId, { userName, email, bio, displayName }, { new: true });
+        if (!!image)
+        {
+            console.log('upload', image[0]);
+            await User.findByIdAndUpdate(userId, { avatar:image[0] }, { new: true });
+        } else if (!!dob)
+        {
+            await User.findByIdAndUpdate(userId, { dob }, { new: true });
+            }
+        if (!updatedUser) {
+            return res.status(400).json(formatResponse(null, false, "Update user failed"));
+        }
+
         const data = {
-            username: updatedUser.username,
+            username: updatedUser.userName,
+            displayName: updatedUser.username,
             email: updatedUser.email,
             bio: updatedUser.bio,
             dob: updatedUser.dob
         };
+
         res.status(200).json(formatResponse(data, true, ""));
     } catch (error) {
         console.error('Error editing user information:', error);
-        res.status(500).json(formatResponse(null, false, "Update user false. Error:" + error.message));
+        res.status(500).json(formatResponse(null, false, "Update user failed. Error:" + error.message));
     }
 });
 
@@ -55,12 +72,10 @@ const addFollowUser = asyncHandle(async (req, res) => {
             //Tạo notify
             const dataAddNotify = {
                 userId: followUser._id,
-                content: `${req.user.displayName} đã theo dõi bạn.`,
+                content: '${req.user.displayName} đã theo dõi bạn.',
                 relateTo: userId,
             }
-
-            await createNotification(dataAddNotify);
-            //Trả về dữ liệu
+            await createNotification(dataAddNotify)
             const data = {
                 userId: user._id,
                 following: user.following.length,
@@ -101,14 +116,19 @@ const getUser = asyncHandle(async (req, res) => {
         if (!user) {
             return res.status(404).json(formatResponse(null, false, "User not found"));
         }
+        const followingUsers = await User.find({ _id: { $in: user.following } }).select('username displayName avatar');
+        const followerUsers = await User.find({ _id: { $in: user.followers } }).select('username displayName avatar');
+
         const data = {
             userId: user._id,
-            following: user.following.length,
-            followUser: user.followers.length,
+            following:followingUsers,
+            followUser: followerUsers,
             userName: user.username,
             displayName: user.displayName,
             bio: user.bio ?? "",
             dob: user.dob ?? "",
+            email: user?.email, 
+            avatar:user?.avatar,
             createdAt:user.created_at.toLocaleDateString(),
             statusList:sweetList
 
@@ -121,37 +141,41 @@ const getUser = asyncHandle(async (req, res) => {
     }
 });
 
-const searchUser = asyncHandle(async (req, res) => {
-
-    const email = req.query.email;
-    const username = req.query.username;
-    console.log(email, username)
-
-    const searchKeyWord = await User.find({
-        $or: [
-            email && { email: { $regex: email, $options: "i" } },
-            username && { username: { $regex: username, $options: "i" } }
-        ].filter(Boolean)
-    });
-
+const searchUsers = asyncHandle(async (req, res) => {
     try {
-        if (searchKeyWord.length > 0) {
-            const data = {
-                QuantityResult: searchKeyWord.length,
-                InFo_User: searchKeyWord
-            }
-            return res.status(200).json(formatResponse(data, true, "Tìm kiếm thành công!!"))
-        } else return res.status(400).json(formatResponse("", false, "Không tìm thấy User!!"))
+        const { query, skip = 0, limit = 10 } = req.query;
+        const searchRegex = new RegExp(query, 'i');
 
+        const users = await User.find({
+            $or: [
+                { username: { $regex: searchRegex } },
+                { displayName: { $regex: searchRegex } }
+            ]
+        })
+        .select('username displayName avatar')
+        .skip(parseInt(skip))
+        .limit(parseInt(limit));
+
+        const totalUsers = await User.countDocuments({
+            $or: [
+                { username: { $regex: searchRegex } },
+                { displayName: { $regex: searchRegex } }
+            ]
+        });
+
+        return res.status(200).json(formatResponse({
+            users,
+            totalUsers
+        }, true, ""));
     } catch (error) {
-        console.error("Lỗi khi tìm kiếm: ", error.message);
-        return res.status(400).json(formatResponse("", false, "Lỗi khi tìm kiếm User!!"));
+        console.error(error);
+        res.status(500).json(formatResponse(null, false, "Internal Server Error"));
     }
-})
+});
+
 
 const getListUserUnFollow = asyncHandle(async (req, res) => {
     const user_id = req.user.userId;
-    console.log('userId',user_id)
     //const user_id = req.query.UserID;
 
     // Lấy người dùng hiện tại
@@ -159,7 +183,7 @@ const getListUserUnFollow = asyncHandle(async (req, res) => {
 
     // Lấy danh sách người dùng không được theo dõi và giới hạn số lượng kết quả là 10
     const usersNotFollowing = await User.find({
-        _id: { $nin: [...user.following, user_id] } // Không nằm trong danh sách đang theo dõi và không phải chính user_id
+        _id: { $nin: [...user?.following, user_id] } // Không nằm trong danh sách đang theo dõi và không phải chính user_id
     }).limit(10).select('displayName username _id');
 
     try {
@@ -172,13 +196,11 @@ const getListUserUnFollow = asyncHandle(async (req, res) => {
 //API lấy user đang follow và đang online
 const getListUserOnline = asyncHandle(async (req, res) => {
     const userId = req.user.userId;
-    console.log(userId)
     try {
         // Lấy danh sách người dùng đang online
         const onlineUsers = await getUsersOnline();
 
         const userFollowing = await User.findById(userId).populate('following', 'displayName username _id');
-        console.log('userFollow',userFollowing)
 
         // Lọc danh sách người dùng đang online mà cũng được theo dõi bởi người dùng hiện tại
         const followingOnlineUsers = userFollowing.following.filter(user => onlineUsers.includes(user?._id.toString()));
@@ -191,4 +213,5 @@ const getListUserOnline = asyncHandle(async (req, res) => {
 });
 
 
-module.exports = { editUser, addFollowUser, getUser, searchUser, getListUserUnFollow, getListUserOnline }
+
+module.exports = { editUser, addFollowUser, getUser, searchUsers, getListUserUnFollow, getListUserOnline }

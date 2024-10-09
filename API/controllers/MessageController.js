@@ -8,7 +8,6 @@ const { WebSocket } = require('ws');
 const getAllMessages = asyncHandle(async (req, res) => {
     try {
         const user_id = req.user.userId;
-        console.log(user_id)
         const messages = await Message.aggregate([
             {
                 $match: {
@@ -38,12 +37,9 @@ const getAllMessages = asyncHandle(async (req, res) => {
                 }
             },
             {
-                $sort: { createdAt: -1 }
-            },
-            {
                 $group: {
                     _id: { $cond: [{ $eq: ['$receiverID', new ObjectId(user_id)] }, '$senderID', '$receiverID'] },
-                    lastMessage: { $first: '$$ROOT' },
+                    lastMessage: { $last: '$$ROOT' },
                     userInfo: { $first: '$userInfo' }
                 }
             },
@@ -56,8 +52,12 @@ const getAllMessages = asyncHandle(async (req, res) => {
                     'userInfo.username': 1,
                     'userInfo.displayName': 1,
                     'userInfo._id': 1,
+                    'userInfo.avatar':1
                 }
-            }
+            },
+            {
+                $sort: { _id: -1 }
+            },
         ]);
 
         res.status(200).json(formatResponse(messages, true, null));
@@ -76,8 +76,6 @@ const getAllMessagesBetweenUsers = asyncHandle(async (req, res) => {
                 { senderID: user_id, receiverID: otherUserId },
                 { senderID: otherUserId, receiverID: user_id }
             ]
-
-
         }).sort({ createdAt: 1 });
 
         res.status(200).json(formatResponse(messages, true, null));
@@ -94,6 +92,7 @@ const sendMessage = asyncHandle(async (message, userList) => {
         const newMessage = await Message.create({
             senderID: new mongoose.Types.ObjectId(senderId),
             receiverID: new mongoose.Types.ObjectId(receiverId),
+            images:message.images,
             content,
             createdBy: new mongoose.Types.ObjectId(senderId)
         });

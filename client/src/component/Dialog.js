@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import axiosClient from '../authenticate/authenticationConfig';
 import { toast } from 'react-toastify';
-
+import { useParams } from 'react-router-dom';
+import SinglePost from './SinglePost';
 
 
 function Dialog({sweet, getList, onCloseDialog}) {
@@ -23,29 +24,6 @@ function Dialog({sweet, getList, onCloseDialog}) {
         onCloseDialog(false);
     };
     
-    // const getListLikeHandle = async () => {
-    //     console.log("ID: " ,sweet._id);
-    //     const response = await axiosClient.get(`/sweet/checkSweetOrShare?SweetID=${sweet._id}`);
-    //     if(response.data.isSuccess){
-    //         if(response.data.data.State){
-    //             const response = await axiosClient.get(`/sweet/getListLike?SweetID=${sweet._id}`);
-    //             if(response.data.isSuccess){
-    //                 setListLike(response.data.data.List_UserName_ToLike)
-    //                 console.log("Data:" ,response.data.data.List_UserName_ToLike);
-    //             }else {
-    //                 toast.error(response.errorMessage);
-    //             }
-    //         }else{
-    //             const response = await axiosClient.get(`/share/getListLike?ShareID=${sweet._id}`);
-    //             if(response.data.isSuccess){
-    //                 setListLike(response.data.data.List_UserName_ToLike)
-    //                 console.log("Data:" ,response.data.data.List_UserName_ToLike);
-    //             }else {
-    //                 toast.error(response.errorMessage);
-    //             }
-    //         }
-    //     }     
-    // }
 
     const getListLikeHandle = async () => {
              

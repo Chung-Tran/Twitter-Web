@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import Navbar from './component/Navbar/Navbar';
 
 function MessageLayout() {
     const navigate = useNavigate();
     const isAuthentication = localStorage.getItem("token") ? true : false;
+
 
     useEffect(() => {
         if (!isAuthentication) {

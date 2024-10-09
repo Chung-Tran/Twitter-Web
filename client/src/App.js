@@ -1,49 +1,51 @@
 import './App.scss';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Suspense, useEffect } from 'react';
+import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
+import {jwtDecode} from 'jwt-decode';
+
 import LoginPage from './pages/LoginPage';
 import NotFound from './pages/NotFound';
-import 'react-toastify/dist/ReactToastify.css';
-import { Suspense, useEffect } from 'react';
 import CommonToastContainer from './ultis/ToastNoti';
 import HomePage from './pages/HomePage';
-import SinglePost from './component/SinglePost';
 import SweetDetail from './pages/SweetDetail';
 import Layout from './layout';
 import MessageLayout from './messageLayout';
 import MessagePage from './pages/MessagePage';
 import NotificationPage from './pages/NotificationPage';
-import { w3cwebsocket as W3CWebSocket } from "websocket";
-import { toast } from 'react-toastify';
-import { jwtDecode } from 'jwt-decode';
 import ProfilePage from './pages/ProfilePage';
-const client = W3CWebSocket('ws://localhost:8080');
+import useWebSocket from './authenticate/Websocket.config';
+
 const App = () => {
   const token = localStorage.getItem("token");
-  const userId = token && jwtDecode(token).userId;
+  const userId = token ? jwtDecode(token).userId : null;
+  const { client, isConnected } = useWebSocket('ws://localhost:8080');
 
   useEffect(() => {
-    // Lắng nghe tin nhắn từ server
-    client.onmessage = function (event) {
-      const receivedMessage = JSON.parse(event.data);
-      console.log(userId,receivedMessage)
-      if (receivedMessage?.userId == userId) {
-        if (receivedMessage && receivedMessage?.type == "Notify") {
-          toast.info(receivedMessage.content)
-        }
-      }
+    if (!client) return;
 
+    const handleMessage = (event) => {
+      const receivedMessage = JSON.parse(event.data);
+      if (receivedMessage?.userId === userId && receivedMessage?.type === "Notify") {
+        toast.info(receivedMessage.content);
+      }
     };
-    // return () => {
-    //   client.close(); // Đóng kết nối khi component unmount
-    // };
-  }, []);
+
+    client.onmessage = handleMessage;
+
+    return () => {
+      client.onmessage = null;
+    };
+  }, [client, userId]);
+
   return (
     <Router>
       <Suspense fallback={<div>Loading...</div>}>
         <CommonToastContainer />
         <Routes>
-          <Route exact path="/login" element={<LoginPage />} />
-          <Route path="/messages" element={<MessageLayout />}>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/messages/:id" element={<MessageLayout />}>
             <Route index element={<MessagePage />} />
           </Route>
           <Route path="/" element={<Layout />}>
@@ -51,7 +53,6 @@ const App = () => {
             <Route path="/notifications" element={<NotificationPage />} />
             <Route path="/status/:id" element={<SweetDetail />} />
             <Route path="/profile/:id" element={<ProfilePage />} />
-           
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

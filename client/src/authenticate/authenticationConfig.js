@@ -1,8 +1,9 @@
 import axios from 'axios';
 
 const axiosClient = axios.create({
+    // baseURL: 'http://localhost:5008/api',
     baseURL: 'http://localhost:5008/api',
-    timeout: 10000, 
+    timeout: 20000, 
     headers: {
         'Content-Type': 'application/json'
       }
@@ -26,7 +27,6 @@ axiosClient.interceptors.request.use(
 axiosClient.interceptors.response.use(
     (response) => {
         if (response.status === 401 || response.status === 403) {
-            console.log('response status', response);
             localStorage.removeItem('token')
         }
         const { data } = response;

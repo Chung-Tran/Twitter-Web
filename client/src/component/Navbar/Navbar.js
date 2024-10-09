@@ -13,6 +13,7 @@ import { MdWorkspacePremium } from "react-icons/md";
 import styles from './Navbar.css';
 import { useNavigate, useNavigation } from 'react-router-dom';
 import { BsThreeDots } from "react-icons/bs";
+import axiosClient from '../../authenticate/authenticationConfig';
 const Navbar = () => {
     const navigate = useNavigate();
     const user = JSON.parse(localStorage.getItem("twitter-user")) ?? navigate('login');
@@ -22,6 +23,16 @@ const Navbar = () => {
         localStorage.removeItem("twitter-user");
         setShowSectioLogout(false);
         navigate('/login')
+    }
+    const handleTransToMessages = async() => {
+         await axiosClient.get('/chat')
+        .then(response => {
+          let data = response.data.data;
+          // Lấy ID của người nhận đầu tiên
+          if (data.length > 0) {
+            navigate(`/messages/${data[0]._id}`);
+          }
+        })
     }
     return (
         <div className='homepage-navbar'>
@@ -34,7 +45,7 @@ const Navbar = () => {
                         <li onClick={() => navigate("/")}><AiFillHome /><span>Home</span></li>
                         <li><AiOutlineSearch /><span>Explore</span></li>
                         <li onClick={() => navigate("/notifications")}><BsBell /><span>Notifications</span></li>
-                        <li onClick={() => navigate("/messages")}><SlEnvolopeLetter /><span>Messages</span></li>
+                        <li onClick={() => handleTransToMessages()}><SlEnvolopeLetter /><span>Messages</span></li>
                         <li onClick={() => navigate("")}><IoListSharp /><span>Lists</span></li>
                         <li onClick={() => navigate("")}><PiBookmarkSimple /><span>Bookmarks</span></li>
                         <li onClick={() => navigate("")}><BsTwitterX /><span>Communities</span></li>
@@ -59,17 +70,17 @@ const Navbar = () => {
                     POST
                 </div>
                 <div className='navbar-userInfo'>
-                    <img src='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
+                    <img src={!!user?.avatar ? user.avatar : 'https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' } alt='https://as2.ftcdn.net/v2/jpg/03/49/49/79/1000_F_349497933_Ly4im8BDmHLaLzgyKg2f2yZOvJjBtlw5.jpg' />
                     <div className='navbar-userinfo-name'>
-                        <span>{user.displayName}</span>
-                        <span>@{user.username}</span>
+                        <span>{user?.displayName}</span>
+                        <span>@{user?.username}</span>
                     </div>
                     <div className='logout-section'>
                         <BsThreeDots onClick={()=>setShowSectioLogout(!showSectionLogout)}/>
                         { showSectionLogout &&
-                            <div className='logout'>
+                            <div className='logout' >
                             <span>Add an existing account</span>
-                            <span onClick={handleLogout}>Log out @{ user.username}</span>
+                            <span onClick={handleLogout}>Log out @{ user?.username}</span>
                         </div>
                         }
                     </div>

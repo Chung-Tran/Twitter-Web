@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react'
 import MessageList from '../component/MessageList'
 import MessageContent from '../component/messageContent'
 import axiosClient from '../authenticate/authenticationConfig';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 
 function MessagePage() {
   const navigate = useNavigate();
-  
+  const { id } = useParams();
   const token = localStorage.getItem("token");
   if (!token) {
     navigate('/login')
@@ -42,7 +42,8 @@ function MessagePage() {
     fetchData()
   }
   const changeReceiverId = (id) => {
-    setDefaultReceiverId(id);
+    //setDefaultReceiverId(id);
+    navigate(`/messages/${id}`)
   }
   return (
     <div className='message-page-container'>
@@ -52,7 +53,7 @@ function MessagePage() {
       </div>
       <div className='message-content-container'>
         {/* Truyền ID của người nhận mặc định vào MessageContent */}
-        <MessageContent receiverId={defaultReceiverId} resetData={resetData}  />
+        <MessageContent receiverId={id} resetData={resetData}  />
       </div>
     </div>
   );
