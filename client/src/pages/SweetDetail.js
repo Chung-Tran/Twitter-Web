@@ -48,10 +48,16 @@ function SweetDetail() {
 
     };
     useEffect(() => {
-        fetchData();
-        handleSortOutStanding();
-        window.scrollTo(0, 0);
-    }, []);
+        const fetchDataAndSort = async () => {
+          await fetchData();
+          handleSortOutStanding();
+          window.scrollTo(0, 0);
+          console.log(sweetDetail);
+        };
+      
+        fetchDataAndSort();
+      }, []);
+
 
     
 
@@ -237,19 +243,19 @@ function SweetDetail() {
 
                         {
                             typeSortComment==='OutStanding' && listComment.map((item, index) => (
-                                <SweetComment commentData={item} resetData={handleSortOutStanding}/>
+                                <SweetComment commentData={item} resetData={handleSortOutStanding} useIDOwnerSweet={sweetDetail.UserName._id}/>
                             ))
                         }
 
                         {
                             typeSortComment==='Recently' && listComment.map((item, index) => (
-                                <SweetComment commentData={item} resetData={handleSortRecently}/>
+                                <SweetComment commentData={item} resetData={handleSortRecently} useIDOwnerSweet={sweetDetail.UserName._id}/>
                             ))
                         }
 
                         {
                             typeSortComment==='Furthest' && listComment.map((item, index) => (
-                                <SweetComment commentData={item} resetData={handleSortFurthest}/>
+                                <SweetComment commentData={item} resetData={handleSortFurthest} useIDOwnerSweet={sweetDetail.UserName._id}/>
                             ))
                         }
                         
